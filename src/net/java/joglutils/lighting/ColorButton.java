@@ -76,7 +76,7 @@ public class ColorButton extends JButton implements ActionListener {
 
     public void actionPerformed(ActionEvent e) {
         JButton src = (JButton)e.getSource();
-        Color c = JColorChooser.showDialog(this,"tit",src.getForeground());
+        Color c = JColorChooser.showDialog(this,"",src.getForeground());
         if (c != null)
             src.setForeground(c);
     }

@@ -327,7 +327,8 @@ public class LightPanel extends javax.swing.JPanel {
     
     private void colorAction(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorAction
         javax.swing.JButton src = (javax.swing.JButton)evt.getSource();
-        java.awt.Color c = javax.swing.JColorChooser.showDialog(this,"tit",src.getForeground());
+        
+        java.awt.Color c = javax.swing.JColorChooser.showDialog(this,src.getText()+" Color",src.getForeground());
         if (c != null)
             src.setForeground(c);
     }//GEN-LAST:event_colorAction
