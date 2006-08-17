@@ -410,9 +410,7 @@ public class Light {
                 
                 gl.glUniform1i(diffMatCol,phongDiffColorMat ? 1 : 0);
                 gl.glUniform1i(ambMatCol,phongAmbColorMat ? 1 : 0);
-                 
-                gl.glUseProgram(progID);
-                        
+                      
                 gl.glUseProgram(progID+lightNumber);
                 /*for light one program
                  int progID = shaderProgNums.get(gl);
@@ -428,8 +426,8 @@ public class Light {
                 int diffMatCol = gl.glGetUniformLocationARB(progID,"diffMatCol");
                 int ambMatCol = gl.glGetUniformLocationARB(progID,"ambMatCol");
                 
-                gl.glUniform1iARB(diffMatCol,phongDiffColorMat ? GL.GL_TRUE : GL.GL_FALSE);
-                gl.glUniform1iARB(ambMatCol,phongAmbColorMat ? GL.GL_TRUE : GL.GL_FALSE);
+                gl.glUniform1iARB(diffMatCol,phongDiffColorMat ? 1 : 0);
+                gl.glUniform1iARB(ambMatCol,phongAmbColorMat ? 1 : 0);
                 
                 gl.glUseProgramObjectARB(progID+lightNumber);
                 /*for light one program
