@@ -186,7 +186,6 @@ public class GLJFrame extends JFrame {
     private void initComponents() {
         mainCanvas = new GLCanvas(caps,chooser,contextToShareWith,null);
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentResized(java.awt.event.ComponentEvent evt) {
                 formComponentResized(evt);
