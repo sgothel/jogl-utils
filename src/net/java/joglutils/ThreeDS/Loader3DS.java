@@ -1,21 +1,21 @@
 /*
  * Copyright (c) 2006 Greg Rodgers All Rights Reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- *   
+ *
  * - Redistribution of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- *    
+ *
  * - Redistribution in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- *   
+ *
  * The names of Greg Rodgers, Sun Microsystems, Inc. or the names of
  * contributors may not be used to endorse or promote products derived from
  * this software without specific prior written permission.
- *    
+ *
  * This software is provided "AS IS," without a warranty of any kind. ALL
  * EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES,
  * INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A
@@ -23,12 +23,12 @@
  * SUN MICROSYSTEMS, INC. ("SUN"), AND SUN'S LICENSORS SHALL NOT BE LIABLE FOR
  * ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR
  * DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES. IN NO EVENT WILL GREG
- * RODGERS, SUN, OR SUN'S LICENSORS BE LIABLE FOR ANY LOST REVENUE, PROFIT 
+ * RODGERS, SUN, OR SUN'S LICENSORS BE LIABLE FOR ANY LOST REVENUE, PROFIT
  * OR DATA, OR FOR DIRECT, INDIRECT, SPECIAL, CONSEQUENTIAL, INCIDENTAL OR
  * PUNITIVE DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY,
  * ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF GREG
  * RODGERS OR SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- *   
+ *
  * You acknowledge that this software is not designed or intended for use
  * in the design, construction, operation or maintenance of any nuclear
  * facility.
@@ -84,7 +84,7 @@ public class Loader3DS
         currentChunk = new Chunk();
         tempChunk = new Chunk();
     }
-    
+
     // Verified
     public boolean load(Model3DS model, String fileName)
     {
@@ -117,12 +117,12 @@ public class Loader3DS
             System.err.println("Error:  File IO error in: Closing File");
             return false;
         }
-        
+
         loaded = true;
-        
+
         return loaded;
     }
-    
+
     // Verified
     void processNextChunk(Model3DS model, Chunk previousChunk)
     {
@@ -187,7 +187,7 @@ public class Loader3DS
     private void readChunkHeader(Chunk chunk)
     {
         byte buffer[] = new byte[2];
-        
+
         try {
             chunk.id = swap(dataInputStream.readShort());
             chunk.id &= 0x0000FFFF;
@@ -200,7 +200,7 @@ public class Loader3DS
             return;
         }
     }
-    
+
     // Verified
     private void processNextObjectChunk(Model3DS model, Obj object, Chunk previousChunk)
     {
@@ -296,7 +296,7 @@ public class Loader3DS
         }
 	currentChunk = previousChunk;
     }
-    
+
     // Verified
     private void readObjectMaterial(Model3DS model, Obj object, Chunk previousChunk)
     {
@@ -445,14 +445,14 @@ public class Loader3DS
                 vVector2.z -= vPoly[1].z;
 
                 normals[i] = vVector1;
-                
+
                 // Compute the cross product
                 normals[i].x = normals[i].y*vVector1.z - normals[i].z*vVector1.y;
                 normals[i].y = normals[i].z*vVector1.x - normals[i].x*vVector1.z;
                 normals[i].z = normals[i].x*vVector1.y - normals[i].y*vVector1.x;
-                
+
                 tempNormals[i] = new Vec3(normals[i]);
-                
+
                 // Normalize
                 float mag = (float)Math.sqrt(normals[i].x*normals[i].x + normals[i].y*normals[i].y + normals[i].z*normals[i].z);
                 normals[i].x /= mag;
@@ -477,17 +477,17 @@ public class Loader3DS
                         shared++;
                     }
                 }
-                
+
                 // Divide the vector vSum by -shared
                 vSum.x /= -shared;
                 vSum.y /= -shared;
-                vSum.z /= -shared;                
-                
+                vSum.z /= -shared;
+
                 object.normals[i] = new Vec3(vSum);
-                
+
                 // Normalize
-                float mag = (float)Math.sqrt(object.normals[i].x*object.normals[i].x + 
-                                             object.normals[i].y*object.normals[i].y + 
+                float mag = (float)Math.sqrt(object.normals[i].x*object.normals[i].x +
+                                             object.normals[i].y*object.normals[i].y +
                                              object.normals[i].z*object.normals[i].z);
                 object.normals[i].x /= mag;
                 object.normals[i].y /= mag;
