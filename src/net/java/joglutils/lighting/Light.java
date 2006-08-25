@@ -404,6 +404,7 @@ public class Light {
             
             if(shaderBuiltin.get(gl)) {
                 int progID = shaderProgNums.get(gl);
+                gl.glUseProgram(progID+lightNumber);
                  
                 int diffMatCol = gl.glGetUniformLocation(progID,"diffMatCol");
                 int ambMatCol = gl.glGetUniformLocation(progID,"ambMatCol");
@@ -411,7 +412,7 @@ public class Light {
                 gl.glUniform1i(diffMatCol,phongDiffColorMat ? 1 : 0);
                 gl.glUniform1i(ambMatCol,phongAmbColorMat ? 1 : 0);
                       
-                gl.glUseProgram(progID+lightNumber);
+                
                 /*for light one program
                  int progID = shaderProgNums.get(gl);
                  
@@ -439,7 +440,19 @@ public class Light {
                 gl.glUseProgramObjectARB(progID);
                  */
             }
+        } else {
+            Integer result = shaderProgNums.get(gl);
+            if (result != null) {
+                int lightID = result+lightNumber;
+                java.nio.IntBuffer buffer = java.nio.IntBuffer.allocate(1);
+                gl.glGetIntegerv(GL.GL_CURRENT_PROGRAM,buffer);
+                int currProgram = buffer.get();
+                
+                if (currProgram == lightID)
+                    gl.glUseProgramObjectARB(0);
+            }
         }
+        
     }
     /**
      * Disables the requested light on the specified OpenGL Context.
