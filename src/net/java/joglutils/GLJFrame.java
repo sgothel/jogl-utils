@@ -548,4 +548,11 @@ public class GLJFrame extends JFrame {
         return ((GLCanvas)mainCanvas).getContext();
     }
     
+    /**
+     * Retrieves a GLAutoDrawable view of the associated GLCanvas
+     * @return a GLAutoDrawable corresponding to the GLCanvas on this GLJFrame
+     */
+    public GLAutoDrawable getAutoDrawable() {
+        return (GLAutoDrawable)mainCanvas;
+    }
 }
