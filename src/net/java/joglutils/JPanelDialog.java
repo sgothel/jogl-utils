@@ -56,7 +56,7 @@ public class JPanelDialog extends JDialog implements ActionListener{
         this.setModal(false);
         initLayout(inputPanel);
     }
-    public JPanelDialog(JPanel inputPanel, String title) {
+    public JPanelDialog(String title, JPanel inputPanel) {
         super();
         this.setTitle(title);
         this.setModal(false);
@@ -166,7 +166,7 @@ public class JPanelDialog extends JDialog implements ActionListener{
         return jpd.showAsModal();
     }
     public static boolean showModalDialog(JPanel panel, String title) {
-        JPanelDialog jpd = new JPanelDialog(panel,title);
+        JPanelDialog jpd = new JPanelDialog(title,panel);
         return jpd.showAsModal();
     }
     public static boolean showModalDialog(Frame parent, JPanel panel) {
