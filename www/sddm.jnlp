@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<jnlp spec="1.5+" codebase="http://ags.uci.edu/~etolleru/sddm/webstart" href="sddm.jnlp">
+  <application-desc />
+  <information>
+    <title>Stereo Data Display Modules</title>
+    <vendor>Erik J. Tollerud</vendor>
+    <description>An open source data visualization program implemented with JOGL.</description>
+    <offline-allowed/>
+  </information>
+  <security>
+      <all-permissions/>
+  </security>
+  <resources>
+    <j2se version="1.5+"/>
+    <jar href="SDDM.jar" main="true"/>
+	<jar href="lib/AbsoluteLayout.jar"/>
+	<jar href="lib/joglutilsnb.jar"/>
+	<jar href="lib/swing-layout-1.0.jar"/>
+	<jar href="lib/vecmath.jar"/>
+	<jar href="lib/jogl.jar"/>
+    [b]<extension name="jogl" href="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp"/>[/b]
+  </resources>
+</jnlp>
