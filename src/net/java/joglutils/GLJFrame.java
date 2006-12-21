@@ -333,11 +333,13 @@ public class GLJFrame extends JFrame {
         
     }
     /**
-     * Repaint the JFrame and render the GLCanvas if no animator is present.  If animator is attached, only repaints the JFrame.
+     * Repaint the JFrame and render the GLCanvas if no animator is present.  If animator is attached and running, only repaints the JFrame.
      */
     public void repaint() {
         super.repaint();
         if (this.animator == null)
+            ((GLCanvas)this.mainCanvas).display();
+        else if (!this.animator.isAnimating())
             ((GLCanvas)this.mainCanvas).display();
     }
     /**

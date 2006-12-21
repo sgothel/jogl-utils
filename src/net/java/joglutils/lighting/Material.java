@@ -85,6 +85,10 @@ public class Material {
     public Material(GL gl, int face) {
         this.attachedGL = gl;
         this.face = face;
+        this.specular = new float[4];
+        this.ambient = new float[4];
+        this.diffuse = new float[4];
+        this.emissive = new float[4];
         this.retrieve();
     }
     /**
@@ -147,15 +151,14 @@ public class Material {
         FloatBuffer buff = FloatBuffer.allocate(17);
         
         gl.glGetMaterialfv(retrievalFace,gl.GL_SPECULAR,buff);
-        gl.glGetMaterialfv(retrievalFace,gl.GL_EMISSION,buff);
-        gl.glGetMaterialfv(retrievalFace,gl.GL_AMBIENT,buff);
-        gl.glGetMaterialfv(retrievalFace,gl.GL_DIFFUSE,buff);
-        gl.glGetMaterialfv(retrievalFace,gl.GL_SHININESS,buff);
-        
         buff.get(this.specular);
+        gl.glGetMaterialfv(retrievalFace,gl.GL_EMISSION,buff);
         buff.get(this.emissive);
+        gl.glGetMaterialfv(retrievalFace,gl.GL_AMBIENT,buff);
         buff.get(this.ambient);
+        gl.glGetMaterialfv(retrievalFace,gl.GL_DIFFUSE,buff);
         buff.get(this.diffuse);
+        gl.glGetMaterialfv(retrievalFace,gl.GL_SHININESS,buff);
         this.shininess = buff.get();
     }
     /**

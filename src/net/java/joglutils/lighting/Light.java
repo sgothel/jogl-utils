@@ -258,13 +258,13 @@ public class Light {
         retrieve(this.attachedGL,this.lightNumber);
     }
     /**
-     * Enables this Light on the attached {@link GL} Context.
+     * Enables this Light on the attached {@link GL} Context. Note that GL_LIGHTING must be enabled in this context.
      */
     public void enable() {
         enable(this.attachedGL,this.lightNumber);
     }
     /**
-     * Disables this Light on the attached {@link GL} Context.
+     * Disables this Light on the attached {@link GL} Context.  Note that GL_LIGHTING must be enabled in this context.
      */
     public void disable() {
         disable(this.attachedGL,this.lightNumber);
@@ -312,7 +312,7 @@ public class Light {
      * @throws net.java.joglutils.lighting.LightingException if the requested light is not valid on the specified context.
      */
     public void apply(GL gl, int lightNumber) throws LightingException {
-        if(!this.isLightNumberValid(gl, lightNumber))
+       if(!this.isLightNumberValid(gl, lightNumber))
             throw new LightingException("attempted to apply Light settings to invalid lightNumber for the requested OpenGL context");
         
         int lightID = numToID(lightNumber);
@@ -352,35 +352,30 @@ public class Light {
         int lightID = numToID(lightNumber);
         FloatBuffer buff = FloatBuffer.allocate(24);
         
-        //get color components - 4 each
+        //get color components  - 4 each
         gl.glGetLightfv(lightID,GL.GL_AMBIENT,buff);
+        buff.get(this.ambient);
         gl.glGetLightfv(lightID,GL.GL_DIFFUSE,buff);
+        buff.get(this.diffuse);
         gl.glGetLightfv(lightID,GL.GL_SPECULAR,buff);
+        buff.get(this.specular);
         //get light position - 4 (including distance)
         gl.glGetLightfv(lightID,GL.GL_POSITION,buff);
-        //get spot direction- 3
-        gl.glGetLightfv(lightID,GL.GL_SPOT_DIRECTION,buff);
-        //get individual floats - 1 each
-        gl.glGetLightfv(lightID,GL.GL_SPOT_CUTOFF,buff);
-        gl.glGetLightfv(lightID,GL.GL_SPOT_EXPONENT,buff);
-        gl.glGetLightfv(lightID,GL.GL_CONSTANT_ATTENUATION,buff);
-        gl.glGetLightfv(lightID,GL.GL_LINEAR_ATTENUATION,buff);
-        gl.glGetLightfv(lightID,GL.GL_QUADRATIC_ATTENUATION,buff);
-        
-        //set state from the loaded buffer - start with the three colors
-        buff.get(this.ambient);
-        buff.get(this.diffuse);
-        buff.get(this.specular);
-        //grab first 3 for position, and 4th element from GL_POSITION for distance
         buff.get(this.lightPosition);
         this.lightW = buff.get();
-        // grab spot direction
+        //get spot direction- 3
+        gl.glGetLightfv(lightID,GL.GL_SPOT_DIRECTION,buff);
         buff.get(this.spotDirection);
-        //get individual floats
+        //get individual floats - 1 each
+        gl.glGetLightfv(lightID,GL.GL_SPOT_CUTOFF,buff);
         this.spotCutoff = buff.get();
+        gl.glGetLightfv(lightID,GL.GL_SPOT_EXPONENT,buff);
         this.spotExponent = buff.get();
+        gl.glGetLightfv(lightID,GL.GL_CONSTANT_ATTENUATION,buff);
         this.constantAttenuation = buff.get();
+        gl.glGetLightfv(lightID,GL.GL_LINEAR_ATTENUATION,buff);
         this.linearAttenuation = buff.get();
+        gl.glGetLightfv(lightID,GL.GL_QUADRATIC_ATTENUATION,buff);
         this.quadraticAttenuation = buff.get();
         
         this.lightNumber = lightNumber;
