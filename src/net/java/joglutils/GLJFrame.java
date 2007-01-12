@@ -558,29 +558,4 @@ public class GLJFrame extends JFrame {
         return (GLAutoDrawable)mainCanvas;
     }
     
-    public static void main(String[] args) {
-        GLJFrame gljf = new GLJFrame(new GLEventListener() {
-            public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
-            }
-
-            public void init(GLAutoDrawable drawable) {
-            }
-
-            public void display(GLAutoDrawable drawable) {
-                GL gl = drawable.getGL();
-                gl.glColor3f(1.0f,0.323f,0.8f);
-                gl.glBegin(GL.GL_TRIANGLE_STRIP);
-                gl.glVertex2d(0,0);
-                gl.glVertex2d(0.5,1.0);
-                gl.glVertex2d(-0.3,-0.9);
-                gl.glEnd();
-            }
-
-            public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {
-            }
-            
-        });
-        gljf.setDefaultCloseOperation(gljf.EXIT_ON_CLOSE);
-        gljf.setVisible(true);
-    }
 }

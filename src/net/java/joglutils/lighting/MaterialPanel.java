@@ -173,19 +173,5 @@ public class MaterialPanel extends javax.swing.JPanel {
         m.setSpecular(this.specularButton.getForeground());
         m.setEmissive(this.emissiveButton.getForeground());
     }
-    public static void main(String[] args) {
-        Material m = new Material();
-        MaterialPanel mp = new MaterialPanel(m);
-        net.java.joglutils.JPanelDialog jdp = new net.java.joglutils.JPanelDialog(mp);
-        jdp.setTitle("the new title");
-        System.err.println("bf modal show");
-        boolean accept = jdp.showAsModal();
-        System.err.println("after modal show");
-        if (accept) {
-            mp.panelToMat(m);
-            System.err.println("shininess:"+m.getShininess()+" Emissive color:"+m.getEmissive());
-        } else
-            System.err.println("cancelled");
-    }
             
 }

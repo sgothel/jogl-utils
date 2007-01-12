@@ -10,6 +10,7 @@
   </information>
     <resources>
       <jar href="joglutilsnb.jar" />
+	  <extension name="jogl" href="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp"/>
     </resources>
   <component-desc />
 </jnlp>

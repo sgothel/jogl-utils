@@ -1,14 +1,47 @@
+/*
+ * Copyright (c) 2006 Erik Tollerud (erik.tollerud@gmail.com) All Rights Reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *   
+ * - Redistribution of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ *    
+ * - Redistribution in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ *   
+ * The names of Erik Tollerud, Davide Raccagni, Sun Microsystems, Inc. or the names of
+ * contributors may not be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ *    
+ * This software is provided "AS IS," without a warranty of any kind. ALL
+ * EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES,
+ * INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A
+ * PARTICULAR PURPOSE OR NON-INFRINGEMENT, ARE HEREBY EXCLUDED. ERIK TOLLERUD,
+ * SUN MICROSYSTEMS, INC. ("SUN"), AND SUN'S LICENSORS SHALL NOT BE LIABLE FOR
+ * ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR
+ * DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES. IN NO EVENT WILL ERIK
+ * TOLLERUD, SUN, OR SUN'S LICENSORS BE LIABLE FOR ANY LOST REVENUE, PROFIT 
+ * OR DATA, OR FOR DIRECT, INDIRECT, SPECIAL, CONSEQUENTIAL, INCIDENTAL OR
+ * PUNITIVE DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY,
+ * ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF ERIK
+ * TOLLERUD OR SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ *   
+ * You acknowledge that this software is not designed or intended for use
+ * in the design, construction, operation or maintenance of any nuclear
+ * facility.
+ */
+
 package net.java.joglutils.jogltext;
 
 import java.awt.*;
-import java.awt.event.*;
 import java.awt.geom.*;
 import java.awt.font.*;
-import java.io.*;
 import java.text.*;
 import javax.media.opengl.*;
 import javax.media.opengl.glu.*;
-import com.sun.opengl.util.*;
 
 /**
  *  This class renders a TrueType Font into OpenGL
@@ -73,11 +106,11 @@ public class FontDrawer {
                 new StringCharacterIterator(str));
         GeneralPath gp = (GeneralPath)gv.getOutline();
         PathIterator pi = gp.getPathIterator(AffineTransform.getScaleInstance(1.0, -1.0), 1.0f);
-        gl.glNormal3i(0,0,1);
+        gl.glNormal3i(0,0,-1);
         tesselateFace(glu, gl, pi, pi.getWindingRule(), this.edgeOnly);
         if (this.depth != 0.0) {
             pi = gp.getPathIterator(AffineTransform.getScaleInstance(1.0, -1.0), 1.0f);
-            gl.glNormal3i(0,0,-1);
+            gl.glNormal3i(0,0,1);
             tesselateFace(glu, gl, pi, pi.getWindingRule(), this.edgeOnly, this.depth);
             pi = gp.getPathIterator(AffineTransform.getScaleInstance(1.0, -1.0), 1.0f);
             if (this.flatNorm)
@@ -156,7 +189,7 @@ public class FontDrawer {
         //TODO: work out texture coords
         //TODO:work out double vs. float
         
-        if (justBoundary) 
+        if (justBoundary)
             gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_LINE);
         else
             gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_FILL);
@@ -168,9 +201,9 @@ public class FontDrawer {
                 case PathIterator.SEG_MOVETO:
                     gl.glBegin(GL.GL_QUADS);
                     lastCoord[0] = coords[0];
-                    lastCoord[1] = coords[1]; 
+                    lastCoord[1] = coords[1];
                     firstCoord[0] = coords[0];
-                    firstCoord[1] = coords[1]; 
+                    firstCoord[1] = coords[1];
                     break;
                 case PathIterator.SEG_LINETO:
                     //Normal: {deltay,-deltax,0}
@@ -211,7 +244,7 @@ public class FontDrawer {
         //TODO: work out texture coords
         //TODO: improve performance
         
-        if (justBoundary) 
+        if (justBoundary)
             gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_LINE);
         else
             gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_FILL);
@@ -252,8 +285,7 @@ public class FontDrawer {
                             secondNorm[0] = avgdeltay;
                             secondNorm[1] = -avgdeltax;
                             secondNorm[2] = 0;
-                        }
-                        else if (thirdNorm == null) {
+                        } else if (thirdNorm == null) {
                             thirdNorm = new float[3];
                             thirdNorm[0] = avgdeltay;
                             thirdNorm[1] = -avgdeltax;
@@ -264,14 +296,14 @@ public class FontDrawer {
                         gl.glVertex3fv(oneBackCoord,0);
                         oneBackCoord[2] = tessZ;
                         gl.glVertex3fv(oneBackCoord,0);
-                                                
+                        
                         //copy to not have to recreate
                         twoBackCoord[0] = oneBackCoord[0];
                         twoBackCoord[1] = oneBackCoord[1];
                         oneBackCoord[0] = coords[0];
                         oneBackCoord[1] = coords[1];
                     }
-                        break;
+                    break;
                 case PathIterator.SEG_CLOSE:
                     float avgdeltax = oneBackCoord[0] - twoBackCoord[0] + firstCoord[0] - oneBackCoord[0];
                     float avgdeltay = oneBackCoord[1] - twoBackCoord[1] + firstCoord[1] - oneBackCoord[1];
@@ -316,152 +348,6 @@ public class FontDrawer {
                     throw new JogltextException("PathIterator segment not SEG_MOVETO, SEG_LINETO, SEG_CLOSE");
             }
         }
-    }
-    
-    
-    /**
-     * Generates {@link GLJFrame} 
-     * Generates a GLJFrame with a FontDrawer demo. Console output describes input.
-     * @param args Command Line argument order: textDepth xRotspeed yRotspeed zRotspeed filled flatnormal
-     *
-     */
-    public static void main(String[] args) {
-        System.out.println("Option Command line argument order (first 4 numerical, last 2 boolean)\ntextDepth xRotspeed yRotspeed zRotspeed filled flatnormal");
-        System.out.println("Keyboard Inputs (case sensitive)\nr: toggle rotation\nn: toggle flat normals\nf: toggle filled text\nt: change text\nF: change font");
-        final String[] argsFin = args;
-        Font font = GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts()[5];
-        final FontDrawer dttf = new FontDrawer(font);
-        final StringBuffer upperStr = new StringBuffer("0,0");
-        final StringBuffer lowerStr = new StringBuffer("-1,-1");
-                
-        GLEventListener listener = new GLEventListener() {
-            GLU glu;
-            float xrot,yrot,zrot,xstep = 0,ystep = 0.1f,zstep = 0;
-            float dpth = 0.2f;
-            boolean filled = true, fnorm = true;
-            net.java.joglutils.lighting.Light lt;
-            net.java.joglutils.lighting.Material mt;
-            
-            
-            public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
-            }
-            
-            public void init(GLAutoDrawable drawable) {
-                drawable.setGL(new DebugGL(drawable.getGL()));
-                glu = new GLU();
-                switch(argsFin.length) {
-                    case 6:
-                        fnorm = Boolean.parseBoolean(argsFin[5]);
-                    case 5:
-                        filled = Boolean.parseBoolean(argsFin[4]);
-                    case 4:
-                        zstep = Float.parseFloat(argsFin[3]);
-                    case 3:
-                        ystep = Float.parseFloat(argsFin[2]);
-                    case 2:
-                        xstep = Float.parseFloat(argsFin[1]);
-                    case 1:
-                        dpth = Float.parseFloat(argsFin[0]);
-                }
-                dttf.setDepth(dpth);
-                dttf.setFill(filled);
-                dttf.setFlatNormals(fnorm);
-                
-                xrot = 0;yrot = 0;zrot = 0;
-                GL gl = drawable.getGL();
-                lt = new net.java.joglutils.lighting.Light(gl);
-                //mt = new net.java.joglutils.lighting.Material(gl);
-                
-                
-                lt.setLightPosition(0,0,1);
-                lt.enable();
-                lt.apply();
-                //mt.apply();
-                gl.glColorMaterial ( GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT_AND_DIFFUSE ) ;
-                
-                gl.glEnable(GL.GL_DEPTH_TEST);
-                gl.glEnable(GL.GL_LIGHTING);
-                gl.glEnable(GL.GL_NORMALIZE);
-                
-                gl.glClearColor(0.3f,0.5f,0.2f,0);
-            }
-            
-            public void display(GLAutoDrawable drawable) {
-                GL gl = drawable.getGL();
-                
-                gl.glMatrixMode(GL.GL_PROJECTION);
-                gl.glLoadIdentity();
-                //glu.gluPerspective(90,1,0.001,10);
-                //gl.glFrustum(-1.5f,1.5f,-1.5f,1.5f,1,5);
-                
-                gl.glMatrixMode(GL.GL_MODELVIEW);
-                gl.glLoadIdentity();
-                //glu.gluLookAt(0,0,-2,0,0,1,0,1,0);
-                gl.glRotatef(xrot,1.0f,0,0);
-                gl.glRotatef(yrot,0,1.0f,0);
-                gl.glRotatef(zrot,0,0,1.0f);
-                xrot+=xstep;
-                yrot+=ystep;
-                zrot+=zstep;
-                
-                
-                gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-                dttf.drawString(upperStr.toString(),glu,gl);
-                dttf.drawString(lowerStr.toString(),glu,gl,-0.8f,-0.8f,0);
-            }
-            
-            public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {
-            }
-            
-        };
-        final net.java.joglutils.GLJFrame gljf = new net.java.joglutils.GLJFrame("FontDrawerDemo", listener, 600, 600);
-        gljf.setDefaultCloseOperation(gljf.EXIT_ON_CLOSE);
-        gljf.addKeyListener(new java.awt.event.KeyAdapter() {
-            
-            public void keyPressed(KeyEvent e) {
-                switch (e.getKeyChar()) {
-                    case 'f':
-                        FontDrawer fd = dttf;
-                        dttf.setFill(!dttf.isFill());
-                        break;
-                    case 'n':
-                        dttf.setFlatNormals(!dttf.isFlatNormals());
-                        break;
-                    case 'r':
-                        Animator anim = gljf.getAnimator();
-                        if(anim.isAnimating())
-                            anim.stop();
-                        else
-                            anim.start();
-                        break;
-                    case '>':
-                    case '.':
-                        float depthStep = dttf.getFont().getSize()/20.0f;
-                        dttf.setDepth(dttf.getDepth() + depthStep);
-                        break;
-                    case '<':
-                    case ',':
-                        depthStep = dttf.getFont().getSize()/20.0f;
-                        dttf.setDepth(dttf.getDepth() - depthStep);
-                        break;
-                    case 't':
-                    case 'T':
-                        String up = javax.swing.JOptionPane.showInputDialog("Upper Text:",upperStr.toString());
-                        upperStr.delete(0,upperStr.length());
-                        upperStr.append(up);
-                        String dn = javax.swing.JOptionPane.showInputDialog("Lower Text:",lowerStr.toString());
-                        lowerStr.delete(0,lowerStr.length());
-                        lowerStr.append(dn);
-                        break;
-                    case 'F':
-                        //TODO:implement font change
-                        break;
-                }
-                gljf.repaint();
-            }
-        });
-        gljf.generateAnimator();
-        gljf.setVisible(true);
     }
     
     private class GLUtesselatorCallbackImpl extends javax.media.opengl.glu.GLUtessellatorCallbackAdapter {

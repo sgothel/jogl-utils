@@ -409,19 +409,5 @@ public class LightPanel extends javax.swing.JPanel {
         
         
     }
-    public static void main(String args[]) {
-        Light l = new Light();
-        LightPanel lp = new LightPanel(l);
-        net.java.joglutils.JPanelDialog jdp = new net.java.joglutils.JPanelDialog(lp);
-        jdp.setTitle("the new title");
-        System.err.println("bf modal show");
-        boolean accept = jdp.showAsModal();
-        System.err.println("after modal show");
-        if (accept) {
-            lp.panelToLight(l);
-            System.err.println("Light Number:"+l.getLightNumber()+" const atten:"+l.getConstantAttenuation());
-        } else
-            System.err.println("cancelled");
-        
-    }
+    
 }
