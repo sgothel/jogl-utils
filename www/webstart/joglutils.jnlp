@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<jnlp codebase="https://joglutils.dev.java.net/svn/joglutils/trunk/www"
+<jnlp codebase="https://joglutils.dev.java.net/svn/joglutils/trunk/www/webstart"
       href="joglutils.jnlp">
   <information>
     <title>Joglutils</title>
