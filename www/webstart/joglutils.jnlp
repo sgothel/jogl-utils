@@ -2,6 +2,7 @@
 <jnlp codebase="http://joglutils.dev.java.net/webstart" href="joglutils.jnlp">
   <information>
     <title>Joglutils</title>
+	<vendor>Erik J. Tollerud</vendor>
     <homepage href="http://joglutils.dev.java.net/"/>
     <description>Joglutils - utilities for Java bindings for OpenGL (JOGL/JSR-231)</description>
     <offline-allowed/>
