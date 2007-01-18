@@ -34,7 +34,7 @@
  * facility.
  */
 
-package net.java.joglutils.demos;
+package jgudemos;
 
 import net.java.joglutils.*;
 import javax.media.opengl.*;
