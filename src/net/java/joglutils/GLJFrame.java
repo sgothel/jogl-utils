@@ -40,6 +40,7 @@ import javax.media.opengl.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import com.sun.opengl.util.Animator;
 
 /**
  * A JFrame containing a heavyweight {@link GLCanvas} with a single attached {@link GLEventListener}. 
@@ -50,7 +51,7 @@ public class GLJFrame extends JFrame {
     private GLEventListener listener;
     private GLCapabilities caps;
     private GLCapabilitiesChooser chooser;
-    private com.sun.opengl.util.Animator animator;
+    private Animator animator;
     private GLContext contextToShareWith;
     
     /**
@@ -377,12 +378,12 @@ public class GLJFrame extends JFrame {
      * Generates a new {@link Animator} for updating the GLCanvas, and starts it.
      * @return the generated Animator
      */
-    public com.sun.opengl.util.Animator generateAnimator() {
+    public Animator generateAnimator() {
         if (this.animator != null) {
             this.animator.stop();
             this.animator.remove((GLCanvas)mainCanvas);
         }
-        this.animator = new com.sun.opengl.util.Animator((GLCanvas)mainCanvas);
+        this.animator = new Animator((GLCanvas)mainCanvas);
         this.animator.start();
         return this.animator;
     }
@@ -390,14 +391,14 @@ public class GLJFrame extends JFrame {
      * Retrieves the attached Animator connected to the GLCanvas.
      * @return The Animator attached to this, or null if there is no Animator
      */
-    public com.sun.opengl.util.Animator getAnimator() {
+    public Animator getAnimator() {
         return this.animator;
     }
     /**
      * Specifies an {@link Animator} for updating the GLCanvas, and starts it.
      * @param anim Animator to use to animate the GLCanvas
      */
-    public void setAnimator(com.sun.opengl.util.Animator anim) {
+    public void setAnimator(Animator anim) {
         this.setAnimator(anim,true);
     }
     /**
@@ -405,7 +406,7 @@ public class GLJFrame extends JFrame {
      * @param anim Animator  to use to animate the GLCanvas
      * @param start starts the animator if true, just sets it if not
      */
-    public void setAnimator(com.sun.opengl.util.Animator anim, boolean start) {
+    public void setAnimator(Animator anim, boolean start) {
         if (this.animator != null) {
             this.animator.stop();
             this.animator.remove((GLCanvas)mainCanvas);
@@ -432,7 +433,7 @@ public class GLJFrame extends JFrame {
     }
     
     /**
-     * Removes the specified key listener so that it no longer receives key events from this component and the GLCanvas. This method performs no function, nor does it throw an exception, if the listener specified by the argument was not previously added to this component. If listener l is null, no exception is thrown and no action is performed.
+     * Removes the specified key listener so that it no longer receives key events from this component and the GLCanvas. This method performs no function, nor does it throw an exception, if the listener specified by the argument was not previously added to this component. if the listener is null, no exception is thrown and no action is performed.
      * @param l the key listener.
      */
     public void removeKeyListener(KeyListener l) {
@@ -450,7 +451,7 @@ public class GLJFrame extends JFrame {
     }
     
     /**
-     * Removes the specified mouse listener so that it no longer receives mouse events from this component and the GLCanvas. This method performs no function, nor does it throw an exception, if the listener specified by the argument was not previously added. If listener l is null, no exception is thrown and no action is performed.
+     * Removes the specified mouse listener so that it no longer receives mouse events from this component and the GLCanvas. This method performs no function, nor does it throw an exception, if the listener specified by the argument was not previously added. if the listener is null, no exception is thrown and no action is performed.
      * @param l the mouse listener
      */
     public void removeMouseListener(MouseListener l) {
@@ -459,7 +460,7 @@ public class GLJFrame extends JFrame {
     }
     
     /**
-     * Adds the specified mouse listener to receive mouse events from this component and the GLCanvas. If listener l is null, no exception is thrown and no action is performed.
+     * Adds the specified mouse listener to receive mouse events from this component and the GLCanvas. if the listener is null, no exception is thrown and no action is performed.
      * @param l the mouse listener
      */
     public void addMouseListener(MouseListener l) {
@@ -477,7 +478,7 @@ public class GLJFrame extends JFrame {
     }
     
     /**
-     * Removes the specified mouse motion listener so that it no longer receives mouse motion events from this component and the GLCanvas. This method performs no function, nor does it throw an exception, if the listener specified by the argument was not previously added. If listener l is null, no exception is thrown and no action is performed.
+     * Removes the specified mouse motion listener so that it no longer receives mouse motion events from this component and the GLCanvas. This method performs no function, nor does it throw an exception, if the listener specified by the argument was not previously added. if the listener is null, no exception is thrown and no action is performed.
      * @param l the mouse motion listener.
      */
     public void removeMouseMotionListener(MouseMotionListener l) {
@@ -500,7 +501,7 @@ public class GLJFrame extends JFrame {
     }
     
     /**
-     * Adds the specified mouse motion listener to receive mouse motion events from this component and the GLCanvas. If listener l is null, no exception is thrown and no action is performed.
+     * Adds the specified mouse motion listener to receive mouse motion events from this component and the GLCanvas. if the listener is null, no exception is thrown and no action is performed.
      * @param l the mouse motion listener.
      */
     public void addMouseMotionListener(MouseMotionListener l) {
@@ -509,7 +510,7 @@ public class GLJFrame extends JFrame {
     }
     
     /**
-     * Removes the specified input method listener so that it no longer receives input method events from this component and the GLCanvas. This method performs no function, nor does it throw an exception, if the listener specified by the argument was not previously added. If listener l is null, no exception is thrown and no action is performed.
+     * Removes the specified input method listener so that it no longer receives input method events from this component and the GLCanvas. This method performs no function, nor does it throw an exception, if the listener specified by the argument was not previously added. if the listener is null, no exception is thrown and no action is performed.
      * @param l the input method listener
      */
     public void removeInputMethodListener(java.awt.event.InputMethodListener l) {
@@ -518,7 +519,7 @@ public class GLJFrame extends JFrame {
     }
     
     /**
-     * Adds the specified input method listener to receive input method events from this component and the GLCanvas. A component will only receive input method events from input methods if it also overrides getInputMethodRequests to return an InputMethodRequests instance. If listener l is null, no exception is thrown and no action is performed.
+     * Adds the specified input method listener to receive input method events from this component and the GLCanvas. A component will only receive input method events from input methods if it also overrides getInputMethodRequests to return an InputMethodRequests instance. if the listener is null, no exception is thrown and no action is performed.
      * @param l the input method listener
      */
     public void addInputMethodListener(java.awt.event.InputMethodListener l) {

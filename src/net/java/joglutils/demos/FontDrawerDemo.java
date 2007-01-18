@@ -55,7 +55,7 @@ import com.sun.opengl.util.Animator;
 public class FontDrawerDemo {
     
     /**
-     * Generates {@link GLJFrame}
+     * Generates {@link net.java.joglutils.GLJFrame}
      * Generates a GLJFrame with a FontDrawer demo. Console output describes input.
      * @param args Command Line argument order: textDepth xRotspeed yRotspeed zRotspeed filled flatnormal
      *

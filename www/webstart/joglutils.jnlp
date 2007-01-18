@@ -3,13 +3,13 @@
       href="joglutils.jnlp">
   <information>
     <title>Joglutils</title>
-    <!--<vendor>Sun Microsystems, Inc.</vendor>-->
     <homepage href="http://joglutils.dev.java.net/"/>
     <description>Joglutils - utilities for Java bindings for OpenGL (JOGL/JSR-231)</description>
     <offline-allowed/>
   </information>
     <resources>
-      <jar href="joglutilsnb.jar" />
+      <jar href="joglutils.jar" />
+	  <jar href="lib/swing-layout-1.0.jar" />
 	  <extension name="jogl" href="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp"/>
     </resources>
   <component-desc />
