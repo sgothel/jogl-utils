@@ -10,7 +10,7 @@
     <resources>
       <jar href="joglutils.jar" />
 	  <jar href="lib/swing-layout-1.0.jar" />
-	  <!-- <extension name="jogl" href="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp"/> -->
+	  <extension name="jogl" href="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp"/> 
     </resources>
   <component-desc />
 </jnlp>
