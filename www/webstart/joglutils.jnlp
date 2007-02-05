@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<jnlp codebase="http://joglutils.dev.java.net/webstart" href="joglutils.jnlp">
+<jnlp codebase="https://joglutils.dev.java.net/webstart" href="joglutils.jnlp">
   <information>
     <title>Joglutils</title>
 	<vendor>Erik J. Tollerud</vendor>
