@@ -38,6 +38,7 @@
 package net.java.joglutils.msg.nodes;
 
 import net.java.joglutils.msg.actions.*;
+import net.java.joglutils.msg.elements.*;
 import net.java.joglutils.msg.collections.*;
 
 /** Represents a set of 3-dimensional vertices which can be assembled
@@ -45,6 +46,11 @@ import net.java.joglutils.msg.collections.*;
 
 public class Coordinate3 extends Node {
   private Vec3fCollection data;
+
+  static {
+    // Enable the elements this node affects for known actions
+    GLCoordinateElement.enable(GLRenderAction.getDefaultState());
+  }
 
   /** Sets the coordinate data in this node. */
   public void setData(Vec3fCollection data) {
@@ -57,6 +63,8 @@ public class Coordinate3 extends Node {
   }
 
   public void doAction(Action action) {
-    action.visit(this);
+    if (CoordinateElement.isEnabled(action.getState())) {
+      CoordinateElement.set(action.getState(), getData().getData());
+    }
   }
 }

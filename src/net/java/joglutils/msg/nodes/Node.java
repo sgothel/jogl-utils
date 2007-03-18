@@ -42,11 +42,13 @@ import net.java.joglutils.msg.actions.*;
 /** The base class for all nodes in the scene graph. */
 
 public class Node {
+  /** Performs the "typical" operation for this node when an action is
+      applied to it. The default implementation does nothing. */
+  public void doAction(Action action) {}
 
-  /** This is an internal API not intended for public use. To apply an
-      action to the scene graph or a portion of the scene graph, use
-      {@link net.java.joglutils.msg.actions.Action#apply
-      Action.apply}. */
-  public void doAction(Action action) {
-  }
+  /** Support for the built-in GLRenderAction. Note that supplying
+      virtual methods in Node subclasses to support various actions is
+      not required due to the framework supporting action methods, but
+      for built-in actions it may make it simpler. */
+  public void render(GLRenderAction action) { doAction(action); }
 }

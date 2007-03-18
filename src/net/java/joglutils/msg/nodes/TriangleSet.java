@@ -37,7 +37,13 @@
 
 package net.java.joglutils.msg.nodes;
 
+import javax.media.opengl.*;
+import com.sun.opengl.util.texture.*;
+
 import net.java.joglutils.msg.actions.*;
+import net.java.joglutils.msg.elements.*;
+import net.java.joglutils.msg.math.*;
+import net.java.joglutils.msg.misc.*;
 
 /** A TriangleSet assembles the coordinates specified by a Coordinate3
     node, and any auxiliary nodes such as a TextureCoordinate2 node,
@@ -56,7 +62,67 @@ public class TriangleSet extends Node {
     return numTriangles;
   }
 
-  public void doAction(Action action) {
-    action.visit(this);
+  public void render(GLRenderAction action) {
+    State state = action.getState();
+    if (!CoordinateElement.isEnabled(state))
+      return;
+
+    if (CoordinateElement.get(state) != null) {
+      // OK, we have coordinates to send down, at least
+
+      GL gl = action.getGL();
+
+      Texture tex = null;
+      boolean haveTexCoords = false;
+
+      if (GLTextureElement.isEnabled(state) &&
+          GLTextureCoordinateElement.isEnabled(state)) {
+        tex = GLTextureElement.get(state);
+        haveTexCoords = (GLTextureCoordinateElement.get(state) != null);
+      }
+
+      if (tex != null) {
+        // Set up the texture matrix to uniformly map [0..1] to the used
+        // portion of the texture image
+        gl.glMatrixMode(GL.GL_TEXTURE);
+        gl.glPushMatrix();
+        gl.glLoadTransposeMatrixf(getTextureMatrix(tex).getRowMajorData(), 0);
+        gl.glMatrixMode(GL.GL_MODELVIEW);
+      } else if (haveTexCoords) {
+        // Want to turn off the use of texture coordinates to avoid errors
+        // FIXME: not 100% sure whether we need to do this, but think we should
+        gl.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY);
+      }
+
+      // For now, assume the triangle set and the number of available
+      // coordinates match -- may want to add debugging information
+      // for this later
+      gl.glDrawArrays(GL.GL_TRIANGLES, 0, 3 * getNumTriangles());
+
+      if (tex != null) {
+        gl.glMatrixMode(GL.GL_TEXTURE);
+        gl.glPopMatrix();
+        gl.glMatrixMode(GL.GL_MODELVIEW);
+      } else if (haveTexCoords) {
+        // Might want this the next time we render a shape
+        gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
+      }
+    }
+  }
+
+  // Helper routine for setting up a texture matrix to allow texture
+  // coords in the scene graph to always be specified from (0..1)
+  private Mat4f textureMatrix = new Mat4f();
+  private Mat4f getTextureMatrix(Texture texture) {
+    textureMatrix.makeIdent();
+    TextureCoords coords = texture.getImageTexCoords();
+    // Horizontal scale
+    textureMatrix.set(0, 0, coords.right() - coords.left());
+    // Vertical scale (may be negative if texture needs to be flipped vertically)
+    float vertScale = coords.top() - coords.bottom();
+    textureMatrix.set(1, 1, vertScale);
+    textureMatrix.set(0, 3, coords.left());
+    textureMatrix.set(1, 3, coords.bottom());
+    return textureMatrix;
   }
 }

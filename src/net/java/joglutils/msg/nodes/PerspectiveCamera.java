@@ -91,7 +91,11 @@ public class PerspectiveCamera extends Camera {
     return vertFOVScale * DEFAULT_HEIGHT_ANGLE;
   }
 
-  public void doAction(Action action) {
-    action.visit(this);
+  public void render(GLRenderAction action) {
+    // FIXME: unclear whether we should be doing this, or whether we
+    // should have a mechanism which doesn't require mutation of the
+    // camera
+    setAspectRatio(action.getCurAspectRatio());
+    doAction(action);
   }
 }

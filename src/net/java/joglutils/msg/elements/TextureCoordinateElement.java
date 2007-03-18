@@ -52,12 +52,20 @@ public class TextureCoordinateElement extends Element {
   public Element newInstance() {
     return new TextureCoordinateElement();
   }
+  /** Returns the instance of this element in the passed State. */
   public static TextureCoordinateElement getInstance(State state) {
     return (TextureCoordinateElement) state.getElement(index);
   }
+  /** Enables this element in the passed state, which should be the
+      default for a given action. */
   public static void enable(State defaultState) {
     TextureCoordinateElement tmp = new TextureCoordinateElement();
     defaultState.setElement(tmp.getStateIndex(), tmp);
+  }
+  /** Indicates whether this element is enabled in the given default
+      state for a particular action. */
+  public static boolean isEnabled(State state) {
+    return (state.getDefaults().getElement(index) != null);
   }
 
   // The actual coordinate data

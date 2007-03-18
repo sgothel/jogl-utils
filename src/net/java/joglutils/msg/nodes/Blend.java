@@ -38,6 +38,7 @@
 package net.java.joglutils.msg.nodes;
 
 import net.java.joglutils.msg.actions.*;
+import net.java.joglutils.msg.elements.*;
 import net.java.joglutils.msg.math.*;
 
 /** Provides control over OpenGL blending modes. */
@@ -48,6 +49,11 @@ public class Blend extends Node {
   private int srcFunc = ONE;
   private int destFunc = ZERO;
   private int blendEquation = FUNC_ADD;
+
+  static {
+    // Enable the elements this node affects for known actions
+    GLBlendElement.enable(GLRenderAction.getDefaultState());
+  }
 
   /** One of the blend functions. See the OpenGL documentation for glBlendFunc for more details. */
   public static final int ZERO                     = 1;
@@ -163,6 +169,13 @@ public class Blend extends Node {
   }
 
   public void doAction(Action action) {
-    action.visit(this);
+    if (BlendElement.isEnabled(action.getState())) {
+      BlendElement.set(action.getState(),
+                       getEnabled(),
+                       getBlendColor(),
+                       getSourceFunc(),
+                       getDestFunc(),
+                       getBlendEquation());
+    }
   }
 }

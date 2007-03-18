@@ -39,12 +39,18 @@ package net.java.joglutils.msg.nodes;
 
 import net.java.joglutils.msg.actions.*;
 import net.java.joglutils.msg.collections.*;
+import net.java.joglutils.msg.elements.*;
 
 /** Represents a set of 2-dimensional texture coordinates which can be
     used to texture geometric shapes. */
 
 public class TextureCoordinate2 extends Node {
   private Vec2fCollection data;
+
+  static {
+    // Enable the elements this node affects for known actions
+    GLTextureCoordinateElement.enable(GLRenderAction.getDefaultState());
+  }
 
   /** Sets the texture coordinate data in this node. */
   public void setData(Vec2fCollection data) {
@@ -57,6 +63,8 @@ public class TextureCoordinate2 extends Node {
   }
 
   public void doAction(Action action) {
-    action.visit(this);
+    if (TextureCoordinateElement.isEnabled(action.getState())) {
+      TextureCoordinateElement.set(action.getState(), getData().getData());
+    }
   }
 }

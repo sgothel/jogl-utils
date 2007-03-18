@@ -87,6 +87,14 @@ public class State {
     push();
   }
 
+  /** Returns the default State, or this State if it corresponds to
+      the defaults for a given Action subclass. */
+  public State getDefaults() {
+    if (defaults != null)
+      return defaults;
+    return this;
+  }
+
   /** Gets the state element at the given index. */
   public Element getElement(StateIndex index) {
     // The comments in the Open Inventor implementation indicate that

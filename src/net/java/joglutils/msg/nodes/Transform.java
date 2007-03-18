@@ -38,6 +38,7 @@
 package net.java.joglutils.msg.nodes;
 
 import net.java.joglutils.msg.actions.*;
+import net.java.joglutils.msg.elements.*;
 import net.java.joglutils.msg.math.*;
 
 /** Represents a generalized 4x4 matrix transformation. */
@@ -45,6 +46,14 @@ import net.java.joglutils.msg.math.*;
 public class Transform extends Node {
   private Mat4f transform;
   
+  static {
+    // Enable the elements this node affects for known actions
+    // Note that all of these elements are interdependent
+    GLModelMatrixElement      .enable(GLRenderAction.getDefaultState());
+    GLProjectionMatrixElement .enable(GLRenderAction.getDefaultState());
+    GLViewingMatrixElement    .enable(GLRenderAction.getDefaultState());
+  }
+
   public Transform() {
     transform = new Mat4f();
     transform.makeIdent();
@@ -61,6 +70,8 @@ public class Transform extends Node {
   }
 
   public void doAction(Action action) {
-    action.visit(this);
+    if (ModelMatrixElement.isEnabled(action.getState())) {
+      ModelMatrixElement.mult(action.getState(), getTransform());
+    }
   }
 }

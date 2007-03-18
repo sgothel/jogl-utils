@@ -62,6 +62,6 @@ public class IndexedTriangleSet extends Node {
   }
 
   public void doAction(Action action) {
-    action.visit(this);
+    throw new RuntimeException("Not yet implemented");
   }
 }

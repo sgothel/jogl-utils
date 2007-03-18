@@ -37,47 +37,51 @@
 
 package net.java.joglutils.msg.actions;
 
+import java.lang.reflect.*;
+
 import net.java.joglutils.msg.misc.*;
 import net.java.joglutils.msg.nodes.*;
 
 /** The base class of all actions, which are applied to nodes in the
     scene graph to implement operations such as rendering. <P>
 
-    Subclasses of Action should define, by convention, a public static
-    method <CODE>getDefaultState</CODE>, returning a {@link
-    net.java.joglutils.msg.misc.State State} object, which is used to
-    enable the elements in the state which should be updated by the
-    action's traversal of nodes. Each Action instance maintains a
-    State object internally which is initialized from this
-    default. Note that different actions may enable different elements
-    of the global state.
+    Subclasses of Action should define, by convention, a method <BR>
+    <PRE>  public static State getDefaultState()</PRE>
+    returning a {@link net.java.joglutils.msg.misc.State State}
+    object, which is used to enable the elements in the state which
+    should be updated by the action's traversal of nodes. Each Action
+    instance maintains a State object internally which is initialized
+    from this default. Note that different actions may enable
+    different elements of the global state. <P>
+
+    Subclasses of Action should also define, by convention, a method <BR>
+    <PRE>  public static void addActionMethod(Class&lt;? extends Node&gt; nodeType, Method m)</PRE>
+    which is used to add action methods to the particular Action
+    class. This may be used by developers to attach new functionality
+    to the Action for new node types they define.
 */
 
 public abstract class Action {
-
   /** Applies this Action to a particular node. This is how operations
       such as rendering are initiated. */
-  public void apply(Node node) {
-    node.doAction(this);
-  }
+  public abstract void apply(Node node);
 
   /** Returns the global state this action encompasses, which is
       altered by the nodes the action traverses. */
   public abstract State getState();
 
-  // Visitor methods, one per node class
-
-  // FIXME: should rethink this mechanism and make it extensible as
-  // per the original Open Inventor
-  public abstract void visit    (Blend blend);
-  public abstract void visit    (Color4 colors);
-  public abstract void visit    (Coordinate3 coords);
-  public abstract void visit    (IndexedTriangleSet tris);
-  public abstract void visit    (PerspectiveCamera camera);
-  public abstract void visitPre (Separator sep);
-  public abstract void visitPost(Separator sep);
-  public abstract void visit    (Texture2 texture);
-  public abstract void visit    (TextureCoordinate2 texCoords);
-  public abstract void visit    (Transform transform);
-  public abstract void visit    (TriangleSet tris);
+  private Object[] argTmp = new Object[2];
+  /** Invokes the appropriate action method for the given Node. */
+  protected void apply(ActionTable table, Node node) {
+    try {
+      Method m = table.lookupActionMethod(node);
+      if (m != null) {
+        argTmp[0] = this;
+        argTmp[1] = node;
+        m.invoke(null, argTmp);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

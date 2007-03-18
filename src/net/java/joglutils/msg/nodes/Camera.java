@@ -37,6 +37,8 @@
 
 package net.java.joglutils.msg.nodes;
 
+import net.java.joglutils.msg.actions.*;
+import net.java.joglutils.msg.elements.*;
 import net.java.joglutils.msg.math.*;
 
 /** Represents a camera which is used to view the scene. The camera
@@ -61,6 +63,14 @@ public abstract class Camera extends Node {
   protected boolean viewDirty;
   protected Mat4f projMatrix;
   protected Mat4f viewMatrix;
+
+  static {
+    // Enable the elements this node affects for known actions
+    // Note that all of these elements are interdependent
+    GLModelMatrixElement      .enable(GLRenderAction.getDefaultState());
+    GLProjectionMatrixElement .enable(GLRenderAction.getDefaultState());
+    GLViewingMatrixElement    .enable(GLRenderAction.getDefaultState());
+  }
 
   public Camera() {
     position = new Vec3f(0, 0, 1);
@@ -123,4 +133,13 @@ public abstract class Camera extends Node {
 
   /** Returns the projection matrix associated with this camera's parameters. */
   public abstract Mat4f getProjectionMatrix();
+
+  public void doAction(Action action) {
+    if (ViewingMatrixElement.isEnabled(action.getState())) {
+      ViewingMatrixElement.set(action.getState(), getViewingMatrix());
+    }
+    if (ProjectionMatrixElement.isEnabled(action.getState())) {
+      ProjectionMatrixElement.set(action.getState(), getProjectionMatrix());
+    }
+  }
 }

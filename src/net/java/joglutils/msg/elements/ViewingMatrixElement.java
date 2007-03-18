@@ -50,12 +50,20 @@ public class ViewingMatrixElement extends Element {
   public Element newInstance() {
     return new ViewingMatrixElement();
   }
+  /** Returns the instance of this element in the passed State. */
   public static ViewingMatrixElement getInstance(State state) {
     return (ViewingMatrixElement) state.getElement(index);
   }
+  /** Enables this element in the passed state, which should be the
+      default for a given action. */
   public static void enable(State defaultState) {
     Element tmp = new ViewingMatrixElement();
     defaultState.setElement(tmp.getStateIndex(), tmp);
+  }
+  /** Indicates whether this element is enabled in the given default
+      state for a particular action. */
+  public static boolean isEnabled(State state) {
+    return (state.getDefaults().getElement(index) != null);
   }
 
   // The matrix data

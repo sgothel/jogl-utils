@@ -45,6 +45,7 @@ import javax.media.opengl.*;
 import com.sun.opengl.util.texture.*;
 
 import net.java.joglutils.msg.actions.*;
+import net.java.joglutils.msg.elements.*;
 
 /** Represents a two-dimensional texture. */
 
@@ -53,6 +54,11 @@ public class Texture2 extends Node {
   private Texture texture;
   private int texEnvMode = MODULATE;
   private boolean dirty;
+
+  static {
+    // Enable the elements this node affects for known actions
+    GLTextureElement.enable(GLRenderAction.getDefaultState());
+  }
 
   /** Represents the OpenGL MODULATE texture environment mode. */
   public static final int MODULATE = 1;
@@ -134,6 +140,8 @@ public class Texture2 extends Node {
   }
 
   public void doAction(Action action) {
-    action.visit(this);
+    if (TextureElement.isEnabled(action.getState())) {
+      TextureElement.set(action.getState(), getTexture(), getTexEnvMode());
+    }
   }
 }

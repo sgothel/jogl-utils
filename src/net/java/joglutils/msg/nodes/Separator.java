@@ -38,6 +38,7 @@
 package net.java.joglutils.msg.nodes;
 
 import net.java.joglutils.msg.actions.*;
+import net.java.joglutils.msg.misc.*;
 
 /** Represents a push / pop of OpenGL state, "separating" the
     sub-graph below this separator from the nodes which follow it in
@@ -45,8 +46,12 @@ import net.java.joglutils.msg.actions.*;
 
 public class Separator extends Group {
   public void doAction(Action action) {
-    action.visitPre(this);
-    super.doAction(action);
-    action.visitPost(this);
+    State state = action.getState();
+    state.push();
+    try {
+      super.doAction(action);
+    } finally {
+      state.pop();
+    }
   }
 }

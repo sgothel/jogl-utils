@@ -38,6 +38,7 @@
 package net.java.joglutils.msg.nodes;
 
 import net.java.joglutils.msg.actions.*;
+import net.java.joglutils.msg.elements.*;
 import net.java.joglutils.msg.collections.*;
 
 /** Represents a set of 4-valued colors which are applied on a
@@ -54,6 +55,11 @@ import net.java.joglutils.msg.collections.*;
 
 public class Color4 extends Node {
   private Vec4fCollection data;
+
+  static {
+    // Enable the elements this node affects for known actions
+    GLColorElement.enable(GLRenderAction.getDefaultState());
+  }
 
   //  private int colorBinding = AMBIENT_AND_DIFFUSE;
 
@@ -90,6 +96,8 @@ public class Color4 extends Node {
   }
 
   public void doAction(Action action) {
-    action.visit(this);
+    if (ColorElement.isEnabled(action.getState())) {
+      ColorElement.set(action.getState(), getData().getData());
+    }
   }
 }

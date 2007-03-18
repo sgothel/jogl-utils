@@ -63,6 +63,11 @@ public class BlendElement extends Element {
     BlendElement tmp = new BlendElement();
     defaultState.setElement(tmp.getStateIndex(), tmp);
   }
+  /** Indicates whether this element is enabled in the given default
+      state for a particular action. */
+  public static boolean isEnabled(State state) {
+    return (state.getDefaults().getElement(index) != null);
+  }
 
   // These defaults match those in the Blend node -- is there a better way of factoring them out?
 

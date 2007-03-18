@@ -37,12 +37,12 @@
 
 package net.java.joglutils.msg.actions;
 
+import java.lang.reflect.*;
+
 import javax.media.opengl.*;
 import javax.media.opengl.glu.*;
-import com.sun.opengl.util.texture.*;
 
 import net.java.joglutils.msg.elements.*;
-import net.java.joglutils.msg.math.*;
 import net.java.joglutils.msg.misc.*;
 import net.java.joglutils.msg.nodes.*;
 
@@ -64,6 +64,14 @@ public class GLRenderAction extends Action {
   public static State getDefaultState() {
     return defaults;
   }
+  private static ActionTable table = new ActionTable(GLRenderAction.class);
+
+  /** Adds an action method for the given node type to this action.
+      This should only be called by developers adding new node types
+      and not desiring to use the standard overriding mechanisms. */
+  public static void addActionMethod(Class<? extends Node> nodeType, Method m) {
+    table.addActionMethod(nodeType, m);
+  }
 
   private State state = new State(defaults);
   public State getState() {
@@ -71,34 +79,31 @@ public class GLRenderAction extends Action {
   }
 
   static {
-    // FIXME: may need to rethink when and where these elements are enabled
-
-    // In Open Inventor, this is folded into the node's initialization
-    // (i.e., the node needs to know which elements it might affect).
-    // That in theory allows for fewer elements to be enabled, but it
-    // isn't clear that this makes a difference, or that it results in
-    // correct code elsewhere where certain elements implicitly expect
-    // others to be enabled.
-    GLBlendElement            .enable(getDefaultState());
-    GLColorElement            .enable(getDefaultState());
-    GLCoordinateElement       .enable(getDefaultState());
-    GLModelMatrixElement      .enable(getDefaultState());
-    GLProjectionMatrixElement .enable(getDefaultState());
-    GLViewingMatrixElement    .enable(getDefaultState());
-    GLTextureCoordinateElement.enable(getDefaultState());
-    GLTextureElement          .enable(getDefaultState());
+    // Set up action methods
+    // Note that because this action is built-in, we use virtual
+    // method dispatch to allow overriding of rendering functionality.
+    // We could optionally pull in all of the action methods into this
+    // class. However, factoring the setting of the elements into the
+    // nodes provides for more sharing of common functionality among
+    // actions.
+    try {
+      addActionMethod(Node.class, GLRenderAction.class.getMethod("render", GLRenderAction.class, Node.class));
+    } catch (Exception e) {
+      throw new RuntimeException("Error initializing action method for GLRenderAction class", e);
+    }
   }
 
   // For automatically setting the aspect ratios of cameras we encounter
   private float curAspectRatio = 1.0f;
 
   private int applyDepth = 0;
+  private GL gl;
 
   public void apply(Node node) {
-    GL gl = GLU.getCurrentGL();
     int depth = applyDepth++;
     try {
       if (depth == 0) {
+        gl = GLU.getCurrentGL();
         // Applying to the root of the scene graph
         // Push necessary GL state
         // FIXME: add in additional bits as we add more capabilities
@@ -115,116 +120,30 @@ public class GLRenderAction extends Action {
         gl.glGetIntegerv(GL.GL_VIEWPORT, viewport, 0);
         curAspectRatio = (float) viewport[2] / (float) viewport[3];
       }
-      super.apply(node);
+      apply(table, node);
     } finally {
       if (depth == 0) {
         gl.glPopClientAttrib();
         gl.glPopAttrib();
+        gl = null;
       }
       --applyDepth;
     }
   }
 
-  public void visit(Blend blend) {
-    GLBlendElement.set(state,
-                       blend.getEnabled(),
-                       blend.getBlendColor(),
-                       blend.getSourceFunc(),
-                       blend.getDestFunc(),
-                       blend.getBlendEquation());
+  /** Returns the GL instance being used for rendering. */
+  public GL getGL() {
+    return gl;
   }
 
-  public void visit(Color4 colors) {
-    GLColorElement.set(state, colors.getData().getData());
+  /** Fetches the current aspect ratio of the viewport this
+      GLRenderAction is rendering into. */
+  public float getCurAspectRatio() {
+    return curAspectRatio;
   }
 
-  public void visit(Coordinate3 coords) {
-    GLCoordinateElement.set(state, coords.getData().getData());
-  }
-
-  public void visit(IndexedTriangleSet tris) {
-    throw new RuntimeException("Not yet implemented");
-  }
-
-  public void visit(PerspectiveCamera camera) {
-    // FIXME: unclear whether we should be doing this, or whether we
-    // should have a mechanism which doesn't require mutation of the
-    // camera
-    camera.setAspectRatio(curAspectRatio);
-
-    GLViewingMatrixElement.set(state, camera.getViewingMatrix());
-    GLProjectionMatrixElement.set(state, camera.getProjectionMatrix());
-  }
-
-  public void visitPre(Separator sep) {
-    state.push();
-  }
-
-  public void visitPost(Separator sep) {
-    state.pop();
-  }
-
-  public void visit(Texture2 texture) {
-    GLTextureElement.set(state, texture.getTexture(), texture.getTexEnvMode());
-  }
-
-  public void visit(TextureCoordinate2 texCoords) {
-    GLTextureCoordinateElement.set(state, texCoords.getData().getData());
-  }
-
-  public void visit(Transform transform) {
-    GLModelMatrixElement.mult(state, transform.getTransform());
-  }
-
-  public void visit(TriangleSet tris) {
-    if (CoordinateElement.get(state) != null) {
-      // OK, we have coordinates to send down, at least
-
-      GL gl = GLU.getCurrentGL();
-
-      Texture tex = GLTextureElement.get(state);
-      boolean haveTexCoords = (GLTextureCoordinateElement.get(state) != null);
-
-      if (tex != null) {
-        // Set up the texture matrix to uniformly map [0..1] to the used
-        // portion of the texture image
-        gl.glMatrixMode(GL.GL_TEXTURE);
-        gl.glPushMatrix();
-        gl.glLoadTransposeMatrixf(getTextureMatrix(tex).getRowMajorData(), 0);
-        gl.glMatrixMode(GL.GL_MODELVIEW);
-      } else if (haveTexCoords) {
-        // Want to turn off the use of texture coordinates to avoid errors
-        // FIXME: not 100% sure whether we need to do this, but think we should
-        gl.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY);
-      }
-
-      // For now, assume the triangle set and the number of available
-      // coordinates match -- may want to add debugging information
-      // for this later
-      gl.glDrawArrays(GL.GL_TRIANGLES, 0, 3 * tris.getNumTriangles());
-
-      if (tex != null) {
-        gl.glMatrixMode(GL.GL_TEXTURE);
-        gl.glPopMatrix();
-        gl.glMatrixMode(GL.GL_MODELVIEW);
-      } else if (haveTexCoords) {
-        // Might want this the next time we render a shape
-        gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
-      }
-    }
-  }
-
-  private Mat4f textureMatrix = new Mat4f();
-  private Mat4f getTextureMatrix(Texture texture) {
-    textureMatrix.makeIdent();
-    TextureCoords coords = texture.getImageTexCoords();
-    // Horizontal scale
-    textureMatrix.set(0, 0, coords.right() - coords.left());
-    // Vertical scale (may be negative if texture needs to be flipped vertically)
-    float vertScale = coords.top() - coords.bottom();
-    textureMatrix.set(1, 1, vertScale);
-    textureMatrix.set(0, 3, coords.left());
-    textureMatrix.set(1, 3, coords.bottom());
-    return textureMatrix;
+  /** Action method which dispatches to per-node rendering functionality. */
+  public static void render(GLRenderAction action, Node node) {
+    node.render(action);
   }
 }
