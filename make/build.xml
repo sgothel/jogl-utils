@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   - Ant build for the JOGL utilities.
+   -
+   - In order for this build to succeed the resulting jar file from this build
+   - (joglutils.jar) must not be on the CLASSPATH.
+   -
+   - This build requires that the jogl project has been checked out into a sibling
+   - directory to the joglutils top-level directory and that the jogl.jar has been
+   - built into its build directory.
+   -->
+<project name="joglutils" basedir="." default="all">
+    <property name="src.dir"         value="../src" />
+    <property name="output.dir"      value="../build" />
+    <property name="output.tmp.dir"  value="../build/classes" />
+    <property name="output.jar"      value="${output.dir}/joglutils.jar" />
+    <property name="jogl.jar"        value="../../jogl/build/jogl.jar" />
+    <property name="swinglayout.jar" value="${output.dir}/lib/swing-layout-1.0.jar" />
+    <path id="build.classpath">
+        <pathelement location="${jogl.jar}" />
+        <pathelement location="${swinglayout.jar}" />
+    </path>
+
+    <property name="javadoc.link" value="http://java.sun.com/j2se/1.5.0/docs/api/" />
+
+    <property name="msg.javadoc.dir" value="../msg_javadoc" />
+    <property name="msg.javadoc.packagenames" value="net.java.joglutils.msg.actions,net.java.joglutils.msg.collections,net.java.joglutils.msg.elements,net.java.joglutils.msg.math,net.java.joglutils.msg.misc,net.java.joglutils.msg.nodes,net.java.joglutils.msg.test" />
+    <property name="msg.javadoc.overview" value="../src/net/java/joglutils/msg/overview.html" />
+    <property name="msg.javadoc.windowtitle" value="Minimal Scene Graph (MSG)" />
+    <target name="msg.javadoc">
+        <javadoc packagenames="${msg.javadoc.packagenames}"
+                 sourcepath="${src.dir}"
+                 destdir="${msg.javadoc.dir}" windowtitle="${msg.javadoc.windowtitle}"
+                 overview="${msg.javadoc.overview}" 
+                 source="1.5"
+                 linkoffline="${javadoc.link} 5-packages" >
+        </javadoc>
+    </target>
+
+    <target name="all">
+        <mkdir dir="${output.tmp.dir}" />
+        <javac destdir="${output.tmp.dir}" source="5" debug="true" debuglevel="source,lines">
+            <src path="${src.dir}" />
+            <classpath refid="build.classpath" />
+        </javac>
+        <jar destfile="${output.jar}">
+            <fileset dir="${output.tmp.dir}" />
+        </jar>
+    </target>
+</project>
