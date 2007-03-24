@@ -42,7 +42,6 @@ import java.lang.reflect.*;
 import javax.media.opengl.*;
 import javax.media.opengl.glu.*;
 
-import net.java.joglutils.msg.elements.*;
 import net.java.joglutils.msg.misc.*;
 import net.java.joglutils.msg.nodes.*;
 

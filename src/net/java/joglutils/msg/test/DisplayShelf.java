@@ -73,6 +73,7 @@ public class DisplayShelf extends Container {
 
   static class TitleGraph {
     String url;
+    Separator sep   = new Separator();
     Transform xform = new Transform();
     Texture2  texture = new Texture2();
     Coordinate3 coords = new Coordinate3();
@@ -83,9 +84,11 @@ public class DisplayShelf extends Container {
   }
 
   private Group root;
+  private Separator imageRoot;
   private String[] images;
   private List<TitleGraph> titles = new ArrayList<TitleGraph>();
   private int targetIndex;
+  private JSlider slider;
   // This encodes both the current position and the animation alpha
   private float currentIndex;
   // If the difference between the current index and target index is >
@@ -130,7 +133,7 @@ public class DisplayShelf extends Container {
     final List<TitleGraph> queuedGraphs = new ArrayList<TitleGraph>();
     queuedGraphs.addAll(titles);
 
-    new Thread(new Runnable() {
+    Thread loaderThread = new Thread(new Runnable() {
         public void run() {
           while (queuedGraphs.size() > 0) {
             TitleGraph graph = queuedGraphs.remove(0);
@@ -152,7 +155,10 @@ public class DisplayShelf extends Container {
             }
           }
         }
-      }).start();
+      });
+    // Avoid having the loader thread preempt the rendering thread
+    loaderThread.setPriority(Thread.MIN_PRIORITY + 1);
+    loaderThread.start();
   }
 
   private void setTargetIndex(int index) {
@@ -219,8 +225,9 @@ public class DisplayShelf extends Container {
     camera.setFarDistance(20.0f);
     canvas = new GLCanvas();
     canvas.addGLEventListener(new Listener());
+    canvas.addMouseListener(new MListener());
     add(canvas, BorderLayout.CENTER);
-    final JSlider slider = new JSlider(0, images.length - 1, 0);
+    slider = new JSlider(0, images.length - 1, 0);
     slider.addChangeListener(new ChangeListener() {
         public void stateChanged(ChangeEvent e) {
           setTargetIndex(slider.getValue());
@@ -239,7 +246,7 @@ public class DisplayShelf extends Container {
       root.removeAllChildren();
 
       // The images
-      Separator imageRoot = new Separator();
+      imageRoot = new Separator();
 
       // The mirrored images, under the floor
       Separator mirrorRoot = new Separator();
@@ -274,7 +281,7 @@ public class DisplayShelf extends Container {
         titles.add(graph);
         computeCoords(graph.coords, DEFAULT_ASPECT_RATIO);
         graph.xform.getTransform().setTranslation(new Vec3f(i, 0, 0));
-        Separator sep = new Separator();
+        Separator sep = graph.sep;
         sep.addChild(graph.xform);
         sep.addChild(graph.coords);
         sep.addChild(graph.texture);
@@ -375,6 +382,27 @@ public class DisplayShelf extends Container {
     public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {}
   }
 
+  class MListener extends MouseAdapter {
+    RayPickAction ra = new RayPickAction();
+
+    public void mousePressed(MouseEvent e) {
+      ra.setPoint(e.getX(), e.getY(), e.getComponent());
+      // Apply to the scene root
+      ra.apply(root);
+      List<PickedPoint> pickedPoints = ra.getPickedPoints();
+      Path p = null;
+      if (!pickedPoints.isEmpty())
+        p = pickedPoints.get(0).getPath();
+      if (p != null && p.size() > 1) {
+        int idx = imageRoot.findChild(p.get(p.size() - 2));
+        if (idx >= 0) {
+          // Need to keep the slider and this mechanism in sync
+          slider.setValue(idx);
+        }
+      }
+    }
+  }
+
   public static void main(String[] args) {
     Frame f = new Frame("Display Shelf test");
     f.setLayout(new BorderLayout());
@@ -390,33 +418,58 @@ public class DisplayShelf extends Container {
 
     // The images to configure the shelf with
     String[] images = {
-      "http://a1.phobos.apple.com/r10/Music/05/7d/c3/dj.umbuvrfe.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Music/cb/9a/b3/mzi.krksguze.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Features/94/8d/83/dj.jionwnuf.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Features/26/43/02/dj.dgnjindw.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Music/69/2a/63/mzi.wpfmtfzp.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Features/17/e1/88/dj.gcajwhco.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Features/21/f6/32/dj.glzycglj.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Music/d1/6b/3b/mzi.pajmxsmk.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Features/f6/a7/b2/dj.lamcsbwx.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Features/84/a5/4f/dj.nqvsikaq.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Features/7d/c3/23/dj.elyzoipc.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Features/80/a5/8c/dj.oidpsvzg.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Features/d1/b2/cf/dj.moyzjiht.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Music/49/a3/59/mzi.ssjpuxwt.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Features/9b/8f/7c/dj.qizpbris.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Features/b1/4f/c8/dj.uadqyjbr.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Music/d4/31/df/mzi.pqzeferc.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Features/4b/88/a7/dj.jhotijvb.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Features/a8/a9/36/dj.asztraij.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Music/d6/6b/c4/mzi.dricykdh.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Features/d4/81/a3/dj.tpysowpf.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Music/4f/2c/a6/dj.cawuddxy.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Music/d8/9c/8a/mzi.vmajyyha.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Music/00/5c/31/mzi.tuyoxwib.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Music/da/c8/e2/mzi.sanzeosx.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Music/43/cc/0e/dj.zfqfgoas.200x200-75.jpg",
-      "http://a1.phobos.apple.com/r10/Music/73/70/13/mzi.uswlslxx.200x200-75.jpg"
+      "http://download.java.net/media/jogl/builds/ds_tmp/mzi.jsepedzf.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.wvbmknhn.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/mzi.oorrjicu.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.woofnkar.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.tapbaxpy.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/mzi.awlngumx.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.bpuzrjch.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.nqarjlzt.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.hgadlawz.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.sdfnrwzj.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.vtbicehh.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.lhgtckcs.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/mzi.tbwyqyqm.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.eimndamh.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.nxvdfcwt.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.njoydoqk.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/mzi.ikfbfqzh.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.niqwioqm.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/mzi.tqqldmqe.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/mzi.ynokefwv.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.jodjmgxs.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.yhdaeino.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.xmgrrxef.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/mzi.pahnmknr.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/mzi.sbkwhrik.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.hwbcjnfx.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.umbuvrfe.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/mzi.krksguze.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.jionwnuf.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.dgnjindw.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/mzi.wpfmtfzp.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.gcajwhco.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.glzycglj.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/mzi.pajmxsmk.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.lamcsbwx.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.nqvsikaq.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.elyzoipc.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.oidpsvzg.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.moyzjiht.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.qizpbris.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.uadqyjbr.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/mzi.pqzeferc.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.jhotijvb.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.asztraij.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/mzi.dricykdh.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.tpysowpf.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.cawuddxy.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/mzi.vmajyyha.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/mzi.tuyoxwib.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/mzi.sanzeosx.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/dj.zfqfgoas.200x200-75.jpg",
+      "http://download.java.net/media/jogl/builds/ds_tmp/mzi.uswlslxx.200x200-75.jpg"
     };
 
     Separator root = new Separator();

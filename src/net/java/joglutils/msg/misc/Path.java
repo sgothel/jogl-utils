@@ -35,47 +35,18 @@
  * 
  */
 
-package net.java.joglutils.msg.nodes;
+package net.java.joglutils.msg.misc;
 
-import net.java.joglutils.msg.actions.*;
-import net.java.joglutils.msg.elements.*;
-import net.java.joglutils.msg.math.*;
+import java.util.*;
 
-/** Represents a generalized 4x4 matrix transformation. */
+import net.java.joglutils.msg.nodes.*;
 
-public class Transform extends Node {
-  private Mat4f transform;
-  
-  static {
-    // Enable the elements this node affects for known actions
-    // Note that all of these elements are interdependent
-    GLModelMatrixElement     .enable(GLRenderAction.getDefaultState());
-    GLProjectionMatrixElement.enable(GLRenderAction.getDefaultState());
-    GLViewingMatrixElement   .enable(GLRenderAction.getDefaultState());
+/** Represents a path through the scene graph. The topmost node is at
+    index 0 and subsequent child nodes are at later indices. */
 
-    ModelMatrixElement     .enable(RayPickAction.getDefaultState());
-    ProjectionMatrixElement.enable(RayPickAction.getDefaultState());
-    ViewingMatrixElement   .enable(RayPickAction.getDefaultState());
-  }
-
-  public Transform() {
-    transform = new Mat4f();
-    transform.makeIdent();
-  }
-
-  /** Sets the transformation in thie node. */
-  public void setTransform(Mat4f transform) {
-    this.transform.set(transform);
-  }
-
-  /** Returns the transformation in thie node. */
-  public Mat4f getTransform() {
-    return transform;
-  }
-
-  public void doAction(Action action) {
-    if (ModelMatrixElement.isEnabled(action.getState())) {
-      ModelMatrixElement.mult(action.getState(), getTransform());
-    }
+public class Path extends ArrayList<Node> {
+  /** Returns a copy of this path. */
+  public Path copy() {
+    return (Path) clone();
   }
 }

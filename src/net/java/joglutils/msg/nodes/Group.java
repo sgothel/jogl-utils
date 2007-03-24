@@ -52,7 +52,7 @@ public class Group extends Node {
   }
 
   /** Adds a child so that it becomes the one with the given index. */
-  public void insertChild(Node child, int index) {
+  public void insertChild(int index, Node child) {
     children.add(index, child);
   }
 
@@ -103,7 +103,7 @@ public class Group extends Node {
   */
   public void replaceChild(int index, Node newChild) throws IndexOutOfBoundsException {
     removeChild(index);
-    insertChild(newChild, index);
+    insertChild(index, newChild);
   }
 
   /** Replaces the old child with the new child. This is a convenience

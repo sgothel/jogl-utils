@@ -70,6 +70,13 @@ public abstract class Action {
       altered by the nodes the action traverses. */
   public abstract State getState();
 
+  /** Returns the path to the node currently being traversed. The
+      caller should make a copy of this path if it is desired to keep
+      it around. */
+  public Path getPath() {
+    return path;
+  }
+
   private Object[] argTmp = new Object[2];
   /** Invokes the appropriate action method for the given Node. */
   protected void apply(ActionTable table, Node node) {
@@ -78,10 +85,28 @@ public abstract class Action {
       if (m != null) {
         argTmp[0] = this;
         argTmp[1] = node;
-        m.invoke(null, argTmp);
+        push(node);
+        try {
+          m.invoke(null, argTmp);
+        } finally {
+          pop();
+        }
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private Path path = new Path();
+  /** Pushes the given Node onto the internal Path this Action
+      maintains during traversal. */
+  private void push(Node node) {
+    path.add(node);
+  }
+
+  /** Pops the given Node off the internal Path this Action maintains
+      during traversal. */
+  private void pop() {
+    path.remove(path.size() - 1);
   }
 }

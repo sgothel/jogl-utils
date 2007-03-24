@@ -37,6 +37,9 @@
 
 package net.java.joglutils.msg.nodes;
 
+import java.nio.*;
+import java.util.*;
+
 import javax.media.opengl.*;
 import com.sun.opengl.util.texture.*;
 
@@ -49,7 +52,7 @@ import net.java.joglutils.msg.misc.*;
     node, and any auxiliary nodes such as a TextureCoordinate2 node,
     into a set of triangles. */
 
-public class TriangleSet extends Node {
+public class TriangleSet extends TriangleBasedShape {
   private int numTriangles;
 
   /** Sets the number of triangles this TriangleSet references. */
@@ -107,6 +110,102 @@ public class TriangleSet extends Node {
         // Might want this the next time we render a shape
         gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
       }
+    }
+  }
+
+  public void generateTriangles(Action action, TriangleCallback cb) {
+    State state = action.getState();
+    FloatBuffer coords    = null;
+    FloatBuffer texCoords = null;
+    // FIXME: normals and lighting not supported yet
+    //    FloatBuffer normals   = null;
+    FloatBuffer colors    = null;
+    if (CoordinateElement.isEnabled(state)) {
+      coords = CoordinateElement.get(state);
+    }
+    // No point in continuing if we don't have coordinates
+    if (coords == null)
+      return;
+    if (TextureCoordinateElement.isEnabled(state)) {
+      texCoords = TextureCoordinateElement.get(state);
+    }
+    //    if (NormalElement.isEnabled(state)) {
+    //      texCoords = NormalElement.get(state);
+    //    }
+    if (ColorElement.isEnabled(state)) {
+      colors = ColorElement.get(state);
+    }
+    PrimitiveVertex v0 = new PrimitiveVertex();
+    PrimitiveVertex v1 = new PrimitiveVertex();
+    PrimitiveVertex v2 = new PrimitiveVertex();
+    v0.setCoord(new Vec3f());
+    v1.setCoord(new Vec3f());
+    v2.setCoord(new Vec3f());
+    if (texCoords != null) {
+      v0.setTexCoord(new Vec2f());
+      v1.setTexCoord(new Vec2f());
+      v2.setTexCoord(new Vec2f());
+    }
+    if (colors != null) {
+      v0.setColor(new Vec4f());
+      v1.setColor(new Vec4f());
+      v2.setColor(new Vec4f());
+    }
+
+    int coordIdx = 0;
+    for (int i = 0; i < numTriangles; i++) {
+      // Vertex 0
+      v0.getCoord().set(coords.get(3 * coordIdx + 0),
+                        coords.get(3 * coordIdx + 1),
+                        coords.get(3 * coordIdx + 2));
+      if (texCoords != null) {
+        v0.getTexCoord().set(texCoords.get(2 * coordIdx + 0),
+                             texCoords.get(2 * coordIdx + 1));
+      }
+      if (colors != null) {
+        v0.getColor().set(colors.get(4 * coordIdx + 0),
+                          colors.get(4 * coordIdx + 1),
+                          colors.get(4 * coordIdx + 2),
+                          colors.get(4 * coordIdx + 3));
+      }
+
+      // Vertex 1
+      v1.getCoord().set(coords.get(3 * (coordIdx + 1) + 0),
+                        coords.get(3 * (coordIdx + 1) + 1),
+                        coords.get(3 * (coordIdx + 1) + 2));
+      if (texCoords != null) {
+        v1.getTexCoord().set(texCoords.get(2 * (coordIdx + 1) + 0),
+                             texCoords.get(2 * (coordIdx + 1) + 1));
+      }
+      if (colors != null) {
+        v1.getColor().set(colors.get(4 * (coordIdx + 1) + 0),
+                          colors.get(4 * (coordIdx + 1) + 1),
+                          colors.get(4 * (coordIdx + 1) + 2),
+                          colors.get(4 * (coordIdx + 1) + 3));
+      }
+
+      // Vertex 2
+      v2.getCoord().set(coords.get(3 * (coordIdx + 2) + 0),
+                        coords.get(3 * (coordIdx + 2) + 1),
+                        coords.get(3 * (coordIdx + 2) + 2));
+      if (texCoords != null) {
+        v2.getTexCoord().set(texCoords.get(2 * (coordIdx + 2) + 0),
+                             texCoords.get(2 * (coordIdx + 2) + 1));
+      }
+      if (colors != null) {
+        v2.getColor().set(colors.get(4 * (coordIdx + 2) + 0),
+                          colors.get(4 * (coordIdx + 2) + 1),
+                          colors.get(4 * (coordIdx + 2) + 2),
+                          colors.get(4 * (coordIdx + 2) + 3));
+      }
+
+      // Call callback
+      cb.triangleCB(i,
+                    v0, 3 * i + 0,
+                    v1, 3 * i + 1,
+                    v2, 3 * i + 2);
+
+      coordIdx += 3;
     }
   }
 

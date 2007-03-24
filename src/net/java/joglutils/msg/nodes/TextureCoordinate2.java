@@ -50,6 +50,8 @@ public class TextureCoordinate2 extends Node {
   static {
     // Enable the elements this node affects for known actions
     GLTextureCoordinateElement.enable(GLRenderAction.getDefaultState());
+
+    TextureCoordinateElement  .enable(RayPickAction.getDefaultState());
   }
 
   /** Sets the texture coordinate data in this node. */

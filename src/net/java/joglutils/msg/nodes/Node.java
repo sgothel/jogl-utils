@@ -51,4 +51,10 @@ public class Node {
       not required due to the framework supporting action methods, but
       for built-in actions it may make it simpler. */
   public void render(GLRenderAction action) { doAction(action); }
+
+  /** Support for the built-in RayPickAction. Note that supplying
+      virtual methods in Node subclasses to support various actions is
+      not required due to the framework supporting action methods, but
+      for built-in actions it may make it simpler. */
+  public void rayPick(RayPickAction action) { doAction(action); }
 }

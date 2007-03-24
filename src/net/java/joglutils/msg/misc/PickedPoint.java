@@ -35,47 +35,38 @@
  * 
  */
 
-package net.java.joglutils.msg.nodes;
+package net.java.joglutils.msg.misc;
 
-import net.java.joglutils.msg.actions.*;
-import net.java.joglutils.msg.elements.*;
-import net.java.joglutils.msg.math.*;
+/** Represents a point on a piece of geometry picked for example by a
+    RayPickAction. */
 
-/** Represents a generalized 4x4 matrix transformation. */
+public class PickedPoint extends PrimitiveVertex {
+  private Path path;
 
-public class Transform extends Node {
-  private Mat4f transform;
-  
-  static {
-    // Enable the elements this node affects for known actions
-    // Note that all of these elements are interdependent
-    GLModelMatrixElement     .enable(GLRenderAction.getDefaultState());
-    GLProjectionMatrixElement.enable(GLRenderAction.getDefaultState());
-    GLViewingMatrixElement   .enable(GLRenderAction.getDefaultState());
-
-    ModelMatrixElement     .enable(RayPickAction.getDefaultState());
-    ProjectionMatrixElement.enable(RayPickAction.getDefaultState());
-    ViewingMatrixElement   .enable(RayPickAction.getDefaultState());
-  }
-
-  public Transform() {
-    transform = new Mat4f();
-    transform.makeIdent();
-  }
-
-  /** Sets the transformation in thie node. */
-  public void setTransform(Mat4f transform) {
-    this.transform.set(transform);
-  }
-
-  /** Returns the transformation in thie node. */
-  public Mat4f getTransform() {
-    return transform;
-  }
-
-  public void doAction(Action action) {
-    if (ModelMatrixElement.isEnabled(action.getState())) {
-      ModelMatrixElement.mult(action.getState(), getTransform());
+  public Object clone() {
+    PickedPoint point = (PickedPoint) super.clone();
+    if (path != null) {
+      point.path = path.copy();
     }
+    return point;
+  }
+
+  /** Performs a "deep copy" of this PickedPoint so that it shares
+      none of its contents with this one. */
+  public PickedPoint copy() {
+    return (PickedPoint) clone();
+  }
+
+  /** Sets the path to the picked geometry. Note that this simply
+      retains a reference to the given Path, so the Path should be
+      copied if it can later be changed (for example, if it the
+      internal Path in an Action). */
+  public void setPath(Path path) {
+    this.path = path;
+  }
+
+  /** Returns the path to the picked geometry. */
+  public Path getPath() {
+    return path;
   }
 }

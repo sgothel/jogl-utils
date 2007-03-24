@@ -37,45 +37,7 @@
 
 package net.java.joglutils.msg.nodes;
 
-import net.java.joglutils.msg.actions.*;
-import net.java.joglutils.msg.elements.*;
-import net.java.joglutils.msg.math.*;
+/** The abstract base class for all shapes in the scene graph. */
 
-/** Represents a generalized 4x4 matrix transformation. */
-
-public class Transform extends Node {
-  private Mat4f transform;
-  
-  static {
-    // Enable the elements this node affects for known actions
-    // Note that all of these elements are interdependent
-    GLModelMatrixElement     .enable(GLRenderAction.getDefaultState());
-    GLProjectionMatrixElement.enable(GLRenderAction.getDefaultState());
-    GLViewingMatrixElement   .enable(GLRenderAction.getDefaultState());
-
-    ModelMatrixElement     .enable(RayPickAction.getDefaultState());
-    ProjectionMatrixElement.enable(RayPickAction.getDefaultState());
-    ViewingMatrixElement   .enable(RayPickAction.getDefaultState());
-  }
-
-  public Transform() {
-    transform = new Mat4f();
-    transform.makeIdent();
-  }
-
-  /** Sets the transformation in thie node. */
-  public void setTransform(Mat4f transform) {
-    this.transform.set(transform);
-  }
-
-  /** Returns the transformation in thie node. */
-  public Mat4f getTransform() {
-    return transform;
-  }
-
-  public void doAction(Action action) {
-    if (ModelMatrixElement.isEnabled(action.getState())) {
-      ModelMatrixElement.mult(action.getState(), getTransform());
-    }
-  }
+public abstract class Shape extends Node {
 }

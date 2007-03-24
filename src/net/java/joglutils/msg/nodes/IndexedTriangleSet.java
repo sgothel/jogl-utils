@@ -40,6 +40,7 @@ package net.java.joglutils.msg.nodes;
 import java.nio.*;
 
 import net.java.joglutils.msg.actions.*;
+import net.java.joglutils.msg.misc.*;
 
 /** An IndexedTriangleSet assembles the coordinates specified by a
     Coordinate3 node, and any auxiliary nodes such as a
@@ -48,7 +49,7 @@ import net.java.joglutils.msg.actions.*;
     (FIXME) rendering support for this node is not yet
     implemented.) */
 
-public class IndexedTriangleSet extends Node {
+public class IndexedTriangleSet extends TriangleBasedShape {
   private IntBuffer indices;
 
   /** Sets the indices this node uses to group vertices into triangles. */
@@ -62,6 +63,10 @@ public class IndexedTriangleSet extends Node {
   }
 
   public void doAction(Action action) {
+    throw new RuntimeException("Not yet implemented");
+  }
+
+  public void generateTriangles(Action action, TriangleCallback cb) {
     throw new RuntimeException("Not yet implemented");
   }
 }

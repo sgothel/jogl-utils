@@ -239,6 +239,16 @@ public class Mat4f {
       dest.set(rc, tmp);
     }
   }
+
+  /** Transforms the given line (origin plus direction) by this
+      matrix. */
+  public Line xformLine(Line line) {
+    Vec3f pt = new Vec3f();
+    Vec3f dir = new Vec3f();
+    xformPt(line.getPoint(), pt);
+    xformDir(line.getDirection(), dir);
+    return new Line(dir, pt);
+  }
   
   /** Copies data in column-major (OpenGL format) order into passed
       float array, which must have length 16 or greater. */

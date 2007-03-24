@@ -58,6 +58,8 @@ public class Texture2 extends Node {
   static {
     // Enable the elements this node affects for known actions
     GLTextureElement.enable(GLRenderAction.getDefaultState());
+
+    TextureElement  .enable(RayPickAction.getDefaultState());
   }
 
   /** Represents the OpenGL MODULATE texture environment mode. */
@@ -143,5 +145,12 @@ public class Texture2 extends Node {
     if (TextureElement.isEnabled(action.getState())) {
       TextureElement.set(action.getState(), getTexture(), getTexEnvMode());
     }
+  }
+
+  public void rayPick(RayPickAction action) {
+    // FIXME: because of the issue of potentially not having an OpenGL
+    // context at the time this is called, the TextureElement should
+    // be updated to hold a reference to this node, and only the
+    // GLTextureElement should poll the texture
   }
 }

@@ -35,47 +35,31 @@
  * 
  */
 
-package net.java.joglutils.msg.nodes;
+package net.java.joglutils.msg.misc;
 
-import net.java.joglutils.msg.actions.*;
-import net.java.joglutils.msg.elements.*;
-import net.java.joglutils.msg.math.*;
+/** Supports iteration over the triangles inside shapes. */
 
-/** Represents a generalized 4x4 matrix transformation. */
+public interface TriangleCallback {
+  /** Called for each triangle generated during enumeration of the
+      triangles in a particular shape. Certain elements of the
+      PrimitiveVertex objects may be null if not set, such as normals
+      or texture coordinates. Note that the PrimitiveVertex objects
+      may be reused between calls, so users should copy them if
+      necessary.
 
-public class Transform extends Node {
-  private Mat4f transform;
-  
-  static {
-    // Enable the elements this node affects for known actions
-    // Note that all of these elements are interdependent
-    GLModelMatrixElement     .enable(GLRenderAction.getDefaultState());
-    GLProjectionMatrixElement.enable(GLRenderAction.getDefaultState());
-    GLViewingMatrixElement   .enable(GLRenderAction.getDefaultState());
-
-    ModelMatrixElement     .enable(RayPickAction.getDefaultState());
-    ProjectionMatrixElement.enable(RayPickAction.getDefaultState());
-    ViewingMatrixElement   .enable(RayPickAction.getDefaultState());
-  }
-
-  public Transform() {
-    transform = new Mat4f();
-    transform.makeIdent();
-  }
-
-  /** Sets the transformation in thie node. */
-  public void setTransform(Mat4f transform) {
-    this.transform.set(transform);
-  }
-
-  /** Returns the transformation in thie node. */
-  public Mat4f getTransform() {
-    return transform;
-  }
-
-  public void doAction(Action action) {
-    if (ModelMatrixElement.isEnabled(action.getState())) {
-      ModelMatrixElement.mult(action.getState(), getTransform());
-    }
-  }
+      @param triangleIndex the index within the set of triangles [0..num tris - 1]
+      @param v0  primitive vertex 0
+      @param i0  index of primitive vertex 0 in the current coordinates
+      @param v1  primitive vertex 1
+      @param i1  index of primitive vertex 1 in the current coordinates
+      @param v2  primitive vertex 2
+      @param i2  index of primitive vertex 2 in the current coordinates
+  */
+  public void triangleCB(int triangleIndex,
+                         PrimitiveVertex v0,
+                         int i0,
+                         PrimitiveVertex v1,
+                         int i1,
+                         PrimitiveVertex v2,
+                         int i2);
 }

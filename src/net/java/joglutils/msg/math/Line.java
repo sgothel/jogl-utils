@@ -59,9 +59,9 @@ public class Line {
       <b>point</b>. <b>direction</b> does not need to be normalized but must
       not be the zero vector. */
   public Line(Vec3f direction, Vec3f point) {
-    direction = new Vec3f(direction);
-    direction.normalize();
-    point = new Vec3f(point);
+    this.direction = new Vec3f(direction);
+    this.direction.normalize();
+    this.point = new Vec3f(point);
     alongVec = new Vec3f();
     recalc();
   }

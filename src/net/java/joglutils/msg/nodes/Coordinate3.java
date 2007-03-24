@@ -50,6 +50,8 @@ public class Coordinate3 extends Node {
   static {
     // Enable the elements this node affects for known actions
     GLCoordinateElement.enable(GLRenderAction.getDefaultState());
+
+    CoordinateElement  .enable(RayPickAction.getDefaultState());
   }
 
   /** Sets the coordinate data in this node. */

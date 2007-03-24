@@ -70,6 +70,10 @@ public abstract class Camera extends Node {
     GLModelMatrixElement      .enable(GLRenderAction.getDefaultState());
     GLProjectionMatrixElement .enable(GLRenderAction.getDefaultState());
     GLViewingMatrixElement    .enable(GLRenderAction.getDefaultState());
+
+    ModelMatrixElement     .enable(RayPickAction.getDefaultState());
+    ProjectionMatrixElement.enable(RayPickAction.getDefaultState());
+    ViewingMatrixElement   .enable(RayPickAction.getDefaultState());
   }
 
   public Camera() {
@@ -84,38 +88,74 @@ public abstract class Camera extends Node {
   }
 
   /** Sets the position of the camera. */
-  public void  setPosition(Vec3f position) { this.position.set(position); viewDirty = true; }
+  public void setPosition(Vec3f position) {
+    this.position.set(position);
+    viewDirty = true;
+  }
+
   /** Returns the position of the camera. */
-  public Vec3f getPosition()               { return position;             }
+  public Vec3f getPosition() {
+    return position;
+  }
 
   /** Sets the orientation of the camera. */
-  public void  setOrientation(Rotf orientation) { this.orientation.set(orientation); viewDirty = true; }
+  public void setOrientation(Rotf orientation) {
+    this.orientation.set(orientation);
+    viewDirty = true;
+  }
+
   /** Returns the orientation of the camera. */
-  public Rotf  getOrientation()                 { return orientation;                }
+  public Rotf getOrientation() {
+    return orientation;
+  }
 
   /** Sets the aspect ratio of the camera. */
-  public void  setAspectRatio(float aspectRatio) { this.aspectRatio = aspectRatio; projDirty = true; }
+  public void setAspectRatio(float aspectRatio) {
+    this.aspectRatio = aspectRatio;
+    projDirty = true;
+  }
+
   /** Returns the aspect ratio of the camera. */
-  public float getAspectRatio()                  { return aspectRatio;             }
+  public float getAspectRatio() {
+    return aspectRatio;
+  }
 
   /** Sets the distance from the eye point to the near clipping plane. */
-  public void  setNearDistance(float nearDistance) { this.nearDistance = nearDistance; projDirty = true; }
+  public void setNearDistance(float nearDistance) {
+    this.nearDistance = nearDistance;
+    projDirty = true;
+  }
+
   /** Returns the distance from the eye point to the near clipping plane. */
-  public float getNearDistance()                   { return nearDistance;              }
+  public float getNearDistance() {
+    return nearDistance;
+  }
 
   /** Sets the distance from the eye point to the far clipping plane. */
-  public void  setFarDistance(float farDistance) { this.farDistance = farDistance; projDirty = true; }
+  public void setFarDistance(float farDistance) {
+    this.farDistance = farDistance;
+    projDirty = true;
+  }
+
   /** Returns the distance from the eye point to the far clipping plane. */
-  public float getFarDistance()                  { return farDistance;             }
+  public float getFarDistance() {
+    return farDistance;
+  }
 
   /** Sets the distance from the eye point to the focal point of the
       scene. This is only used for mouse-based interaction with the
       scene and is not factored in to the rendering process. */
-  public void  setFocalDistance(float focalDistance) { this.focalDistance = focalDistance; projDirty = true; }
+  public void setFocalDistance(float focalDistance) {
+    this.focalDistance = focalDistance;
+    projDirty = true;
+  }
+
   /** Returns the distance from the eye point to the focal point of
       the scene. This is only used for mouse-based interaction with
       the scene and is not factored in to the rendering process. */
-  public float getFocalDistance()                    { return focalDistance;               }
+  public float getFocalDistance() {
+    return focalDistance;
+  }
 
   /** Returns the viewing matrix associated with this camera's parameters. */
   public Mat4f getViewingMatrix() {
@@ -134,6 +174,59 @@ public abstract class Camera extends Node {
   /** Returns the projection matrix associated with this camera's parameters. */
   public abstract Mat4f getProjectionMatrix();
 
+  /** Un-projects the given on-screen point to a line in 3D space
+      which can be used for picking or other operations. The x and y
+      coordinates of the point must be in normalized coordinates,
+      where (0, 0) is the lower-left corner of the viewport and (1, 1)
+      is the upper-right. Allocates new storage for the returned
+      Line. */
+  public Line unproject(Vec2f point) {
+    Line line = new Line();
+    unproject(point, line);
+    return line;
+  }
+
+  /** Un-projects the given on-screen point in to the given line in 3D
+      space (in world coordinates) which can be used for picking or
+      other operations. The x and y coordinates of the point must be
+      in normalized coordinates, where (0, 0) is the lower-left corner
+      of the viewport and (1, 1) is the upper-right. */
+  public void unproject(Vec2f point, Line line) throws SingularMatrixException {
+    // First, we are going to compute the 3D point which corresponds
+    // to the given point on the near plane. Map the screen
+    // coordinates to the (-1, 1) range.
+    Vec4f pt3d = new Vec4f(2 * point.x() - 1,
+                           2 * point.y() - 1,
+                           getNearDistance(),
+                           1);
+    // Compute the cumulative view and projection matrices
+    Mat4f mat = new Mat4f();
+    mat.mul(getProjectionMatrix(), getViewingMatrix());
+    // Compute the inverse of this matrix
+    mat.invert();
+    // Multiply
+    Vec4f unproj = new Vec4f();
+    mat.xformVec(pt3d, unproj);
+    if (unproj.z() == 0) {
+      // FIXME: is this the right exception to throw in this case?
+      throw new SingularMatrixException();
+    }
+    float ooZ = 1.0f / unproj.w();
+    Vec3f to = new Vec3f(unproj.x() * ooZ,
+                         unproj.y() * ooZ,
+                         unproj.z() * ooZ);
+    // FIXME: for orthographic projections, need to do something
+    // different; can't just use the eye point
+    Vec3f from = getPosition();
+    Vec3f dir  = to.minus(from);
+
+    //    System.err.println("unprojected point: " + from);
+    //    System.err.println("unprojected dir  : " + dir);
+
+    line.setPoint(from);
+    line.setDirection(dir);
+  }
+
   public void doAction(Action action) {
     if (ViewingMatrixElement.isEnabled(action.getState())) {
       ViewingMatrixElement.set(action.getState(), getViewingMatrix());
@@ -141,5 +234,10 @@ public abstract class Camera extends Node {
     if (ProjectionMatrixElement.isEnabled(action.getState())) {
       ProjectionMatrixElement.set(action.getState(), getProjectionMatrix());
     }
+  }
+
+  public void rayPick(RayPickAction action) {
+    doAction(action);
+    action.recomputeRay(this);
   }
 }
