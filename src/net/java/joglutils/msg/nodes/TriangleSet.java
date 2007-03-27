@@ -80,7 +80,10 @@ public class TriangleSet extends TriangleBasedShape {
 
       if (GLTextureElement.isEnabled(state) &&
           GLTextureCoordinateElement.isEnabled(state)) {
-        tex = GLTextureElement.get(state);
+        Texture2 texNode = GLTextureElement.get(state);
+        if (texNode != null) {
+          tex = texNode.getTexture();
+        }
         haveTexCoords = (GLTextureCoordinateElement.get(state) != null);
       }
 

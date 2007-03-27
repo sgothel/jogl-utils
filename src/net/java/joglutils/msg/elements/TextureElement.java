@@ -39,13 +39,9 @@ package net.java.joglutils.msg.elements;
 
 import java.nio.*;
 import javax.media.opengl.*;
-import com.sun.opengl.util.texture.*;
 
 import net.java.joglutils.msg.misc.*;
-
-// FIXME: the TextureElement / GLTextureElement distinction doesn't
-// make much sense here, because the Texture object the TextureElement
-// contains already implicitly relies on OpenGL
+import net.java.joglutils.msg.nodes.*;
 
 /** Represents the current texture, which is applied to any drawn
     geometry if texture coordinates are also supplied. */
@@ -73,24 +69,22 @@ public class TextureElement extends Element {
     return (state.getDefaults().getElement(index) != null);
   }
 
-  // The actual Texture object
-  protected Texture texture;
-  // The texture environment mode
-  protected int texEnvMode;
+  // This particular element refers to the Texture2 node directly.
+  // Having it refer to the Texture object doesn't really make sense,
+  // because the Texture object implicitly relies on OpenGL and the
+  // intent is to make the base element class not reliant on GL.
 
-  /** Sets the texture and environment mode in the given state. */
-  public static void set(State state, Texture texture, int texEnvMode) {
-    getInstance(state).setElt(texture, texEnvMode);
+  // The Texture2 node
+  protected Texture2 texture;
+
+  /** Sets the texture in the given state. */
+  public static void set(State state, Texture2 texture) {
+    getInstance(state).setElt(texture);
   }
 
   /** Returns the current texture in the state. */
-  public static Texture get(State state) {
+  public static Texture2 get(State state) {
     return getInstance(state).texture;
-  }
-
-  /** Returns the texture environment mode in the state. */
-  public static int getEnvMode(State state) {
-    return getInstance(state).texEnvMode;
   }
 
   public void push(State state) {
@@ -101,9 +95,8 @@ public class TextureElement extends Element {
     }
   }
 
-  /** Sets the texture and environment mode in this element. */
-  public void setElt(Texture texture, int texEnvMode) {
+  /** Sets the texture in this element. */
+  public void setElt(Texture2 texture) {
     this.texture = texture;
-    this.texEnvMode = texEnvMode;
   }
 }

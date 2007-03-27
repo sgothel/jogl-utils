@@ -143,7 +143,7 @@ public class Texture2 extends Node {
 
   public void doAction(Action action) {
     if (TextureElement.isEnabled(action.getState())) {
-      TextureElement.set(action.getState(), getTexture(), getTexEnvMode());
+      TextureElement.set(action.getState(), this);
     }
   }
 

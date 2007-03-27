@@ -64,25 +64,36 @@ public class GLTextureElement extends TextureElement {
 
   public void pop(State state, Element previousTopElement) {
     // Put things back the way they were
-    switchTextures(((GLTextureElement) previousTopElement).texture, texture, texEnvMode);
+    switchTextures(((GLTextureElement) previousTopElement).texture, texture);
   }
 
-  public void setElt(Texture texture, int texEnvMode) {
-    Texture prev = this.texture;
-    super.setElt(texture, texEnvMode);
-    switchTextures(prev, texture, texEnvMode);
+  public void setElt(Texture2 texture) {
+    Texture2 prev = this.texture;
+    super.setElt(texture);
+    switchTextures(prev, texture);
   }
 
-  private void switchTextures(Texture prev, Texture texture, int texEnvMode) {
+  private void switchTextures(Texture2 prev, Texture2 texture) {
     GL gl = GLU.getCurrentGL();
-    // FIXME: should be smarter about this; if the target is the same
-    // for the previous and current textures, just bind the new one
+    Texture prevTexture = null;
+    Texture curTexture  = null;
+    int texEnvMode = 0;
     if (prev != null) {
-      prev.disable();
+      prevTexture = prev.getTexture();
     }
     if (texture != null) {
-      texture.enable();
-      texture.bind();
+      curTexture = texture.getTexture();
+      texEnvMode = texture.getTexEnvMode();
+    }
+
+    // FIXME: should be smarter about this; if the target is the same
+    // for the previous and current textures, just bind the new one
+    if (prevTexture != null) {
+      prevTexture.disable();
+    }
+    if (curTexture != null) {
+      curTexture.enable();
+      curTexture.bind();
       int glEnvMode = 0;
       switch (texEnvMode) {
         case Texture2.MODULATE:   glEnvMode = GL.GL_MODULATE; break;
