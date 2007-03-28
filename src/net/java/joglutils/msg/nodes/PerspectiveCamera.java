@@ -80,13 +80,15 @@ public class PerspectiveCamera extends Camera {
     return projMatrix;
   }
 
-  /** Sets the height angle of this perspective camera. */
+  /** Sets the height angle, in radians, of this perspective camera.
+      The default height angle is Math.PI / 4 radians, or 45 degrees. */
   public void setHeightAngle(float heightAngle) {
     vertFOVScale = heightAngle / DEFAULT_HEIGHT_ANGLE;
     projDirty = true;
   }
 
-  /** Returns the height angle of this perspective camera. */
+  /** Returns the height angle, in radians, of this perspective
+      camera. */
   public float getHeightAngle() {
     return vertFOVScale * DEFAULT_HEIGHT_ANGLE;
   }

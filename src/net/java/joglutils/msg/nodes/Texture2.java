@@ -40,20 +40,44 @@ package net.java.joglutils.msg.nodes;
 import java.awt.image.*;
 import java.io.*;
 import java.net.*;
+import java.util.*;
 
 import javax.media.opengl.*;
+import com.sun.opengl.util.j2d.*;
 import com.sun.opengl.util.texture.*;
 
 import net.java.joglutils.msg.actions.*;
 import net.java.joglutils.msg.elements.*;
 
-/** Represents a two-dimensional texture. */
+/** Represents a two-dimensional texture which can be set up from all
+    of the image sources supported by the JOGL TextureIO classes or
+    the JOGL TextureRenderer. If set up with a texture, supports
+    updating of the texture as well. Supports switching between use of
+    a TextureRenderer and a Texture. */
 
 public class Texture2 extends Node {
   private TextureData data;
   private Texture texture;
   private int texEnvMode = MODULATE;
   private boolean dirty;
+
+  // For now, to make things simpler, keep separate state for the sub-image updating
+  private TextureData subImageData;
+  private int subImageMipmapLevel;
+  private int subImageDstX;
+  private int subImageDstY;
+  private int subImageSrcX;
+  private int subImageSrcY;
+  private int subImageWidth;
+  private int subImageHeight;
+  private boolean subImageDirty;
+
+  private TextureRenderer textureRenderer;
+
+  // Disposed Textures and TextureRenderers, used to allow app to be
+  // oblivious and switch back and forth between them
+  private List<Texture> disposedTextures = new ArrayList<Texture>();
+  private List<TextureRenderer> disposedRenderers = new ArrayList<TextureRenderer>();
 
   static {
     // Enable the elements this node affects for known actions
@@ -75,6 +99,7 @@ public class Texture2 extends Node {
       done during this call; it is done lazily when the Texture is
       fetched. */
   public void setTexture(File file, boolean mipmap, String fileSuffix) throws IOException {
+    disposeTextureRenderer();
     data = TextureIO.newTextureData(file, mipmap, fileSuffix);
     dirty = true;
   }
@@ -83,6 +108,7 @@ public class Texture2 extends Node {
       work is done during this call; it is done lazily when the
       Texture is fetched. */
   public void setTexture(InputStream stream, boolean mipmap, String fileSuffix) throws IOException {
+    disposeTextureRenderer();
     data = TextureIO.newTextureData(stream, mipmap, fileSuffix);
     dirty = true;
   }
@@ -91,6 +117,7 @@ public class Texture2 extends Node {
       done during this call; it is done lazily when the Texture is
       fetched. */
   public void setTexture(URL url, boolean mipmap, String fileSuffix) throws IOException {
+    disposeTextureRenderer();
     data = TextureIO.newTextureData(url, mipmap, fileSuffix);
     dirty = true;
   }
@@ -99,6 +126,7 @@ public class Texture2 extends Node {
       work is done during this call; it is done lazily when the
       Texture is fetched. */
   public void setTexture(BufferedImage image, boolean mipmap) {
+    disposeTextureRenderer();
     data = TextureIO.newTextureData(image, mipmap);
     dirty = true;
   }
@@ -107,14 +135,80 @@ public class Texture2 extends Node {
       work is done during this call; it is done lazily when the
       Texture is fetched. */
   public void setTexture(TextureData data) {
+    disposeTextureRenderer();
     this.data = data;
     dirty = true;
   }
 
-  /** Fetches the Texture object associated with this Texture2 node.
-      An OpenGL context must be current at the time this method is
-      called or a GLException will be thrown. */
+  /**
+   * Updates a subregion of the content area of this texture using the
+   * specified sub-region of the given data. Only updates the
+   * specified mipmap level and does not re-generate mipmaps if they
+   * were originally produced or loaded. This method is only supported
+   * for uncompressed TextureData sources, and may only be called if a
+   * TextureRenderer has not been set up for this Texture2 node.
+   *
+   * @param data the image data to be uploaded to this texture
+   * @param mipmapLevel the mipmap level of the texture to set. If
+   * this is non-zero and the TextureData contains mipmap data, the
+   * appropriate mipmap level will be selected.
+   * @param dstx the x offset (in pixels) relative to the lower-left corner
+   * of this texture where the update will be applied
+   * @param dsty the y offset (in pixels) relative to the lower-left corner
+   * of this texture where the update will be applied
+   * @param srcx the x offset (in pixels) relative to the lower-left corner
+   * of the supplied TextureData from which to fetch the update rectangle
+   * @param srcy the y offset (in pixels) relative to the lower-left corner
+   * of the supplied TextureData from which to fetch the update rectangle
+   * @param width the width (in pixels) of the rectangle to be updated
+   * @param height the height (in pixels) of the rectangle to be updated
+   */
+  public void updateSubImage(TextureData data, int mipmapLevel,
+                             int dstx, int dsty,
+                             int srcx, int srcy,
+                             int width, int height) {
+    if (textureRenderer != null) {
+      throw new IllegalStateException("May not call updateSubImage if a TextureRenderer has been set");
+    }
+    subImageData = data;
+    subImageMipmapLevel = mipmapLevel;
+    subImageDstX = dstx;
+    subImageDstY = dsty;
+    subImageSrcX = srcx;
+    subImageSrcY = srcy;
+    subImageWidth = width;
+    subImageHeight = height;
+    subImageDirty = true;
+  }
+
+  /** Initializes this node to operate upon a TextureRenderer of the
+      specified width, height, and presence of an alpha channel.
+      Updates to the TextureRenderer are automatically propagated to
+      the texture as long as <CODE>TextureRenderer.markDirty()</CODE>
+      is used properly. */
+  public void initTextureRenderer(int width, int height, boolean alpha) {
+    disposeTexture();
+    textureRenderer = new TextureRenderer(width, height, alpha);
+  }
+
+  /** Returns the TextureRenderer, if one has been set, that is
+      associated with this Texture2 node. */
+  public TextureRenderer getTextureRenderer() {
+    return textureRenderer;
+  }
+
+  /** Fetches the Texture object associated with this Texture2 node,
+      refreshing its content if necessary. It is required to call this
+      each frame during rendering. An OpenGL context must be current
+      at the time this method is called or a GLException will be
+      thrown. */
   public Texture getTexture() throws GLException {
+    lazyDispose();
+
+    if (textureRenderer != null) {
+      return textureRenderer.getTexture();
+    }
+
     if (dirty) {
       if (texture != null) {
         texture.dispose();
@@ -123,6 +217,17 @@ public class Texture2 extends Node {
       texture = TextureIO.newTexture(data);
       data = null;
       dirty = false;
+    }
+    if (subImageDirty) {
+      texture.updateSubImage(subImageData,
+                             subImageMipmapLevel,
+                             subImageDstX,
+                             subImageDstY,
+                             subImageSrcX,
+                             subImageSrcY,
+                             subImageWidth,
+                             subImageHeight);
+      subImageDirty = false;
     }
     return texture;
   }
@@ -147,10 +252,39 @@ public class Texture2 extends Node {
     }
   }
 
-  public void rayPick(RayPickAction action) {
-    // FIXME: because of the issue of potentially not having an OpenGL
-    // context at the time this is called, the TextureElement should
-    // be updated to hold a reference to this node, and only the
-    // GLTextureElement should poll the texture
+  private synchronized void disposeTextureRenderer() {
+    if (textureRenderer != null) {
+      disposedRenderers.add(textureRenderer);
+      textureRenderer = null;
+    }
+  }
+
+  private synchronized void disposeTexture() {
+    if (texture != null) {
+      disposedTextures.add(texture);
+      texture = null;
+      data = null;
+      subImageData = null;
+      dirty = false;
+      subImageDirty = false;
+    }
+  }
+
+  private void lazyDispose() {
+    while (!disposedTextures.isEmpty()) {
+      Texture t = null;
+      synchronized (this) {
+        t = disposedTextures.remove(disposedTextures.size() - 1);
+      }
+      t.dispose();
+    }
+
+    while (!disposedRenderers.isEmpty()) {
+      TextureRenderer r = null;
+      synchronized (this) {
+        r = disposedRenderers.remove(disposedRenderers.size() - 1);
+      }
+      r.dispose();
+    }
   }
 }

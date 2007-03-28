@@ -37,10 +37,13 @@
 
 package net.java.joglutils.msg.test;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.DisplayMode;
 import java.awt.Frame;
+import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.*;
@@ -52,6 +55,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 
 import javax.media.opengl.*;
+import com.sun.opengl.util.j2d.*;
 
 import net.java.joglutils.msg.actions.*;
 import net.java.joglutils.msg.collections.*;
@@ -67,6 +71,11 @@ public class DisplayShelf extends Container {
   private float DEFAULT_ASPECT_RATIO = 0.665f;
   // This also affects the spacing
   private float DEFAULT_HEIGHT = 1.5f;
+  private float DEFAULT_ON_SCREEN_FRAC = 0.5f;
+  private float offsetFrac;
+
+  private float STACKED_SPACING_FRAC  = 0.3f;
+  private float SELECTED_SPACING_FRAC = 0.6f;
 
   // The camera
   private PerspectiveCamera camera;
@@ -97,12 +106,16 @@ public class DisplayShelf extends Container {
   private SystemTime time;
   private boolean animating;
   // A scale factor for the animation speed
-  private static final float ANIM_SCALE_FACTOR = 3.0f;
+  private static final float ANIM_SCALE_FACTOR = 7.0f;
   // The rotation angle of the titles
-  private static final float ROT_ANGLE = (float) Math.toRadians(60);
+  private static final float ROT_ANGLE = (float) Math.toRadians(75);
   // Constant rotations
   private static final Rotf POS_ANGLE = new Rotf(Vec3f.Y_AXIS,  ROT_ANGLE);
   private static final Rotf NEG_ANGLE = new Rotf(Vec3f.Y_AXIS, -ROT_ANGLE);
+
+  // Visual progress of downloads
+  private Texture2 clockTexture;
+  private volatile boolean doneLoading;
 
   private void computeCoords(Coordinate3 coordNode, float aspectRatio) {
     Vec3fCollection coords = coordNode.getData();
@@ -129,36 +142,86 @@ public class DisplayShelf extends Container {
     coords.set(5, lowerRight);
   }
 
+  private static void drawClock(Graphics2D g, int minsPastMidnight,
+                                int x, int y, int width, int height) {
+    g.setColor(Color.DARK_GRAY);
+    g.fillRect(x, y, width, height);
+    g.setColor(Color.GRAY);
+    int midx = (int) (x + (width / 2.0f));
+    int midy = (int) (y + (height / 2.0f));
+    int sz = (int) (0.8f * Math.min(width, height));
+    g.setStroke(new BasicStroke(sz / 20.0f,
+                                BasicStroke.CAP_ROUND,
+                                BasicStroke.JOIN_MITER));
+    int arcSz = (int) (0.4f * sz);
+    int smallHandSz = (int) (0.3f * sz);
+    int bigHandSz   = (int) (0.4f * sz);
+    g.drawRoundRect(midx - (sz / 2), midy - (sz / 2),
+                    sz, sz,
+                    arcSz, arcSz);
+    float hour = minsPastMidnight / 60.0f;
+    int   min  = minsPastMidnight % 60;
+    float hourAngle = hour * 2.0f * (float) Math.PI / 12;
+    float minAngle  = min * 2.0f * (float) Math.PI / 60;
+
+    g.drawLine(midx, midy,
+               midx + (int) (smallHandSz * Math.cos(hourAngle)),
+               midy + (int) (smallHandSz * Math.sin(hourAngle)));
+    g.drawLine(midx, midy,
+               midx + (int) (bigHandSz * Math.cos(minAngle)),
+               midy + (int) (bigHandSz * Math.sin(minAngle)));
+  }
+
   private void startLoading() {
     final List<TitleGraph> queuedGraphs = new ArrayList<TitleGraph>();
     queuedGraphs.addAll(titles);
 
     Thread loaderThread = new Thread(new Runnable() {
         public void run() {
-          while (queuedGraphs.size() > 0) {
-            TitleGraph graph = queuedGraphs.remove(0);
-            BufferedImage img = null;
-            try {
-              img = ImageIO.read(new URL(graph.url));
-            } catch (Exception e) {
-              System.out.println("Exception loading " + graph.url + ":");
-              e.printStackTrace();
+          try {
+            while (queuedGraphs.size() > 0) {
+              TitleGraph graph = queuedGraphs.remove(0);
+              BufferedImage img = null;
+              try {
+                img = ImageIO.read(new URL(graph.url));
+              } catch (Exception e) {
+                System.out.println("Exception loading " + graph.url + ":");
+                e.printStackTrace();
+              }
+              if (img != null) {
+                graph.sep.replaceChild(clockTexture, graph.texture);
+                graph.texture.setTexture(img, false);
+                // Figure out the new aspect ratio based on the image's width and height
+                float aspectRatio = (float) img.getWidth() / (float) img.getHeight();
+                // Compute new coordinates
+                computeCoords(graph.coords, aspectRatio);
+                // Schedule a repaint
+                canvas.repaint();
+              }
             }
-            if (img != null) {
-              graph.texture.setTexture(img, false);
-              // Figure out the new aspect ratio based on the image's width and height
-              float aspectRatio = (float) img.getWidth() / (float) img.getHeight();
-              // Compute new coordinates
-              computeCoords(graph.coords, aspectRatio);
-              // Schedule a repaint
-              canvas.repaint();
-            }
+          } finally {
+            doneLoading = true;
           }
         }
       });
     // Avoid having the loader thread preempt the rendering thread
-    loaderThread.setPriority(Thread.MIN_PRIORITY + 1);
+    loaderThread.setPriority(Thread.NORM_PRIORITY - 2);
     loaderThread.start();
+  }
+
+  private void startClockAnimation() {
+    Thread clockAnimThread = new Thread(new Runnable() {
+        public void run() {
+          while (!doneLoading) {
+            canvas.repaint();
+            try {
+              Thread.sleep(100);
+            } catch (InterruptedException e) {
+            }
+          }
+        }
+      });
+    clockAnimThread.start();
   }
 
   private void setTargetIndex(int index) {
@@ -181,31 +244,59 @@ public class DisplayShelf extends Container {
     // Make the animation speed independent of frame rate
     currentIndex = currentIndex + (targetIndex - currentIndex) * deltaT * ANIM_SCALE_FACTOR;
 
-    // Now recompute the position of the camera
-    camera.setPosition(new Vec3f(currentIndex, 0.5f * DEFAULT_HEIGHT, DEFAULT_HEIGHT));
-
-    // Now recompute the orientations of each title
+    // Recompute the positions and orientations of each title, and the position of the camera
     int firstIndex  = (int) Math.floor(currentIndex);
     int secondIndex = (int) Math.ceil(currentIndex);
+    if (secondIndex == firstIndex) {
+      secondIndex = firstIndex + 1;
+    }
 
     float alpha = currentIndex - firstIndex;
 
     int idx = 0;
+    float curPos = 0.0f;
+    float stackedSpacing  = DEFAULT_HEIGHT * STACKED_SPACING_FRAC;
+    float selectedSpacing = DEFAULT_HEIGHT * SELECTED_SPACING_FRAC;
+    float offset = 0;
+    // Only bump the selected title out of the list if we're close to it
+    if (Math.abs(targetIndex - currentIndex) < 3.0) {
+      offset = offsetFrac * DEFAULT_HEIGHT;
+    }
     for (TitleGraph graph : titles) {
       if (idx < firstIndex) {
         graph.xform.getTransform().setRotation(POS_ANGLE);
-        graph.xform.getTransform().setTranslation(new Vec3f(idx, 0, 0));
+        graph.xform.getTransform().setTranslation(new Vec3f(curPos, 0, 0));
+        curPos += stackedSpacing;
       } else if (idx > secondIndex) {
         graph.xform.getTransform().setRotation(NEG_ANGLE);
-        graph.xform.getTransform().setTranslation(new Vec3f(idx, 0, 0));
+        graph.xform.getTransform().setTranslation(new Vec3f(curPos, 0, 0));
+        curPos += stackedSpacing;
       } else if (idx == firstIndex) {
+        // Bump the position of this title
+        curPos += (1.0f - alpha) * (selectedSpacing - stackedSpacing);
+
+        // The camera is glued to this position
+        float cameraPos = curPos + alpha * selectedSpacing;
+
         // Interpolate
         graph.xform.getTransform().setRotation(new Rotf(Vec3f.Y_AXIS, alpha * ROT_ANGLE));
-        graph.xform.getTransform().setTranslation(new Vec3f(idx, 0, (1.0f - alpha) * 0.4f * DEFAULT_HEIGHT));
+        graph.xform.getTransform().setTranslation(new Vec3f(curPos, 0, (1.0f - alpha) * offset));
+
+        // Now recompute the position of the camera
+        // Aim to get the titles to fill a certain fraction of the vertical field of view
+        float dist = 0.5f * DEFAULT_HEIGHT / (DEFAULT_ON_SCREEN_FRAC * (float) Math.tan(camera.getHeightAngle()));
+        camera.setPosition(new Vec3f(cameraPos,
+                                     0.5f * DEFAULT_HEIGHT,
+                                     dist));
+
+        // Maintain this much distance between the two animating titles
+        curPos += selectedSpacing;
       } else {
         // Interpolate
         graph.xform.getTransform().setRotation(new Rotf(Vec3f.Y_AXIS, (1.0f - alpha) * -ROT_ANGLE));
-        graph.xform.getTransform().setTranslation(new Vec3f(idx, 0, alpha * 0.4f * DEFAULT_HEIGHT));
+        graph.xform.getTransform().setTranslation(new Vec3f(curPos, 0, alpha * offset));
+
+        curPos += stackedSpacing + alpha * (selectedSpacing - stackedSpacing);
       }
 
       ++idx;
@@ -221,8 +312,12 @@ public class DisplayShelf extends Container {
     time.rebase();
     setLayout(new BorderLayout());
     camera = new PerspectiveCamera();
-    camera.setNearDistance(0.1f);
-    camera.setFarDistance(20.0f);
+    camera.setNearDistance(1.0f);
+    camera.setFarDistance(100.0f);
+    camera.setHeightAngle((float) Math.PI / 8);
+    // Compute the fraction by which we offset the selected title
+    // based on a couple of known good points
+    offsetFrac = (float) (((3 * Math.PI / 40) / camera.getHeightAngle()) + 0.1f);
     canvas = new GLCanvas();
     canvas.addGLEventListener(new Listener());
     canvas.addMouseListener(new MListener());
@@ -244,6 +339,12 @@ public class DisplayShelf extends Container {
 
       // Build the scene graph
       root.removeAllChildren();
+
+      // The clock
+      clockTexture = new Texture2();
+      clockTexture.initTextureRenderer((int) (150 * DEFAULT_HEIGHT * DEFAULT_ASPECT_RATIO),
+                                       (int) (150 * DEFAULT_HEIGHT),
+                                       false);
 
       // The images
       imageRoot = new Separator();
@@ -284,7 +385,8 @@ public class DisplayShelf extends Container {
         Separator sep = graph.sep;
         sep.addChild(graph.xform);
         sep.addChild(graph.coords);
-        sep.addChild(graph.texture);
+        // Add in the clock texture at the beginning
+        sep.addChild(clockTexture);
         TextureCoordinate2 texCoordNode = new TextureCoordinate2();
         Vec2fCollection texCoords = new Vec2fCollection();
         // Texture coordinates for two triangles
@@ -356,12 +458,26 @@ public class DisplayShelf extends Container {
       root.addChild(floorRoot);
 
       startLoading();
+      startClockAnimation();
       recompute(true);
     }
 
     public void display(GLAutoDrawable drawable) {
       // Recompute position of camera and orientation of images
       boolean repaintAgain = recompute(false);
+
+      if (!doneLoading) {
+        if (!repaintAgain) {
+          time.update();
+        }
+
+        TextureRenderer rend = clockTexture.getTextureRenderer();
+        Graphics2D g = rend.createGraphics();
+        drawClock(g, (int) (time.time() * 30),
+                  0, 0, rend.getWidth(), rend.getHeight());
+        g.dispose();
+        rend.markDirty(0, 0, rend.getWidth(), rend.getHeight());
+      }
 
       // Redraw
       GL gl = drawable.getGL();
