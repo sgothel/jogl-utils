@@ -72,10 +72,15 @@ public class DisplayShelf extends Container {
   // This also affects the spacing
   private float DEFAULT_HEIGHT = 1.5f;
   private float DEFAULT_ON_SCREEN_FRAC = 0.5f;
+  private float EDITING_ON_SCREEN_FRAC = 0.95f;
   private float offsetFrac;
 
   private float STACKED_SPACING_FRAC  = 0.3f;
   private float SELECTED_SPACING_FRAC = 0.6f;
+  private float EDITED_SPACING_FRAC   = 1.5f;
+
+  // This is how much we raise the geometry above the floor in single image mode
+  private float SINGLE_IMAGE_MODE_RAISE_FRAC = 2.0f;
 
   // The camera
   private PerspectiveCamera camera;
@@ -96,22 +101,37 @@ public class DisplayShelf extends Container {
   private Separator imageRoot;
   private String[] images;
   private List<TitleGraph> titles = new ArrayList<TitleGraph>();
-  private int targetIndex;
   private JSlider slider;
-  // This encodes both the current position and the animation alpha
+  private int targetIndex;
+  // This encodes both the current position and the horizontal animation alpha
   private float currentIndex;
-  // If the difference between the current index and target index is >
-  // EPSILON, then we will continue repainting
+  // This encodes the animation alpha for the z-coordinate motion
+  // associated with going in to and out of editing mode
+  private float currentZ;
+  private float targetZ;
+  // This is effectively a constant
+  private float viewingZ;
+  // This is also currently effectively a constant, though we need to
+  // compute it dynamically for each picture to get it to show up
+  // centered
+  private float editingZ;
+  // This encodes our current Y coordinate in editing mode
+  private float currentY;
+  // This encodes our target Y coordinate in editing mode
+  private float targetY;
+  // If the difference between the current and target values of any of
+  // the above are > EPSILON, then we will continue repainting
   private static final float EPSILON = 1.0e-3f;
   private SystemTime time;
   private boolean animating;
+  private boolean forceRecompute;
+  // Single image mode toggle
+  private boolean singleImageMode;
+
   // A scale factor for the animation speed
   private static final float ANIM_SCALE_FACTOR = 7.0f;
   // The rotation angle of the titles
   private static final float ROT_ANGLE = (float) Math.toRadians(75);
-  // Constant rotations
-  private static final Rotf POS_ANGLE = new Rotf(Vec3f.Y_AXIS,  ROT_ANGLE);
-  private static final Rotf NEG_ANGLE = new Rotf(Vec3f.Y_AXIS, -ROT_ANGLE);
 
   // Visual progress of downloads
   private Texture2 clockTexture;
@@ -229,20 +249,52 @@ public class DisplayShelf extends Container {
     if (!animating) {
       time.rebase();
     }
+    recomputeTargetYZ(true);
     canvas.repaint();
   }
 
-  private boolean recompute(boolean force) {
-    if (!force) {
-      if (Math.abs(targetIndex - currentIndex) < EPSILON)
+  private void recomputeTargetYZ(boolean animate) {
+    if (singleImageMode) {
+      // Compute a target Y and Z depth based on the image we want to view
+
+      // FIXME: right now the Y and Z targets are always the same, but
+      // once we adjust the images to fit within a bounding square,
+      // they won't be
+      targetY = (0.5f + SINGLE_IMAGE_MODE_RAISE_FRAC) * DEFAULT_HEIGHT;
+      editingZ = 0.5f * DEFAULT_HEIGHT / (EDITING_ON_SCREEN_FRAC * (float) Math.tan(camera.getHeightAngle()));
+      targetZ = editingZ;
+    } else {
+      targetY = 0.5f * DEFAULT_HEIGHT;
+      targetZ = viewingZ;
+    }
+
+    if (!animate) {
+      currentY = targetY;
+      currentZ = targetZ;
+      currentIndex = targetIndex;
+    }
+  }
+
+  private boolean recompute() {
+    if (!forceRecompute) {
+      if (Math.abs(targetIndex - currentIndex) < EPSILON &&
+          Math.abs(targetZ - currentZ) < EPSILON &&
+          Math.abs(targetY - currentY) < EPSILON)
         return false;
     }
+
+    forceRecompute = false;
 
     time.update();
     float deltaT = (float) time.deltaT();
 
     // Make the animation speed independent of frame rate
     currentIndex = currentIndex + (targetIndex - currentIndex) * deltaT * ANIM_SCALE_FACTOR;
+    currentZ = currentZ + (targetZ - currentZ) * deltaT * ANIM_SCALE_FACTOR;
+    currentY = currentY + (targetY - currentY) * deltaT * ANIM_SCALE_FACTOR;
+    // An alpha of 0 indicates we're fully in viewing mode
+    // An alpha of 1 indicates we're fully in editing mode
+    float zAlpha = (currentZ - viewingZ) / (editingZ - viewingZ);
 
     // Recompute the positions and orientations of each title, and the position of the camera
     int firstIndex  = (int) Math.floor(currentIndex);
@@ -255,21 +307,26 @@ public class DisplayShelf extends Container {
 
     int idx = 0;
     float curPos = 0.0f;
-    float stackedSpacing  = DEFAULT_HEIGHT * STACKED_SPACING_FRAC;
-    float selectedSpacing = DEFAULT_HEIGHT * SELECTED_SPACING_FRAC;
+    float stackedSpacing  = DEFAULT_HEIGHT * (zAlpha * EDITED_SPACING_FRAC + (1.0f - zAlpha) * STACKED_SPACING_FRAC);
+    float selectedSpacing = DEFAULT_HEIGHT * (zAlpha * EDITED_SPACING_FRAC + (1.0f - zAlpha) * SELECTED_SPACING_FRAC);
+    float angle = (1.0f - zAlpha) * ROT_ANGLE;
+    float y = zAlpha * DEFAULT_HEIGHT * SINGLE_IMAGE_MODE_RAISE_FRAC;
+    Rotf posAngle = new Rotf(Vec3f.Y_AXIS,  angle);
+    Rotf negAngle = new Rotf(Vec3f.Y_AXIS, -angle);
     float offset = 0;
-    // Only bump the selected title out of the list if we're close to it
+
+    // Only bump the selected title out of the list if we're in viewing mode and close to it
     if (Math.abs(targetIndex - currentIndex) < 3.0) {
-      offset = offsetFrac * DEFAULT_HEIGHT;
+      offset = (1.0f - zAlpha) * offsetFrac * DEFAULT_HEIGHT;
     }
     for (TitleGraph graph : titles) {
       if (idx < firstIndex) {
-        graph.xform.getTransform().setRotation(POS_ANGLE);
-        graph.xform.getTransform().setTranslation(new Vec3f(curPos, 0, 0));
+        graph.xform.getTransform().setRotation(posAngle);
+        graph.xform.getTransform().setTranslation(new Vec3f(curPos, y, 0));
         curPos += stackedSpacing;
       } else if (idx > secondIndex) {
-        graph.xform.getTransform().setRotation(NEG_ANGLE);
-        graph.xform.getTransform().setTranslation(new Vec3f(curPos, 0, 0));
+        graph.xform.getTransform().setRotation(negAngle);
+        graph.xform.getTransform().setTranslation(new Vec3f(curPos, y, 0));
         curPos += stackedSpacing;
       } else if (idx == firstIndex) {
         // Bump the position of this title
@@ -279,22 +336,21 @@ public class DisplayShelf extends Container {
         float cameraPos = curPos + alpha * selectedSpacing;
 
         // Interpolate
-        graph.xform.getTransform().setRotation(new Rotf(Vec3f.Y_AXIS, alpha * ROT_ANGLE));
-        graph.xform.getTransform().setTranslation(new Vec3f(curPos, 0, (1.0f - alpha) * offset));
+        graph.xform.getTransform().setRotation(new Rotf(Vec3f.Y_AXIS, alpha * angle));
+        graph.xform.getTransform().setTranslation(new Vec3f(curPos, y, (1.0f - alpha) * offset));
 
         // Now recompute the position of the camera
         // Aim to get the titles to fill a certain fraction of the vertical field of view
-        float dist = 0.5f * DEFAULT_HEIGHT / (DEFAULT_ON_SCREEN_FRAC * (float) Math.tan(camera.getHeightAngle()));
         camera.setPosition(new Vec3f(cameraPos,
-                                     0.5f * DEFAULT_HEIGHT,
-                                     dist));
+                                     currentY,
+                                     currentZ));
 
         // Maintain this much distance between the two animating titles
         curPos += selectedSpacing;
       } else {
         // Interpolate
-        graph.xform.getTransform().setRotation(new Rotf(Vec3f.Y_AXIS, (1.0f - alpha) * -ROT_ANGLE));
-        graph.xform.getTransform().setTranslation(new Vec3f(curPos, 0, alpha * offset));
+        graph.xform.getTransform().setRotation(new Rotf(Vec3f.Y_AXIS, (1.0f - alpha) * -angle));
+        graph.xform.getTransform().setTranslation(new Vec3f(curPos, y, alpha * offset));
 
         curPos += stackedSpacing + alpha * (selectedSpacing - stackedSpacing);
       }
@@ -315,12 +371,36 @@ public class DisplayShelf extends Container {
     camera.setNearDistance(1.0f);
     camera.setFarDistance(100.0f);
     camera.setHeightAngle((float) Math.PI / 8);
+    // This could / should be computed elsewhere, especially if we add
+    // the ability to dynamically adjust the camera's height angle
+    viewingZ = 0.5f * DEFAULT_HEIGHT / (DEFAULT_ON_SCREEN_FRAC * (float) Math.tan(camera.getHeightAngle()));
     // Compute the fraction by which we offset the selected title
     // based on a couple of known good points
     offsetFrac = (float) (((3 * Math.PI / 40) / camera.getHeightAngle()) + 0.1f);
     canvas = new GLCanvas();
     canvas.addGLEventListener(new Listener());
     canvas.addMouseListener(new MListener());
+    canvas.addKeyListener(new KeyAdapter() {
+        public void keyPressed(KeyEvent e) {
+          switch (e.getKeyCode()) {
+            case KeyEvent.VK_SPACE:
+              setSingleImageMode(!getSingleImageMode(), true);
+              break;
+
+            case KeyEvent.VK_ENTER:
+              setSingleImageMode(!getSingleImageMode(), false);
+              break;
+
+            case KeyEvent.VK_LEFT:
+              slider.setValue(Math.max(0, targetIndex - 1));
+              break;
+
+            case KeyEvent.VK_RIGHT:
+              slider.setValue(Math.min(titles.size() - 1, targetIndex + 1));
+              break;
+          }
+        }
+      });
     add(canvas, BorderLayout.CENTER);
     slider = new JSlider(0, images.length - 1, 0);
     slider.addChangeListener(new ChangeListener() {
@@ -329,6 +409,20 @@ public class DisplayShelf extends Container {
         }
       });
     add(slider, BorderLayout.SOUTH);
+  }
+
+  public void setSingleImageMode(boolean singleImageMode, boolean animateTransition) {
+    this.singleImageMode = singleImageMode;
+    if (!animating) {
+      time.rebase();
+    }
+    recomputeTargetYZ(animateTransition);
+    forceRecompute = !animateTransition;
+    canvas.repaint();
+  }
+
+  public boolean getSingleImageMode() {
+    return singleImageMode;
   }
 
   class Listener implements GLEventListener {
@@ -342,8 +436,8 @@ public class DisplayShelf extends Container {
 
       // The clock
       clockTexture = new Texture2();
-      clockTexture.initTextureRenderer((int) (150 * DEFAULT_HEIGHT * DEFAULT_ASPECT_RATIO),
-                                       (int) (150 * DEFAULT_HEIGHT),
+      clockTexture.initTextureRenderer((int) (300 * DEFAULT_HEIGHT * DEFAULT_ASPECT_RATIO),
+                                       (int) (300 * DEFAULT_HEIGHT),
                                        false);
 
       // The images
@@ -411,8 +505,9 @@ public class DisplayShelf extends Container {
       }
 
       // Now produce the floor geometry
-      float minx = -i;
-      float maxx = 2 * i;
+      float maxSpacing = DEFAULT_HEIGHT * Math.max(STACKED_SPACING_FRAC, Math.max(SELECTED_SPACING_FRAC, EDITED_SPACING_FRAC));
+      float minx = -i * maxSpacing;
+      float maxx = 2 * i * maxSpacing;
       // Furthest back from the camera
       float minz = -2 * DEFAULT_HEIGHT;
       // Assume this will be close enough to cover all of the mirrored geometry
@@ -459,12 +554,14 @@ public class DisplayShelf extends Container {
 
       startLoading();
       startClockAnimation();
-      recompute(true);
+      recomputeTargetYZ(false);
+      forceRecompute = true;
+      recompute();
     }
 
     public void display(GLAutoDrawable drawable) {
       // Recompute position of camera and orientation of images
-      boolean repaintAgain = recompute(false);
+      boolean repaintAgain = recompute();
 
       if (!doneLoading) {
         if (!repaintAgain) {
