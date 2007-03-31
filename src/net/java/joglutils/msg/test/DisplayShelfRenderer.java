@@ -44,7 +44,9 @@ import java.awt.event.*;
 import java.awt.image.*;
 import java.net.*;
 import java.util.*;
-import javax.imageio.*;
+
+import javax.swing.*;
+import javax.swing.event.*;
 
 import javax.media.opengl.*;
 import com.sun.opengl.util.j2d.*;
@@ -54,6 +56,13 @@ import net.java.joglutils.msg.collections.*;
 import net.java.joglutils.msg.math.*;
 import net.java.joglutils.msg.misc.*;
 import net.java.joglutils.msg.nodes.*;
+
+/**
+ * A test implementing a 3D display shelf component. This renderer is
+ * pluggable into any JOGL GLAutoDrawable.
+ *
+ * @author Kenneth Russell
+ */
 
 public class DisplayShelfRenderer implements GLEventListener {
   private float DEFAULT_ASPECT_RATIO = 0.665f;
@@ -74,14 +83,14 @@ public class DisplayShelfRenderer implements GLEventListener {
   private PerspectiveCamera camera;
 
   static class TitleGraph {
-    String url;
+    Object imageDescriptor;
     Separator sep   = new Separator();
     Transform xform = new Transform();
     Texture2  texture = new Texture2();
     Coordinate3 coords = new Coordinate3();
 
-    TitleGraph(String url) {
-      this.url = url;
+    TitleGraph(Object imageDescriptor) {
+      this.imageDescriptor = imageDescriptor;
     }
   }
 
@@ -94,7 +103,8 @@ public class DisplayShelfRenderer implements GLEventListener {
 
   private Separator root;
   private Separator imageRoot;
-  private String[] images;
+  private Fetcher<Integer> fetcher;
+  private ListModel model;
   private List<TitleGraph> titles = new ArrayList<TitleGraph>();
   private GLRenderAction ra = new GLRenderAction();
   private int targetIndex;
@@ -132,14 +142,24 @@ public class DisplayShelfRenderer implements GLEventListener {
   private Texture2 clockTexture;
   private volatile boolean doneLoading;
 
-  public DisplayShelfRenderer(String[] images) {
+  class DownloadListener implements ProgressListener<Integer> {
+    public void progressStart(ProgressEvent<Integer> evt) {}
+    public void progressUpdate(ProgressEvent<Integer> evt) {}
+    public void progressEnd(ProgressEvent<Integer> evt) {
+      updateImage(evt.getClientIdentifier());
+    }
+  }
+
+  public DisplayShelfRenderer(ListModel model) {
     // Create a small pbuffer with which we share textures and display
     // lists to avoid having to reload textures during repeated calls
     // to init()
     sharedPbuffer = GLDrawableFactory.getFactory().createGLPbuffer(new GLCapabilities(), null, 1, 1, null);
     sharedPbuffer.display();
 
-    this.images = images;
+    this.fetcher = new BasicFetcher<Integer>();
+    fetcher.addProgressListener(new DownloadListener());
+    this.model = model;
     root = new Separator();
     time = new SystemTime();
     time.rebase();
@@ -246,9 +266,9 @@ public class DisplayShelfRenderer implements GLEventListener {
       TriangleSet tris = new TriangleSet();
       tris.setNumTriangles(2);
 
-      int i = 0;
-      for (String image : images) {
-        TitleGraph graph = new TitleGraph(image);
+      for (int i = 0; i < model.getSize(); i++) {
+        Object obj = model.getElementAt(i);
+        TitleGraph graph = new TitleGraph(obj);
         titles.add(graph);
         computeCoords(graph.coords, DEFAULT_ASPECT_RATIO);
         graph.xform.getTransform().setTranslation(new Vec3f(i, 0, 0));
@@ -282,6 +302,7 @@ public class DisplayShelfRenderer implements GLEventListener {
 
       // Now produce the floor geometry
       float maxSpacing = DEFAULT_HEIGHT * Math.max(STACKED_SPACING_FRAC, Math.max(SELECTED_SPACING_FRAC, EDITED_SPACING_FRAC));
+      int i = model.getSize();
       float minx = -i * maxSpacing;
       float maxx = 2 * i * maxSpacing;
       // Furthest back from the camera
@@ -352,11 +373,15 @@ public class DisplayShelfRenderer implements GLEventListener {
           }
         });
 
-      startLoading();
       startClockAnimation();
       recomputeTargetYZ(false);
       forceRecompute = true;
       recompute();
+
+      // Get the loading started
+      for (int j = 0; j < titles.size(); j++) {
+        updateImage(j);
+      }
     }
   }
 
@@ -454,43 +479,6 @@ public class DisplayShelfRenderer implements GLEventListener {
                midy + (int) (bigHandSz * Math.sin(minAngle)));
   }
 
-  private void startLoading() {
-    final List<TitleGraph> queuedGraphs = new ArrayList<TitleGraph>();
-    queuedGraphs.addAll(titles);
-
-    Thread loaderThread = new Thread(new Runnable() {
-        public void run() {
-          try {
-            while (queuedGraphs.size() > 0) {
-              TitleGraph graph = queuedGraphs.remove(0);
-              BufferedImage img = null;
-              try {
-                img = ImageIO.read(new URL(graph.url));
-              } catch (Exception e) {
-                System.out.println("Exception loading " + graph.url + ":");
-                e.printStackTrace();
-              }
-              if (img != null) {
-                graph.sep.replaceChild(clockTexture, graph.texture);
-                graph.texture.setTexture(img, false);
-                // Figure out the new aspect ratio based on the image's width and height
-                float aspectRatio = (float) img.getWidth() / (float) img.getHeight();
-                // Compute new coordinates
-                computeCoords(graph.coords, aspectRatio);
-                // Schedule a repaint
-                drawable.repaint();
-              }
-            }
-          } finally {
-            doneLoading = true;
-          }
-        }
-      });
-    // Avoid having the loader thread preempt the rendering thread
-    loaderThread.setPriority(Thread.NORM_PRIORITY - 2);
-    loaderThread.start();
-  }
-
   private void startClockAnimation() {
     Thread clockAnimThread = new Thread(new Runnable() {
         public void run() {
@@ -504,6 +492,38 @@ public class DisplayShelfRenderer implements GLEventListener {
         }
       });
     clockAnimThread.start();
+  }
+
+  private void updateImage(int id) {
+    TitleGraph graph = titles.get(id);
+    // Re-fetch
+    BufferedImage img = fetcher.getImage(graph.imageDescriptor,
+                                         Integer.valueOf(id),
+                                         -1);
+    if (img != null) {
+      // We don't need the image descriptor any more
+      graph.imageDescriptor = null;
+      graph.sep.replaceChild(clockTexture, graph.texture);
+      graph.texture.setTexture(img, false);
+      // Figure out the new aspect ratio based on the image's width and height
+      float aspectRatio = (float) img.getWidth() / (float) img.getHeight();
+      // Compute new coordinates
+      computeCoords(graph.coords, aspectRatio);
+      // Schedule a repaint
+      drawable.repaint();
+    }
+
+    // See whether we're completely done loading
+    boolean done = true;
+    for (TitleGraph cur : titles) {
+      if (cur.imageDescriptor != null) {
+        done = false;
+        break;
+      }
+    }
+    if (done) {
+      doneLoading = true;
+    }
   }
 
   private void recomputeTargetYZ(boolean animate) {

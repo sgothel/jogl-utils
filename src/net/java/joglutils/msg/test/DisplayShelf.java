@@ -43,12 +43,17 @@ import java.awt.Frame;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.*;
+import java.net.*;
 
 import javax.swing.*;
 
 import javax.media.opengl.*;
 
-/** A test implementing a 3D display shelf component. */
+/**
+ * A test implementing a 3D display shelf component.
+ *
+ * @author Kenneth Russell
+ */
 
 public class DisplayShelf {
   public static void main(String[] args) {
@@ -119,8 +124,16 @@ public class DisplayShelf {
       "http://download.java.net/media/jogl/builds/ds_tmp/dj.zfqfgoas.200x200-75.jpg",
       "http://download.java.net/media/jogl/builds/ds_tmp/mzi.uswlslxx.200x200-75.jpg"
     };
+    DefaultListModel model = new DefaultListModel();
+    for (String str : images) {
+      try {
+        model.addElement(new URL(str));
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
 
-    DisplayShelfRenderer renderer = new DisplayShelfRenderer(images);
+    DisplayShelfRenderer renderer = new DisplayShelfRenderer(model);
     GLCanvas canvas = new GLCanvas(new GLCapabilities(), null, renderer.getSharedContext(), null);
     canvas.setFocusable(true);
     canvas.addGLEventListener(renderer);
