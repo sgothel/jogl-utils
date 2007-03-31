@@ -296,8 +296,6 @@ public class DisplayShelfRenderer implements GLEventListener {
         // Add this to each rendering root
         imageRoot.addChild(sep);
         mirrorRoot.addChild(sep);
-
-        ++i;
       }
 
       // Now produce the floor geometry

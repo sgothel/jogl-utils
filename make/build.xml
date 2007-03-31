@@ -37,12 +37,23 @@
         </javadoc>
     </target>
 
-    <target name="all">
+    <target name="compile">
         <mkdir dir="${output.tmp.dir}" />
         <javac destdir="${output.tmp.dir}" source="5" debug="true" debuglevel="source,lines">
             <src path="${src.dir}" />
             <classpath refid="build.classpath" />
         </javac>
+    </target>
+
+    <target name="msg.jar" depends="compile">
+        <jar destfile="${output.dir}/msg.jar">
+            <fileset dir="${output.tmp.dir}"
+                     includes="net/java/joglutils/msg/**"
+                     excludes="net/java/joglutils/msg/test/**" />
+        </jar>
+    </target>
+
+    <target name="all" depends="compile">
         <jar destfile="${output.jar}">
             <fileset dir="${output.tmp.dir}" />
         </jar>

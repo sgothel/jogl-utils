@@ -252,6 +252,19 @@ public class Texture2 extends Node {
     }
   }
 
+  /** Disposes of the OpenGL texture and/or TextureRenderer this
+      Texture2 node refers to. An OpenGL context must be current at
+      the point this method is called. */
+  public void dispose() throws GLException {
+    disposeTexture();
+    disposeTextureRenderer();
+    lazyDispose();
+    data = null;
+    subImageData = null;
+    dirty = false;
+    subImageDirty = false;
+  }
+
   private synchronized void disposeTextureRenderer() {
     if (textureRenderer != null) {
       disposedRenderers.add(textureRenderer);
