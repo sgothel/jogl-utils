@@ -93,6 +93,18 @@ public class PerspectiveCamera extends Camera {
     return vertFOVScale * DEFAULT_HEIGHT_ANGLE;
   }
 
+  /** Returns the width angle, in radians, of this perspective
+      camera, assuming the passed-in aspect ratio. */
+  public float getWidthAngle(float aspectRatio) {
+    return (float) Math.atan(aspectRatio * Math.tan(getHeightAngle()));
+  }
+
+  /** Returns the width angle, in radians, of this perspective camera,
+      assuming the camera's currently-set aspect ratio. */
+  public float getWidthAngle() {
+    return getWidthAngle(getAspectRatio());
+  }
+
   public void render(GLRenderAction action) {
     // FIXME: unclear whether we should be doing this, or whether we
     // should have a mechanism which doesn't require mutation of the

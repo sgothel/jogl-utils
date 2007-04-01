@@ -48,11 +48,15 @@ public class Group extends Node {
 
   /** Append a child node to the list of children nodes this group node is managing. */
   public void addChild(Node child) {
+    if (child == null)
+      throw new IllegalArgumentException("child may not be null");
     children.add(child);
   }
 
   /** Adds a child so that it becomes the one with the given index. */
   public void insertChild(int index, Node child) {
+    if (child == null)
+      throw new IllegalArgumentException("child may not be null");
     children.add(index, child);
   }
 
@@ -102,6 +106,8 @@ public class Group extends Node {
      greater than the number of children
   */
   public void replaceChild(int index, Node newChild) throws IndexOutOfBoundsException {
+    if (newChild == null)
+      throw new IllegalArgumentException("child may not be null");
     removeChild(index);
     insertChild(index, newChild);
   }
@@ -111,6 +117,8 @@ public class Group extends Node {
       oldChild as argument, and call replaceChild(int, SoNode*) if the
       child is found. */
   public void replaceChild(Node oldChild, Node newChild) {
+    if (newChild == null)
+      throw new IllegalArgumentException("child may not be null");
     int idx = findChild(oldChild);
     if (idx >= 0)
       replaceChild(idx, newChild);

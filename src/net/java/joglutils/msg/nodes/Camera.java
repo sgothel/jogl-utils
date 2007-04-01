@@ -79,7 +79,6 @@ public abstract class Camera extends Node {
   public Camera() {
     position = new Vec3f(0, 0, 1);
     orientation = new Rotf();
-    //    orientation = new Rotf(new Vec3f(0, 1, 0), (float) (Math.PI));
 
     projMatrix = new Mat4f();
     viewMatrix = new Mat4f();
@@ -109,13 +108,15 @@ public abstract class Camera extends Node {
     return orientation;
   }
 
-  /** Sets the aspect ratio of the camera. */
+  /** Sets the aspect ratio of the camera -- the width of the viewport
+      divided by the height of the viewport. */
   public void setAspectRatio(float aspectRatio) {
     this.aspectRatio = aspectRatio;
     projDirty = true;
   }
 
-  /** Returns the aspect ratio of the camera. */
+  /** Returns the aspect ratio of the camera -- the width of the
+      viewport divided by the height of the viewport. */
   public float getAspectRatio() {
     return aspectRatio;
   }
