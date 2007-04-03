@@ -62,9 +62,13 @@ public class FontDrawer {
     
     /**
      * Intstantiates a new FontDrawer initially rendering in the specified font. 
+     * 
      * @param font the initial font for this FontDrawer
+     * @throws java.lang.NullPointerException if the supplied font is null
      */
-    public FontDrawer(Font font) {
+    public FontDrawer(Font font) throws NullPointerException {
+        if (font == null)
+            throw new NullPointerException("Can't use a null font to create a FontDrawer");
         this.font = font;
         depth = 0;
         edgeOnly = false;
@@ -74,8 +78,11 @@ public class FontDrawer {
     /**
      * Specifies which font to render with this FontDrawer
      * @param font a font to use for rendering
+     ** @throws java.lang.NullPointerException if the supplied font is null
      */
-    public void setFont(Font font) {
+    public void setFont(Font font) throws NullPointerException {
+        if (font == null)
+            throw new NullPointerException("Can't set a FontDrawer font to null");
         this.font = font;
     }
     
