@@ -36,9 +36,12 @@
 
 package net.java.joglutils.msg.elements;
 
+import java.util.*;
+
 import javax.media.opengl.*;
 import javax.media.opengl.glu.*;
 
+import net.java.joglutils.msg.math.*;
 import net.java.joglutils.msg.misc.*;
 import net.java.joglutils.msg.nodes.*;
 
@@ -87,6 +90,17 @@ public class GLShaderElement extends ShaderElement {
     }
     if (curShader != null) {
       curShader.enable();
+
+      // FIXME: the following is a big hack...
+      Map<String, Vec4f> fMap = shader.getUniformfMap();
+      if (!fMap.isEmpty()) {
+        for (String name : fMap.keySet()) {
+          Vec4f val = fMap.get(name);
+          //curShader.setUniform(name, val.x(), val.y(), val.z(), val.w());
+	  curShader.setUniform(name, val.x());
+          fMap.clear();
+        }
+      }
     }
   }
 }

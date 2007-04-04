@@ -45,6 +45,7 @@ import javax.media.opengl.*;
 
 import net.java.joglutils.msg.actions.*;
 import net.java.joglutils.msg.elements.*;
+import net.java.joglutils.msg.math.*;
 import net.java.joglutils.msg.misc.*;
 
 /** Represents a vertex/fragment shader. */
@@ -76,6 +77,14 @@ public class ShaderNode extends Node {
       disposeShader();
       this.vertexShaderCode = vertexShaderCode;
       this.fragmentShaderCode = fragmentShaderCode;
+  }
+
+  private Map<String, Vec4f> fMap = new HashMap<String, Vec4f>();
+  public void setUniform(String name, float val) {
+    fMap.put(name, new Vec4f(val, val, val, val));
+  }
+  public Map<String, Vec4f> getUniformfMap() {
+    return fMap;
   }
 
   /** Fetches the Shader object associated with this ShaderNode.
