@@ -40,18 +40,11 @@ package net.java.joglutils.msg.nodes;
 import net.java.joglutils.msg.actions.*;
 import net.java.joglutils.msg.math.*;
 
-/** Represents a camera utilizing a perspective projection. <P>
+public class OrthographicCamera extends Camera {
+  private static final float DEFAULT_HEIGHT = 2.0f;
+  // Amount the most recently set height differed from the default
+  private float heightScale = 1.0f;
 
-    The default height angle is Math.PI / 4 radians (45 degrees),
-    meaning that the camera has a total vertical field of view of 90
-    degrees.
-*/
-
-public class PerspectiveCamera extends Camera {
-  private static final float DEFAULT_HEIGHT_ANGLE = (float) (Math.PI / 4);
-  // Amount the most recently set height angle differed from the default
-  private float vertFOVScale = 1.0f;
-  
   public Mat4f getProjectionMatrix() {
     if (projDirty) {
       projMatrix.makeIdent();
@@ -62,51 +55,53 @@ public class PerspectiveCamera extends Camera {
       float zFar  = getFarDistance();
       float deltaZ = zFar - zNear;
       float aspect = getAspectRatio();
-      float radians = vertFOVScale * DEFAULT_HEIGHT_ANGLE;
-      float sine = (float) Math.sin(radians);
-      if ((deltaZ == 0) || (sine == 0) || (aspect == 0)) {
+      float height = heightScale * DEFAULT_HEIGHT;
+      float width  = height * aspect;
+
+      if ((height == 0) || (width == 0) || (deltaZ == 0))
         return projMatrix;
-      }
-      
-      float cotangent = (float) Math.cos(radians) / sine;
-      projMatrix.set(0, 0, cotangent / aspect);
-      projMatrix.set(1, 1, cotangent);
-      projMatrix.set(2, 2, -(zFar + zNear) / deltaZ);
-      projMatrix.set(3, 2, -1);
-      projMatrix.set(2, 3, -2 * zNear * zFar / deltaZ);
-      projMatrix.set(3, 3, 0);
+
+      // This is a simplified version of the orthographic camera
+      // matrix where it's symmetric about the origin
+      projMatrix.set(0, 0,  2.0f / width);
+      projMatrix.set(1, 1,  2.0f / height);
+      projMatrix.set(2, 2, -2.0f / deltaZ);
     }
 
     return projMatrix;
   }
 
-  /** Sets the height angle, in radians, of this perspective camera.
-      The default height angle is Math.PI / 4 radians, or 45 degrees. */
-  public void setHeightAngle(float heightAngle) {
-    vertFOVScale = heightAngle / DEFAULT_HEIGHT_ANGLE;
-    projDirty = true;
+  /** Sets the height, in units, of the volume this orthographic
+      camera views. The default height is 2.0 units. */
+  public void setHeight(float height) {
+    heightScale = height / DEFAULT_HEIGHT;
   }
 
-  /** Returns the height angle, in radians, of this perspective
-      camera. */
-  public float getHeightAngle() {
-    return vertFOVScale * DEFAULT_HEIGHT_ANGLE;
+  /** Returns the height, in units, of the volume this orthographic
+      camera views. */
+  public float getHeight() {
+    return heightScale * DEFAULT_HEIGHT;
   }
 
-  /** Returns the width angle, in radians, of this perspective
-      camera, assuming the passed-in aspect ratio. */
-  public float getWidthAngle(float aspectRatio) {
-    return (float) Math.atan(aspectRatio * Math.tan(getHeightAngle()));
+  /** Returns the width, in units, of the volume this orthographic
+      camera views, assuming the passed-in aspect ratio. */
+  public float getWidth(float aspectRatio) {
+    return getHeight() * aspectRatio;
   }
 
-  /** Returns the width angle, in radians, of this perspective camera,
-      assuming the camera's currently-set aspect ratio. */
-  public float getWidthAngle() {
-    return getWidthAngle(getAspectRatio());
+  /** Returns the width, in units, of the volume this orthographic
+      camera views, assuming the camera's currently-set aspect
+      ratio. */
+  public float getWidth() {
+    return getWidth(getAspectRatio());
   }
 
   protected Vec3f getRayStartPoint(Vec2f point, Vec3f unprojectedPoint) {
-    return getPosition();
+    // The easiest way to compute a reasonable ray start point is to
+    // start from the unprojected 3D point and go back along the Z-axis
+    Vec3f backward = Vec3f.Z_AXIS.times(getNearDistance());
+    backward = getOrientation().rotateVector(backward);
+    return unprojectedPoint.plus(backward);
   }
 
   public void render(GLRenderAction action) {

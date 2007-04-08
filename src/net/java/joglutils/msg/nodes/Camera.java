@@ -216,17 +216,20 @@ public abstract class Camera extends Node {
     Vec3f to = new Vec3f(unproj.x() * ooZ,
                          unproj.y() * ooZ,
                          unproj.z() * ooZ);
-    // FIXME: for orthographic projections, need to do something
-    // different; can't just use the eye point
-    Vec3f from = getPosition();
+    Vec3f from = getRayStartPoint(point, to);
     Vec3f dir  = to.minus(from);
 
-    //    System.err.println("unprojected point: " + from);
+    //    System.err.println("unprojected point: " + to);
     //    System.err.println("unprojected dir  : " + dir);
 
     line.setPoint(from);
     line.setDirection(dir);
   }
+
+  /** Computes the start point of a ray for picking, given a point in
+      normalized screen coordinates ((0, 0) to (1, 1)) and a 3D point
+      which that point unprojects to. */
+  protected abstract Vec3f getRayStartPoint(Vec2f point, Vec3f unprojectedPoint);
 
   public void doAction(Action action) {
     if (ViewingMatrixElement.isEnabled(action.getState())) {
