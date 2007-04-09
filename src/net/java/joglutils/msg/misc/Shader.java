@@ -432,6 +432,82 @@ public class Shader {
     
     /**
      * Sets the uniform array variable of the given name with the provided
+     * int array values.
+     *
+     * @param name the name of the uniform variable to be set
+     * @param count the number of int elements in the array
+     * @param vals the array values to be set
+     * @param off the offset into the vals array
+     * @throws GLException if no OpenGL context was current or if any
+     * OpenGL-related errors occurred
+     */
+    public void setUniformArray1i(String name, int count, int[] vals, int off)
+        throws GLException
+    {
+        GL gl = GLU.getCurrentGL();
+        int loc = gl.glGetUniformLocationARB(id, name);
+        gl.glUniform1ivARB(loc, count, vals, off);
+    }
+    
+    /**
+     * Sets the uniform array variable of the given name with the provided
+     * int array values.
+     *
+     * @param name the name of the uniform variable to be set
+     * @param count the number of ivec2 elements in the array
+     * @param vals the array values to be set
+     * @param off the offset into the vals array
+     * @throws GLException if no OpenGL context was current or if any
+     * OpenGL-related errors occurred
+     */
+    public void setUniformArray2i(String name, int count, int[] vals, int off)
+        throws GLException
+    {
+        GL gl = GLU.getCurrentGL();
+        int loc = gl.glGetUniformLocationARB(id, name);
+        gl.glUniform2ivARB(loc, count, vals, off);
+    }
+    
+    /**
+     * Sets the uniform array variable of the given name with the provided
+     * int array values.
+     *
+     * @param name the name of the uniform variable to be set
+     * @param count the number of ivec3 elements in the array
+     * @param vals the array values to be set
+     * @param off the offset into the vals array
+     * @throws GLException if no OpenGL context was current or if any
+     * OpenGL-related errors occurred
+     */
+    public void setUniformArray3i(String name, int count, int[] vals, int off)
+        throws GLException
+    {
+        GL gl = GLU.getCurrentGL();
+        int loc = gl.glGetUniformLocationARB(id, name);
+        gl.glUniform3ivARB(loc, count, vals, off);
+    }
+    
+    /**
+     * Sets the uniform array variable of the given name with the provided
+     * int array values.
+     *
+     * @param name the name of the uniform variable to be set
+     * @param count the number of ivec4 elements in the array
+     * @param vals the array values to be set
+     * @param off the offset into the vals array
+     * @throws GLException if no OpenGL context was current or if any
+     * OpenGL-related errors occurred
+     */
+    public void setUniformArray4i(String name, int count, int[] vals, int off)
+        throws GLException
+    {
+        GL gl = GLU.getCurrentGL();
+        int loc = gl.glGetUniformLocationARB(id, name);
+        gl.glUniform4ivARB(loc, count, vals, off);
+    }
+
+    /**
+     * Sets the uniform array variable of the given name with the provided
      * float array values.
      *
      * @param name the name of the uniform variable to be set
@@ -441,7 +517,8 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniformArray1f(String name, int count, float[] vals, int off)
+    public void setUniformArray1f(String name,
+                                  int count, float[] vals, int off)
         throws GLException
     {
         GL gl = GLU.getCurrentGL();
@@ -460,7 +537,8 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniformArray2f(String name, int count, float[] vals, int off)
+    public void setUniformArray2f(String name,
+                                  int count, float[] vals, int off)
         throws GLException
     {
         GL gl = GLU.getCurrentGL();
@@ -479,7 +557,8 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniformArray3f(String name, int count, float[] vals, int off)
+    public void setUniformArray3f(String name,
+                                  int count, float[] vals, int off)
         throws GLException
     {
         GL gl = GLU.getCurrentGL();
@@ -498,11 +577,81 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniformArray4f(String name, int count, float[] vals, int off)
+    public void setUniformArray4f(String name,
+                                  int count, float[] vals, int off)
         throws GLException
     {
         GL gl = GLU.getCurrentGL();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform4fvARB(loc, count, vals, off);
+    }
+
+    /**
+     * Sets the uniform matrix (or matrix array) variable of the given name
+     * with the provided matrix values.
+     *
+     * @param name the name of the uniform variable to be set
+     * @param count the number of 2x2 matrices (mat2 elements) in the array
+     * @param transpose if false, each matrix is assumed to be suppplied in
+     * column major order; otherwise assumed to be supplied in row major order
+     * @param vals the matrix values to be set
+     * @param off the offset into the vals array
+     * @throws GLException if no OpenGL context was current or if any
+     * OpenGL-related errors occurred
+     */
+    public void setUniformMatrices2f(String name,
+                                     int count, boolean transpose,
+                                     float[] vals, int off)
+        throws GLException
+    {
+        GL gl = GLU.getCurrentGL();
+        int loc = gl.glGetUniformLocationARB(id, name);
+        gl.glUniformMatrix2fvARB(loc, count, transpose, vals, off);
+    }
+
+    /**
+     * Sets the uniform matrix (or matrix array) variable of the given name
+     * with the provided matrix values.
+     *
+     * @param name the name of the uniform variable to be set
+     * @param count the number of 3x3 matrices (mat3 elements) in the array
+     * @param transpose if false, each matrix is assumed to be suppplied in
+     * column major order; otherwise assumed to be supplied in row major order
+     * @param vals the matrix values to be set
+     * @param off the offset into the vals array
+     * @throws GLException if no OpenGL context was current or if any
+     * OpenGL-related errors occurred
+     */
+    public void setUniformMatrices3f(String name,
+                                     int count, boolean transpose,
+                                     float[] vals, int off)
+        throws GLException
+    {
+        GL gl = GLU.getCurrentGL();
+        int loc = gl.glGetUniformLocationARB(id, name);
+        gl.glUniformMatrix3fvARB(loc, count, transpose, vals, off);
+    }
+
+    /**
+     * Sets the uniform matrix (or matrix array) variable of the given name
+     * with the provided matrix values.
+     *
+     * @param name the name of the uniform variable to be set
+     * @param count the number of 4x4 matrices (mat4 elements) in the array
+     * @param transpose if false, each matrix is assumed to be suppplied in
+     * column major order; otherwise assumed to be supplied in row major order
+     * @param vals the matrix values to be set
+     * @param off the offset into the vals array
+     * @throws GLException if no OpenGL context was current or if any
+     * OpenGL-related errors occurred
+     */
+    public void setUniformMatrices4f(String name,
+                                     int count, boolean transpose,
+                                     float[] vals, int off)
+        throws GLException
+    {
+        GL gl = GLU.getCurrentGL();
+        int loc = gl.glGetUniformLocationARB(id, name);
+        gl.glUniformMatrix4fvARB(loc, count, transpose, vals, off);
     }
 }

@@ -90,17 +90,6 @@ public class GLShaderElement extends ShaderElement {
     }
     if (curShader != null) {
       curShader.enable();
-
-      // FIXME: the following is a big hack...
-      Map<String, Vec4f> fMap = shader.getUniformfMap();
-      if (!fMap.isEmpty()) {
-        for (String name : fMap.keySet()) {
-          Vec4f val = fMap.get(name);
-          //curShader.setUniform(name, val.x(), val.y(), val.z(), val.w());
-	  curShader.setUniform(name, val.x());
-          fMap.clear();
-        }
-      }
     }
   }
 }
