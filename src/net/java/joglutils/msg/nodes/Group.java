@@ -43,7 +43,7 @@ import net.java.joglutils.msg.actions.*;
 
 /** A node which manages other Node instances. */
 
-public class Group extends Node {
+public class Group extends Node implements Iterable<Node> {
   private List<Node> children = new ArrayList<Node>();
 
   /** Append a child node to the list of children nodes this group node is managing. */
@@ -122,6 +122,11 @@ public class Group extends Node {
     int idx = findChild(oldChild);
     if (idx >= 0)
       replaceChild(idx, newChild);
+  }
+
+  /** Returns an Iterator over the nodes this Group contains. */
+  public Iterator<Node> iterator() {
+    return children.iterator();
   }
 
   public void doAction(Action action) {

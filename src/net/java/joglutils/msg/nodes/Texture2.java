@@ -140,6 +140,44 @@ public class Texture2 extends Node {
     dirty = true;
   }
 
+  /** Returns the width of the texture or TextureRenderer this
+      Texture2 node is referencing, or 0 if it has not been set up
+      yet. */
+  public int getWidth() {
+    if (data != null) {
+      return data.getWidth();
+    }
+
+    if (texture != null) {
+      return texture.getWidth();
+    }
+
+    if (textureRenderer != null) {
+      return textureRenderer.getWidth();
+    }
+
+    return 0;
+  }
+
+  /** Returns the height of the texture or TextureRenderer this
+      Texture2 node is referencing, or 0 if it has not been set up
+      yet. */
+  public int getHeight() {
+    if (data != null) {
+      return data.getHeight();
+    }
+
+    if (texture != null) {
+      return texture.getHeight();
+    }
+
+    if (textureRenderer != null) {
+      return textureRenderer.getHeight();
+    }
+
+    return 0;
+  }
+
   /**
    * Updates a subregion of the content area of this texture using the
    * specified sub-region of the given data. Only updates the

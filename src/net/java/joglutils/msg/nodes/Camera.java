@@ -111,6 +111,8 @@ public abstract class Camera extends Node {
   /** Sets the aspect ratio of the camera -- the width of the viewport
       divided by the height of the viewport. */
   public void setAspectRatio(float aspectRatio) {
+    if (aspectRatio == this.aspectRatio)
+      return;
     this.aspectRatio = aspectRatio;
     projDirty = true;
   }
@@ -195,10 +197,13 @@ public abstract class Camera extends Node {
   public void unproject(Vec2f point, Line line) throws SingularMatrixException {
     // First, we are going to compute the 3D point which corresponds
     // to the given point on the near plane. Map the screen
-    // coordinates to the (-1, 1) range.
+    // coordinates to the (-1, 1) range. Note that because the camera
+    // points down the -Z axis, we use as the initial Z coordinate of
+    // the 3D point we need to unproject the negation of the near
+    // distance.
     Vec4f pt3d = new Vec4f(2 * point.x() - 1,
                            2 * point.y() - 1,
-                           getNearDistance(),
+                           -getNearDistance(),
                            1);
     // Compute the cumulative view and projection matrices
     Mat4f mat = new Mat4f();

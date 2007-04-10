@@ -154,10 +154,19 @@ public class RayPickAction extends Action {
 
   /** Returns the list of points this action selected during the last
       traversal, sorted in increasing order of distance from the
-      origin. Typically applications will only need to deal with the
+      camera. Typically applications will only need to deal with the
       first point in the returned list. */
   public List<PickedPoint> getPickedPoints() {
     return pickedPoints;
+  }
+
+  /** Returns the closest point to the camera this action selected
+      during the last traversal, or null if no points were picked. */
+  public PickedPoint getPickedPoint() {
+    List<PickedPoint> pickedPoints = getPickedPoints();
+    if (pickedPoints == null || pickedPoints.isEmpty())
+      return null;
+    return pickedPoints.get(0);
   }
 
   /** Returns the computed 3D ray in world coordinates that this

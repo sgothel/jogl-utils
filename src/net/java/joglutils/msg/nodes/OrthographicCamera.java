@@ -61,11 +61,12 @@ public class OrthographicCamera extends Camera {
       if ((height == 0) || (width == 0) || (deltaZ == 0))
         return projMatrix;
 
-      // This is a simplified version of the orthographic camera
+      // This is a simplified version of the orthographic projection
       // matrix where it's symmetric about the origin
       projMatrix.set(0, 0,  2.0f / width);
       projMatrix.set(1, 1,  2.0f / height);
       projMatrix.set(2, 2, -2.0f / deltaZ);
+      projMatrix.set(2, 3, -(zFar + zNear) / deltaZ);
     }
 
     return projMatrix;
