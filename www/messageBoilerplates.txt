@@ -1,0 +1,20 @@
+Request for developer status:
+
+Thanks for requesting the Developer role in the joglutils project.
+Currently we're keeping the number of Developers fairly small, though
+anyone can check out the source code by becoming an Observer, or if 
+you have a substantial block of code, you will be given access to that package. 
+If not, good ways to help us understand whether you would be a good addition to the
+development team would be to:
+
+ - Send us pointers to work you've done in the past: eteq@dev.java.net
+ - Begin to submit patches or contributions using the joglutils Issue Tracker
+
+Once we get a better feeling for your background we'll be glad to
+consider making you a member of the development team. Please see the
+governance guidelines for games.java.net at
+http://games.dev.java.net/govern.html and the contributor agreement at
+https://jogl.dev.java.net/sun-contributor-agreement.pdf ; a filed
+contributor agreement is a prerequisite to becoming a developer. (This
+agreement basically states that you have the right to contribute the
+code you check in.)
