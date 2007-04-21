@@ -39,8 +39,6 @@ package net.java.joglutils.msg.collections;
 
 import java.nio.*;
 
-import com.sun.opengl.util.*;
-
 import net.java.joglutils.msg.impl.*;
 import net.java.joglutils.msg.math.*;
 
@@ -103,9 +101,10 @@ public class Vec2fCollection {
   public void add(Vec2f value) {
     FloatBuffer buf = data;
     if (buf.limit() == buf.capacity()) {
-      FloatBuffer newBuf = BufferUtil.newFloatBuffer(Math.max(buf.capacity() + ELEMENT_SIZE,
-                                                              round((int) (buf.capacity() * 1.5f))));
+      FloatBuffer newBuf = BufferFactory.newFloatBuffer(Math.max(buf.capacity() + ELEMENT_SIZE,
+                                                                 round((int) (buf.capacity() * 1.5f))));
       newBuf.put(buf);
+      newBuf.rewind();
       newBuf.limit(buf.limit());
       data = newBuf;
       buf = newBuf;
@@ -129,11 +128,12 @@ public class Vec2fCollection {
       // Simply lower the limit
       buf.limit(buf.limit() - ELEMENT_SIZE);
     } else {
-      buf.position(pos + 1);
+      buf.position(pos + ELEMENT_SIZE);
       FloatBuffer rest = buf.slice();
       buf.position(pos);
       buf.put(rest);
       buf.limit(buf.limit() - ELEMENT_SIZE);
+      buf.rewind();
     }
     return res;
   }
