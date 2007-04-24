@@ -92,7 +92,13 @@ public class TriangleSet extends TriangleBasedShape {
         // portion of the texture image
         gl.glMatrixMode(GL.GL_TEXTURE);
         gl.glPushMatrix();
-        gl.glLoadTransposeMatrixf(getTextureMatrix(tex).getRowMajorData(), 0);
+        if (gl.isExtensionAvailable("GL_VERSION_1_3")) {
+            gl.glLoadTransposeMatrixf(getTextureMatrix(tex).getRowMajorData(), 0);
+        } else {
+            float[] tmp = new float[16];
+            getTextureMatrix(tex).getColumnMajorData(tmp);
+            gl.glLoadMatrixf(tmp, 0);
+        }
         gl.glMatrixMode(GL.GL_MODELVIEW);
       } else if (haveTexCoords) {
         // Want to turn off the use of texture coordinates to avoid errors

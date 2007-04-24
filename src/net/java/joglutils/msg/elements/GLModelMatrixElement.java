@@ -86,12 +86,24 @@ public class GLModelMatrixElement extends ModelMatrixElement {
     // Recompute the complete modelview matrix
     Mat4f mat = ViewingMatrixElement.getInstance(state).getMatrix();
     GL gl = GLU.getCurrentGL();
-    gl.glLoadTransposeMatrixf(mat.getRowMajorData(), 0);
+    if (gl.isExtensionAvailable("GL_VERSION_1_3")) {
+        gl.glLoadTransposeMatrixf(mat.getRowMajorData(), 0);
+    } else {
+        float[] tmp = new float[16];
+        mat.getColumnMajorData(tmp);
+        gl.glLoadMatrixf(tmp, 0);
+    }
   }
 
   public void multElt(Mat4f matrix) {
     super.multElt(matrix);
     GL gl = GLU.getCurrentGL();
-    gl.glMultTransposeMatrixf(matrix.getRowMajorData(), 0);
+    if (gl.isExtensionAvailable("GL_VERSION_1_3")) {
+        gl.glMultTransposeMatrixf(matrix.getRowMajorData(), 0);
+    } else {
+        float[] tmp = new float[16];
+        matrix.getColumnMajorData(tmp);
+        gl.glMultMatrixf(tmp, 0);
+    }
   }
 }

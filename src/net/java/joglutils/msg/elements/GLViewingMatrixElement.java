@@ -76,6 +76,12 @@ public class GLViewingMatrixElement extends ViewingMatrixElement {
     Mat4f mdl = ModelMatrixElement.getInstance(state).getMatrix();
     temp.mul(matrix, mdl);
     GL gl = GLU.getCurrentGL();
-    gl.glLoadTransposeMatrixf(temp.getRowMajorData(), 0);
+    if (gl.isExtensionAvailable("GL_VERSION_1_3")) {
+        gl.glLoadTransposeMatrixf(temp.getRowMajorData(), 0);
+    } else {
+        float[] tmp = new float[16];
+        temp.getColumnMajorData(tmp);
+        gl.glLoadMatrixf(tmp, 0);
+    }
   }
 }

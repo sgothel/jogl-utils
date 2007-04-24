@@ -69,7 +69,13 @@ public class GLProjectionMatrixElement extends ProjectionMatrixElement {
     super.setElt(matrix);
     GL gl = GLU.getCurrentGL();
     gl.glMatrixMode(GL.GL_PROJECTION);
-    gl.glLoadTransposeMatrixf(matrix.getRowMajorData(), 0);
+    if (gl.isExtensionAvailable("GL_VERSION_1_3")) {
+        gl.glLoadTransposeMatrixf(matrix.getRowMajorData(), 0);
+    } else {
+        float[] tmp = new float[16];
+        matrix.getColumnMajorData(tmp);
+        gl.glLoadMatrixf(tmp, 0);
+    }
     gl.glMatrixMode(GL.GL_MODELVIEW);
   }
 }
