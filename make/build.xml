@@ -45,7 +45,12 @@
         </javac>
     </target>
 
+    <target name="clean">
+        <delete dir="${output.tmp.dir}" failonerror="false" />
+    </target>
+
     <target name="msg.jar" depends="compile">
+        <delete file="${output.dir}/msg.jar" failonerror="false" />
         <jar destfile="${output.dir}/msg.jar">
             <fileset dir="${output.tmp.dir}"
                      includes="net/java/joglutils/msg/**"
@@ -54,6 +59,7 @@
     </target>
 
     <target name="all" depends="compile">
+        <delete file="${output.jar}" failonerror="false" />
         <jar destfile="${output.jar}">
             <fileset dir="${output.tmp.dir}" />
         </jar>
