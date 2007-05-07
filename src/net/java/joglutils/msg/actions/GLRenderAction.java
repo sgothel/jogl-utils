@@ -107,6 +107,7 @@ public class GLRenderAction extends Action {
         // Push necessary GL state
         // FIXME: add in additional bits as we add more capabilities
         gl.glPushAttrib(GL.GL_ENABLE_BIT | GL.GL_CURRENT_BIT | GL.GL_DEPTH_BUFFER_BIT | GL.GL_TRANSFORM_BIT);
+        gl.glDisable(GL.GL_LIGHTING);
         gl.glEnable(GL.GL_DEPTH_TEST);
         gl.glColor4f(1, 1, 1, 1);
         gl.glMatrixMode(GL.GL_TEXTURE);
@@ -114,6 +115,9 @@ public class GLRenderAction extends Action {
         gl.glMatrixMode(GL.GL_MODELVIEW);
         gl.glLoadIdentity();
         gl.glPushClientAttrib(GL.GL_CLIENT_VERTEX_ARRAY_BIT);
+        gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
+        gl.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY);
+        // FIXME: should add in disabling of normal array
         // Figure out the aspect ratio of the current viewport
         int[] viewport = new int[4];
         gl.glGetIntegerv(GL.GL_VIEWPORT, viewport, 0);

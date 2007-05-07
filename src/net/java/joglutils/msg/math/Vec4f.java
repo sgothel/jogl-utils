@@ -209,6 +209,6 @@ public class Vec4f {
   }
 
   public String toString() {
-    return "(" + x + ", " + y + ", " + z + ")";
+    return "(" + x + ", " + y + ", " + z + ", " + w + ")";
   }
 }
