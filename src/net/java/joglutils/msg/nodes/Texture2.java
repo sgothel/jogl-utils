@@ -303,6 +303,24 @@ public class Texture2 extends Node {
     subImageDirty = false;
   }
 
+  /** Resets the OpenGL state of this node without explicitly
+      disposing of any resources. This should only be called when you
+      know you are using this Texture2 node across the destruction and
+      re-creation of OpenGL contexts and know how to re-initialize the
+      Texture2 from its previous state. */
+  public void resetGL(GLResetAction action) {
+    disposeTexture();
+    disposeTextureRenderer();
+    synchronized(this) {
+      disposedTextures.clear();
+      disposedRenderers.clear();
+    }
+    data = null;
+    subImageData = null;
+    dirty = false;
+    subImageDirty = false;
+  }
+
   private synchronized void disposeTextureRenderer() {
     if (textureRenderer != null) {
       disposedRenderers.add(textureRenderer);

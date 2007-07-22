@@ -441,6 +441,18 @@ public class ShaderNode extends Node {
     }
   }
 
+  /** Resets the OpenGL state of this node without explicitly
+      disposing of any resources. This should only be called when you
+      know you are using this ShaderNode across the destruction and
+      re-creation of OpenGL contexts and know how to re-initialize the
+      ShaderNode from its previous state. */
+  public void resetGL(GLResetAction action) {
+    disposeShader();
+    synchronized(this) {
+      disposedShaders.clear();
+    }
+  }
+
   private synchronized void disposeShader() {
     if (shader != null) {
       disposedShaders.add(shader);
