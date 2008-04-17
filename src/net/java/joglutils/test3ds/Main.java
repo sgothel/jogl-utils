@@ -59,7 +59,6 @@ public class Main {
         GLCanvas canvas = new GLCanvas();
         canvas.addGLEventListener(new Renderer());
         frame.add(canvas);
-        frame.add(canvas);
         frame.setSize(600, 600);
         final Animator animator = new Animator(canvas);
         frame.addWindowListener(new WindowAdapter() {
