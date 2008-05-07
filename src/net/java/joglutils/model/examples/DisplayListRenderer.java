@@ -82,8 +82,11 @@ public class DisplayListRenderer implements iModel3DRenderer {
         
         // save some current state variables
         boolean isTextureEnabled = gl.glIsEnabled(GL.GL_TEXTURE_2D);
-        boolean isLightingEnabled = gl.glIsEnabled(GL.GL_LIGHTING);        
+        boolean isLightingEnabled = gl.glIsEnabled(GL.GL_LIGHTING);
         boolean isMaterialEnabled = gl.glIsEnabled(GL.GL_COLOR_MATERIAL);
+        
+        // check lighting
+        if (!model.isUsingLighting()) { gl.glDisable(GL.GL_LIGHTING); }
         
         // check texture
         if (model.isUsingTexture()) { gl.glEnable(GL.GL_TEXTURE_2D); }
@@ -92,10 +95,6 @@ public class DisplayListRenderer implements iModel3DRenderer {
         // check wireframe
         if (model.isRenderingAsWireframe()) { gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE); }
         else { gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL); }
-        
-        // check lighting
-        if (model.isUsingLighting()) { gl.glEnable(GL.GL_LIGHTING); }
-        else { gl.glDisable(GL.GL_LIGHTING); }
         
         gl.glDisable(GL.GL_COLOR_MATERIAL);
         
