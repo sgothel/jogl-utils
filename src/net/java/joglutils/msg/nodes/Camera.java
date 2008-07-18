@@ -213,14 +213,14 @@ public abstract class Camera extends Node {
     // Multiply
     Vec4f unproj = new Vec4f();
     mat.xformVec(pt3d, unproj);
-    if (unproj.z() == 0) {
+    if (unproj.w() == 0) {
       // FIXME: is this the right exception to throw in this case?
       throw new SingularMatrixException();
     }
-    float ooZ = 1.0f / unproj.w();
-    Vec3f to = new Vec3f(unproj.x() * ooZ,
-                         unproj.y() * ooZ,
-                         unproj.z() * ooZ);
+    float ooW = 1.0f / unproj.w();
+    Vec3f to = new Vec3f(unproj.x() * ooW,
+                         unproj.y() * ooW,
+                         unproj.z() * ooW);
     Vec3f from = getRayStartPoint(point, to);
     Vec3f dir  = to.minus(from);
 
