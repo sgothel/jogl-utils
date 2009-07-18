@@ -49,7 +49,8 @@ import javax.swing.*;
 import javax.swing.event.*;
 
 import javax.media.opengl.*;
-import com.sun.opengl.util.j2d.*;
+import javax.media.opengl.awt.*;
+import com.sun.opengl.util.awt.*;
 
 import net.java.joglutils.msg.actions.*;
 import net.java.joglutils.msg.collections.*;
@@ -99,7 +100,7 @@ public class DisplayShelfRenderer implements GLEventListener {
   private GLPbuffer sharedPbuffer;
   private boolean firstInit = true;
 
-  private GLAutoDrawable drawable;
+  private AWTGLAutoDrawable drawable;
 
   private Separator root;
   private Separator imageRoot;
@@ -154,7 +155,7 @@ public class DisplayShelfRenderer implements GLEventListener {
     // Create a small pbuffer with which we share textures and display
     // lists to avoid having to reload textures during repeated calls
     // to init()
-    sharedPbuffer = GLDrawableFactory.getFactory().createGLPbuffer(new GLCapabilities(), null, 1, 1, null);
+    sharedPbuffer = GLDrawableFactory.getFactory(GLProfile.getDefault()).createGLPbuffer(new GLCapabilities(GLProfile.getDefault()), null, 1, 1, null);
     sharedPbuffer.display();
 
     this.fetcher = new BasicFetcher<Integer>();
@@ -221,8 +222,8 @@ public class DisplayShelfRenderer implements GLEventListener {
     return targetIndex;
   }
 
-  public void init(GLAutoDrawable drawable) {
-    this.drawable = drawable;
+  public void init(GLAutoDrawable d) {
+    this.drawable = (AWTGLAutoDrawable) d;
     GL gl = drawable.getGL();
 
     if (firstInit) {
@@ -407,7 +408,7 @@ public class DisplayShelfRenderer implements GLEventListener {
 
     if (repaintAgain) {
       animating = true;
-      drawable.repaint();
+      ((AWTGLAutoDrawable) drawable).repaint();
     } else {
       animating = false;
     }
@@ -416,7 +417,7 @@ public class DisplayShelfRenderer implements GLEventListener {
   public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
   }
 
-  public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {}
+  public void dispose(GLAutoDrawable drawable) {}
 
   //----------------------------------------------------------------------
   // Internals only below this point

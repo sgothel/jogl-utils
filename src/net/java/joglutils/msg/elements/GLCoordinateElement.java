@@ -88,12 +88,12 @@ public class GLCoordinateElement extends CoordinateElement {
     if (this.enabled == enabled)
       return;  // No OpenGL work to do
     this.enabled = enabled;
-    GL gl = GLU.getCurrentGL();
+    GL2 gl = GLU.getCurrentGL().getGL2();
     if (enabled) {
-      gl.glVertexPointer(3, GL.GL_FLOAT, 0, coords);
-      gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
+      gl.glVertexPointer(3, GL2.GL_FLOAT, 0, coords);
+      gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
     } else {
-      gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
+      gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
     }
   }
 }

@@ -36,10 +36,9 @@
 
 package net.java.joglutils.msg.misc;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GLException;
+import javax.media.opengl.*;
 import javax.media.opengl.glu.GLU;
-import static javax.media.opengl.GL.*;
+import static javax.media.opengl.GL2.*;
 
 /**
  * Represents an OpenGL shader program object, which can be constructed from
@@ -89,7 +88,7 @@ public class Shader {
     public Shader(String fragmentCode)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         id = createProgram(gl, null, fragmentCode);
     }
     
@@ -110,7 +109,7 @@ public class Shader {
     public Shader(String vertexCode, String fragmentCode)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         id = createProgram(gl, vertexCode, fragmentCode);
     }
     
@@ -122,7 +121,7 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    private static int createProgram(GL gl,
+    private static int createProgram(GL2 gl,
                                      String vertexShaderSource,
                                      String fragmentShaderSource)
         throws GLException
@@ -201,10 +200,10 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    private static int compileShader(GL gl, String shaderSource, boolean vertex)
+    private static int compileShader(GL2 gl, String shaderSource, boolean vertex)
         throws GLException
     {
-        int kind = vertex ? GL_VERTEX_SHADER_ARB : GL_FRAGMENT_SHADER_ARB;
+        int kind = vertex ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER;
         int shader;
         int[] success = new int[1];
         int[] infoLogLength = new int[1];
@@ -255,7 +254,7 @@ public class Shader {
      * OpenGL-related errors occurred
      */
     public void enable() throws GLException {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         gl.glUseProgramObjectARB(id);
     }
     
@@ -266,7 +265,7 @@ public class Shader {
      * OpenGL-related errors occurred
      */
     public void disable() throws GLException {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         gl.glUseProgramObjectARB(0);
     }
     
@@ -277,7 +276,7 @@ public class Shader {
      * OpenGL-related errors occurred
      */
     public void dispose() throws GLException {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         gl.glDeleteObjectARB(id);
         id = 0;
     }
@@ -294,7 +293,7 @@ public class Shader {
     public void setUniform(String name, int i0)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform1iARB(loc, i0);
     }
@@ -312,7 +311,7 @@ public class Shader {
     public void setUniform(String name, int i0, int i1)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform2iARB(loc, i0, i1);
     }
@@ -331,7 +330,7 @@ public class Shader {
     public void setUniform(String name, int i0, int i1, int i2)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform3iARB(loc, i0, i1, i2);
     }
@@ -351,7 +350,7 @@ public class Shader {
     public void setUniform(String name, int i0, int i1, int i2, int i3)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform4iARB(loc, i0, i1, i2, i3);
     }
@@ -368,7 +367,7 @@ public class Shader {
     public void setUniform(String name, float f0)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform1fARB(loc, f0);
     }
@@ -386,7 +385,7 @@ public class Shader {
     public void setUniform(String name, float f0, float f1)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform2fARB(loc, f0, f1);
     }
@@ -405,7 +404,7 @@ public class Shader {
     public void setUniform(String name, float f0, float f1, float f2)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform3fARB(loc, f0, f1, f2);
     }
@@ -425,7 +424,7 @@ public class Shader {
     public void setUniform(String name, float f0, float f1, float f2, float f3)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform4fARB(loc, f0, f1, f2, f3);
     }
@@ -444,7 +443,7 @@ public class Shader {
     public void setUniformArray1i(String name, int count, int[] vals, int off)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform1ivARB(loc, count, vals, off);
     }
@@ -463,7 +462,7 @@ public class Shader {
     public void setUniformArray2i(String name, int count, int[] vals, int off)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform2ivARB(loc, count, vals, off);
     }
@@ -482,7 +481,7 @@ public class Shader {
     public void setUniformArray3i(String name, int count, int[] vals, int off)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform3ivARB(loc, count, vals, off);
     }
@@ -501,7 +500,7 @@ public class Shader {
     public void setUniformArray4i(String name, int count, int[] vals, int off)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform4ivARB(loc, count, vals, off);
     }
@@ -521,7 +520,7 @@ public class Shader {
                                   int count, float[] vals, int off)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform1fvARB(loc, count, vals, off);
     }
@@ -541,7 +540,7 @@ public class Shader {
                                   int count, float[] vals, int off)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform2fvARB(loc, count, vals, off);
     }
@@ -561,7 +560,7 @@ public class Shader {
                                   int count, float[] vals, int off)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform3fvARB(loc, count, vals, off);
     }
@@ -581,7 +580,7 @@ public class Shader {
                                   int count, float[] vals, int off)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform4fvARB(loc, count, vals, off);
     }
@@ -604,7 +603,7 @@ public class Shader {
                                      float[] vals, int off)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniformMatrix2fvARB(loc, count, transpose, vals, off);
     }
@@ -627,7 +626,7 @@ public class Shader {
                                      float[] vals, int off)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniformMatrix3fvARB(loc, count, transpose, vals, off);
     }
@@ -650,7 +649,7 @@ public class Shader {
                                      float[] vals, int off)
         throws GLException
     {
-        GL gl = GLU.getCurrentGL();
+        GL2 gl = GLU.getCurrentGL().getGL2();
         int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniformMatrix4fvARB(loc, count, transpose, vals, off);
     }

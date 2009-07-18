@@ -89,16 +89,16 @@ public class GLTextureCoordinateElement extends TextureCoordinateElement {
     if (this.enabled == enabled)
       return;  // No OpenGL work to do
     this.enabled = enabled;
-    GL gl = GLU.getCurrentGL();
+    GL2 gl = GLU.getCurrentGL().getGL2();
     if (enabled) {
       // FIXME: may want to link this up with the GLTextureElement so
       // that we only enable the texture coordinate array if we both
       // have a TextureCoordinateElement and a TextureElement active
       // (a little error checking for the application)
-      gl.glTexCoordPointer(2, GL.GL_FLOAT, 0, coords);
-      gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
+      gl.glTexCoordPointer(2, GL2.GL_FLOAT, 0, coords);
+      gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
     } else {
-      gl.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY);
+      gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
     }
   }
 }

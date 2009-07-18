@@ -96,31 +96,31 @@ public class GLRenderAction extends Action {
   private float curAspectRatio = 1.0f;
 
   private int applyDepth = 0;
-  private GL gl;
+  private GL2 gl;
 
   public void apply(Node node) {
     int depth = applyDepth++;
     try {
       if (depth == 0) {
-        gl = GLU.getCurrentGL();
+        gl = GLU.getCurrentGL().getGL2();
         // Applying to the root of the scene graph
         // Push necessary GL state
         // FIXME: add in additional bits as we add more capabilities
-        gl.glPushAttrib(GL.GL_ENABLE_BIT | GL.GL_CURRENT_BIT | GL.GL_DEPTH_BUFFER_BIT | GL.GL_TRANSFORM_BIT);
-        gl.glDisable(GL.GL_LIGHTING);
-        gl.glEnable(GL.GL_DEPTH_TEST);
+        gl.glPushAttrib(GL2.GL_ENABLE_BIT | GL2.GL_CURRENT_BIT | GL2.GL_DEPTH_BUFFER_BIT | GL2.GL_TRANSFORM_BIT);
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glEnable(GL2.GL_DEPTH_TEST);
         gl.glColor4f(1, 1, 1, 1);
-        gl.glMatrixMode(GL.GL_TEXTURE);
+        gl.glMatrixMode(GL2.GL_TEXTURE);
         gl.glLoadIdentity();
-        gl.glMatrixMode(GL.GL_MODELVIEW);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glLoadIdentity();
-        gl.glPushClientAttrib(GL.GL_CLIENT_VERTEX_ARRAY_BIT);
-        gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
-        gl.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY);
+        gl.glPushClientAttrib(GL2.GL_CLIENT_VERTEX_ARRAY_BIT);
+        gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
+        gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
         // FIXME: should add in disabling of normal array
         // Figure out the aspect ratio of the current viewport
         int[] viewport = new int[4];
-        gl.glGetIntegerv(GL.GL_VIEWPORT, viewport, 0);
+        gl.glGetIntegerv(GL2.GL_VIEWPORT, viewport, 0);
         curAspectRatio = (float) viewport[2] / (float) viewport[3];
       }
       apply(table, node);
@@ -135,7 +135,7 @@ public class GLRenderAction extends Action {
   }
 
   /** Returns the GL instance being used for rendering. */
-  public GL getGL() {
+  public GL2 getGL() {
     return gl;
   }
 

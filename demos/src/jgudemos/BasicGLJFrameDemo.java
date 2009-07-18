@@ -37,6 +37,7 @@
 package jgudemos;
 
 import net.java.joglutils.*;
+
 import javax.media.opengl.*;
 
 /**
@@ -55,16 +56,17 @@ public class BasicGLJFrameDemo {
             }
 
             public void display(GLAutoDrawable drawable) {
-                GL gl = drawable.getGL();
+                GL2 gl = drawable.getGL().getGL2();
+                gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
                 gl.glColor3f(1.0f,0.323f,0.8f);
-                gl.glBegin(GL.GL_TRIANGLE_STRIP);
+                gl.glBegin(GL2.GL_TRIANGLE_STRIP);
                 gl.glVertex2d(0,0);
                 gl.glVertex2d(0.5,1.0);
                 gl.glVertex2d(-0.3,-0.9);
                 gl.glEnd();
             }
 
-            public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {
+            public void dispose(GLAutoDrawable drawable) {
             }
             
         });

@@ -76,41 +76,41 @@ public class GLBlendElement extends BlendElement {
 
   private static int oglBlendFunc(int func) {
     switch (func) {
-      case Blend.ZERO:                     return GL.GL_ZERO;
-      case Blend.ONE:                      return GL.GL_ONE;
-      case Blend.SRC_COLOR:                return GL.GL_SRC_COLOR;
-      case Blend.ONE_MINUS_SRC_COLOR:      return GL.GL_ONE_MINUS_SRC_COLOR;
-      case Blend.DST_COLOR:                return GL.GL_DST_COLOR;
-      case Blend.ONE_MINUS_DST_COLOR:      return GL.GL_ONE_MINUS_DST_COLOR;
-      case Blend.SRC_ALPHA:                return GL.GL_SRC_ALPHA;
-      case Blend.ONE_MINUS_SRC_ALPHA:      return GL.GL_ONE_MINUS_SRC_ALPHA;
-      case Blend.DST_ALPHA:                return GL.GL_DST_ALPHA;
-      case Blend.ONE_MINUS_DST_ALPHA:      return GL.GL_ONE_MINUS_DST_ALPHA;
-      case Blend.SRC_ALPHA_SATURATE:       return GL.GL_SRC_ALPHA_SATURATE;
-      case Blend.CONSTANT_COLOR:           return GL.GL_CONSTANT_COLOR;
-      case Blend.ONE_MINUS_CONSTANT_COLOR: return GL.GL_ONE_MINUS_CONSTANT_COLOR;
-      case Blend.CONSTANT_ALPHA:           return GL.GL_CONSTANT_ALPHA;
-      case Blend.ONE_MINUS_CONSTANT_ALPHA: return GL.GL_ONE_MINUS_CONSTANT_ALPHA;
+      case Blend.ZERO:                     return GL2.GL_ZERO;
+      case Blend.ONE:                      return GL2.GL_ONE;
+      case Blend.SRC_COLOR:                return GL2.GL_SRC_COLOR;
+      case Blend.ONE_MINUS_SRC_COLOR:      return GL2.GL_ONE_MINUS_SRC_COLOR;
+      case Blend.DST_COLOR:                return GL2.GL_DST_COLOR;
+      case Blend.ONE_MINUS_DST_COLOR:      return GL2.GL_ONE_MINUS_DST_COLOR;
+      case Blend.SRC_ALPHA:                return GL2.GL_SRC_ALPHA;
+      case Blend.ONE_MINUS_SRC_ALPHA:      return GL2.GL_ONE_MINUS_SRC_ALPHA;
+      case Blend.DST_ALPHA:                return GL2.GL_DST_ALPHA;
+      case Blend.ONE_MINUS_DST_ALPHA:      return GL2.GL_ONE_MINUS_DST_ALPHA;
+      case Blend.SRC_ALPHA_SATURATE:       return GL2.GL_SRC_ALPHA_SATURATE;
+      case Blend.CONSTANT_COLOR:           return GL2.GL_CONSTANT_COLOR;
+      case Blend.ONE_MINUS_CONSTANT_COLOR: return GL2.GL_ONE_MINUS_CONSTANT_COLOR;
+      case Blend.CONSTANT_ALPHA:           return GL2.GL_CONSTANT_ALPHA;
+      case Blend.ONE_MINUS_CONSTANT_ALPHA: return GL2.GL_ONE_MINUS_CONSTANT_ALPHA;
     }
     throw new InternalError("Illegal blend function " + func);
   }
 
   private int oglBlendEquation(int equation) {
     switch (equation) {
-      case Blend.FUNC_ADD:              return GL.GL_FUNC_ADD;
-      case Blend.FUNC_SUBTRACT:         return GL.GL_FUNC_SUBTRACT;
-      case Blend.FUNC_REVERSE_SUBTRACT: return GL.GL_FUNC_REVERSE_SUBTRACT;
-      case Blend.MIN:                   return GL.GL_MIN;
-      case Blend.MAX:                   return GL.GL_MAX;
+      case Blend.FUNC_ADD:              return GL2.GL_FUNC_ADD;
+      case Blend.FUNC_SUBTRACT:         return GL2.GL_FUNC_SUBTRACT;
+      case Blend.FUNC_REVERSE_SUBTRACT: return GL2.GL_FUNC_REVERSE_SUBTRACT;
+      case Blend.MIN:                   return GL2.GL_MIN;
+      case Blend.MAX:                   return GL2.GL_MAX;
     }
     throw new InternalError("Illegal blend equation " + equation);
   }
 
-  private static void validateFunc(GL gl, int func) {
-    if (func == GL.GL_CONSTANT_COLOR ||
-        func == GL.GL_ONE_MINUS_CONSTANT_COLOR ||
-        func == GL.GL_CONSTANT_ALPHA ||
-        func == GL.GL_ONE_MINUS_CONSTANT_ALPHA) {
+  private static void validateFunc(GL2 gl, int func) {
+    if (func == GL2.GL_CONSTANT_COLOR ||
+        func == GL2.GL_ONE_MINUS_CONSTANT_COLOR ||
+        func == GL2.GL_CONSTANT_ALPHA ||
+        func == GL2.GL_ONE_MINUS_CONSTANT_ALPHA) {
       if (!gl.isExtensionAvailable("GL_ARB_imaging")) {
         throw new RuntimeException("Blend function requires GL_ARB_imaging extension");
       }
@@ -118,10 +118,10 @@ public class GLBlendElement extends BlendElement {
   }
 
   private void send() {
-    GL gl = GLU.getCurrentGL();
+    GL2 gl = GLU.getCurrentGL().getGL2();
     // Don't try to optimize what we send to OpenGL at this point -- too complicated
     if (enabled) {
-      gl.glEnable(GL.GL_BLEND);
+      gl.glEnable(GL2.GL_BLEND);
       int oglSrcFunc  = oglBlendFunc(srcFunc);
       int oglDestFunc = oglBlendFunc(destFunc);
       validateFunc(gl, oglSrcFunc);
@@ -132,7 +132,7 @@ public class GLBlendElement extends BlendElement {
         gl.glBlendColor(blendColor.x(), blendColor.y(), blendColor.z(), blendColor.w());
       }
     } else {
-      gl.glDisable(GL.GL_BLEND);
+      gl.glDisable(GL2.GL_BLEND);
     }
   }
 }

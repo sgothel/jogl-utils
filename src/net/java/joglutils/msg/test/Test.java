@@ -42,6 +42,7 @@ import java.awt.event.*;
 import java.io.*;
 
 import javax.media.opengl.*;
+import javax.media.opengl.awt.*;
 import com.sun.opengl.util.texture.*;
 
 import net.java.joglutils.msg.actions.*;
@@ -145,6 +146,6 @@ public class Test {
     }
 
     public void reshape(GLAutoDrawable drawable, int x, int y, int w, int h) {}
-    public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {}
+    public void dispose(GLAutoDrawable drawable) {}
   }
 }

@@ -42,8 +42,7 @@ import com.sun.opengl.util.texture.TextureCoords;
 import com.sun.opengl.util.texture.TextureIO;
 import java.io.File;
 import java.io.IOException;
-import javax.media.opengl.GL;
-import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.*;
 
 public class MyModel extends Model3DS
 {
@@ -67,7 +66,7 @@ public class MyModel extends Model3DS
         if (!super.load(file))
             return false;
      
-        GL gl = gLDrawable.getGL();
+        GL2 gl = gLDrawable.getGL().getGL2();
         int numMaterials = materials.size();
         
         texture = new Texture[numMaterials];
@@ -77,7 +76,7 @@ public class MyModel extends Model3DS
         }
         
         compiledList = gl.glGenLists(1);
-        gl.glNewList(compiledList, GL.GL_COMPILE);
+        gl.glNewList(compiledList, GL2.GL_COMPILE);
             genList(gLDrawable);
         gl.glEndList();
         
@@ -88,7 +87,7 @@ public class MyModel extends Model3DS
     
     public void render(GLAutoDrawable gLDrawable)
     {
-        GL gl = gLDrawable.getGL();
+        GL2 gl = gLDrawable.getGL().getGL2();
         gl.glCallList(compiledList);
     }
 
@@ -106,7 +105,7 @@ public class MyModel extends Model3DS
     
     private void genList(GLAutoDrawable gLDrawable)
     {
-        GL gl = gLDrawable.getGL();
+        GL2 gl = gLDrawable.getGL().getGL2();
         TextureCoords coords;
         
         for (int i=0; i<objects.size(); i++) {
@@ -117,7 +116,7 @@ public class MyModel extends Model3DS
                 coords = texture[tempObj.materialID].getImageTexCoords();
             }
             
-            gl.glBegin(GL.GL_TRIANGLES);
+            gl.glBegin(GL2.GL_TRIANGLES);
                 for (int j=0; j<tempObj.numOfFaces; j++) {
                     for (int whichVertex=0; whichVertex<3; whichVertex++) {
                         int index = tempObj.faces[j].vertIndex[whichVertex];

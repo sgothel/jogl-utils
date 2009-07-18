@@ -10,22 +10,47 @@
    - built into its build directory.
    -->
 <project name="joglutils" basedir="." default="all">
-    <property name="src.dir"         value="../src" />
-    <property name="output.dir"      value="../build" />
-    <property name="output.tmp.dir"  value="../build/classes" />
+    <property name="top.dir"         value=".." />
+    <property name="src.dir"         value="${top.dir}/src" />
+    <property name="demos.src.dir"   value="${top.dir}/demos/src" />
+    <property name="output.dir"      value="${top.dir}/build" />
+    <property name="output.tmp.dir"  value="${top.dir}/build/classes" />
     <property name="output.jar"      value="${output.dir}/joglutils.jar" />
-    <property name="jogl.jar"        value="../../jogl/build/jogl.jar" />
-    <property name="swinglayout.jar" value="${output.dir}/lib/swing-layout-1.0.jar" />
+    <property name="demos.jar"       value="${output.dir}/joglutils-demos.jar" />
+    <property name="jogl.jar"        value="${top.dir}/../jogl/build/jogl/jogl.all.jar" />
+    <property name="nativewindow.jar" value="${top.dir}/../jogl/build/nativewindow/nativewindow.all.jar" />
+    <property name="swinglayout.jar" value="lib/swing-layout-1.0.jar" />
+    <property name="jogl-demos-util.jar" value="lib/jogl-demos-util.jar" />
     <path id="build.classpath">
         <pathelement location="${jogl.jar}" />
+        <pathelement location="${nativewindow.jar}" />
+        <pathelement location="${jogl-demos-util.jar}" />
         <pathelement location="${swinglayout.jar}" />
+    </path>
+    <path id="demos.build.classpath">
+        <pathelement location="${jogl.jar}" />
+        <pathelement location="${nativewindow.jar}" />
+        <pathelement location="${jogl-demos-util.jar}" />
+        <pathelement location="${swinglayout.jar}" />
+        <pathelement location="${output.jar}" />
     </path>
 
     <property name="javadoc.link" value="http://java.sun.com/j2se/1.5.0/docs/api/" />
 
-    <property name="msg.javadoc.dir" value="../msg_javadoc" />
+    <property name="javadoc.dir" value="${output.dir}/javadoc" />
+    <property name="javadoc.packagenames" value="net.java.joglutils,net.java.joglutils.demos,net.java.joglutils.jogltext,net.java.joglutils.lighting,net.java.joglutils.test3ds,net.java.joglutils.ThreeDS" />
+    <target name="javadoc">
+        <javadoc packagenames="${javadoc.packagenames}"
+                 sourcepath="${src.dir}"
+                 destdir="${javadoc.dir}"
+                 source="1.5"
+                 linkoffline="${javadoc.link} 5-packages" >
+        </javadoc>
+    </target>
+
+    <property name="msg.javadoc.dir" value="${output.dir}/msg_javadoc" />
     <property name="msg.javadoc.packagenames" value="net.java.joglutils.msg.actions,net.java.joglutils.msg.collections,net.java.joglutils.msg.elements,net.java.joglutils.msg.math,net.java.joglutils.msg.misc,net.java.joglutils.msg.nodes,net.java.joglutils.msg.test" />
-    <property name="msg.javadoc.overview" value="../src/net/java/joglutils/msg/overview.html" />
+    <property name="msg.javadoc.overview" value="${top.dir}/src/net/java/joglutils/msg/overview.html" />
     <property name="msg.javadoc.windowtitle" value="Minimal Scene Graph (MSG)" />
     <target name="msg.javadoc">
         <javadoc packagenames="${msg.javadoc.packagenames}"
@@ -45,8 +70,27 @@
         </javac>
     </target>
 
+    <target name="joglutils.jar" depends="compile">
+        <delete file="${output.jar}" failonerror="false" />
+        <jar destfile="${output.jar}">
+            <fileset dir="${output.tmp.dir}"
+		     includes="net/**" />
+        </jar>
+    </target>
+
+    <target name="joglutils-demos.jar" depends="joglutils.jar">
+        <javac destdir="${output.tmp.dir}" source="5" debug="true" debuglevel="source,lines">
+            <src path="${demos.src.dir}" />
+            <classpath refid="demos.build.classpath" />
+        </javac>
+        <jar destfile="${demos.jar}">
+            <fileset dir="${output.tmp.dir}"
+		     includes="jgudemos/**" />
+        </jar>
+    </target>
+
     <target name="clean">
-        <delete dir="${output.tmp.dir}" failonerror="false" />
+        <delete dir="${output.dir}" failonerror="false" />
     </target>
 
     <target name="msg.jar" depends="compile">
@@ -58,7 +102,7 @@
         </jar>
     </target>
 
-    <target name="all" depends="compile">
+    <target name="all" depends="joglutils.jar,joglutils-demos.jar">
         <delete file="${output.jar}" failonerror="false" />
         <jar destfile="${output.jar}">
             <fileset dir="${output.tmp.dir}" />

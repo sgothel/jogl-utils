@@ -45,13 +45,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.awt.GLCanvas;
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
 import java.awt.event.MouseEvent;
-import javax.media.opengl.GL;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
+import javax.media.opengl.*;
 import java.awt.*;
 import javax.media.opengl.glu.GLU;
 import net.java.joglutils.model.ModelFactory;
@@ -163,8 +161,8 @@ public class ModelTest {
          */
         public void display(GLAutoDrawable gLDrawable)
         {
-            final GL gl = gLDrawable.getGL();
-            gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+            final GL2 gl = gLDrawable.getGL().getGL2();
+            gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
             gl.glLoadIdentity();
             
             glu.gluLookAt(0,0,10, 0,0,0, 0,1,0);
@@ -205,7 +203,7 @@ public class ModelTest {
          */
         public void init(GLAutoDrawable gLDrawable)
         {
-            final GL gl = gLDrawable.getGL();
+            final GL2 gl = gLDrawable.getGL().getGL2();
             
             try
             {
@@ -249,26 +247,26 @@ public class ModelTest {
             float lightPosition[] = { 0, 50000000, 0, 1.0f };
             float[] model_ambient = {0.5f, 0.5f, 0.5f, 1.0f};
         
-            gl.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT, model_ambient, 0);
-            gl.glLightfv(GL.GL_LIGHT0, GL.GL_POSITION, lightPosition, 0);
-            gl.glLightfv(GL.GL_LIGHT0, GL.GL_DIFFUSE, lightDiffuse, 0);
-            gl.glLightfv(GL.GL_LIGHT0, GL.GL_AMBIENT, lightAmbient, 0);
-            gl.glLightfv(GL.GL_LIGHT0, GL.GL_SPECULAR, lightSpecular, 0);
+            gl.glLightModelfv(GL2.GL_LIGHT_MODEL_AMBIENT, model_ambient, 0);
+            gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, lightPosition, 0);
+            gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, lightDiffuse, 0);
+            gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_AMBIENT, lightAmbient, 0);
+            gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_SPECULAR, lightSpecular, 0);
 
-            gl.glEnable(GL.GL_LIGHT0);
-            gl.glEnable(GL.GL_LIGHTING);
-            gl.glEnable(GL.GL_NORMALIZE);
+            gl.glEnable(GL2.GL_LIGHT0);
+            gl.glEnable(GL2.GL_LIGHTING);
+            gl.glEnable(GL2.GL_NORMALIZE);
 
-            gl.glEnable(GL.GL_CULL_FACE);
-            gl.glShadeModel(GL.GL_SMOOTH);
+            gl.glEnable(GL2.GL_CULL_FACE);
+            gl.glShadeModel(GL2.GL_SMOOTH);
             gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             gl.glClearDepth(1.0f);
-            gl.glEnable(GL.GL_DEPTH_TEST);
-            gl.glDepthFunc(GL.GL_LEQUAL);
-            gl.glHint(GL.GL_PERSPECTIVE_CORRECTION_HINT, GL.GL_NICEST);
-            //gl.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, 0);
+            gl.glEnable(GL2.GL_DEPTH_TEST);
+            gl.glDepthFunc(GL2.GL_LEQUAL);
+            gl.glHint(GL2.GL_PERSPECTIVE_CORRECTION_HINT, GL2.GL_NICEST);
+            //gl.glLightModeli(GL2.GL_LIGHT_MODEL_TWO_SIDE, 0);
             
-            gl.glMatrixMode(GL.GL_MODELVIEW);
+            gl.glMatrixMode(GL2.GL_MODELVIEW);
             gl.glPushMatrix();
         }
 
@@ -288,19 +286,22 @@ public class ModelTest {
          */
         public void reshape(GLAutoDrawable gLDrawable, int x, int y, int width, int height)
         {
-            final GL gl = gLDrawable.getGL();
+            final GL2 gl = gLDrawable.getGL().getGL2();
 
             if (height <= 0) // avoid a divide by zero error!
                 height = 1;
             final float h = (float)width / (float)height;
             gl.glViewport(0, 0, width, height);
-            gl.glMatrixMode(GL.GL_PROJECTION);
+            gl.glMatrixMode(GL2.GL_PROJECTION);
             gl.glLoadIdentity();
             gl.glOrtho(-1, 1, -1, 1, -50, 50);
-            gl.glMatrixMode(GL.GL_MODELVIEW);
+            gl.glMatrixMode(GL2.GL_MODELVIEW);
             gl.glLoadIdentity();
         }
         
+        public void dispose(GLAutoDrawable drawable) {
+        }
+
         /** 
          * Get the point at the start of the mouse drag
          * 

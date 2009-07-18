@@ -52,7 +52,7 @@ import java.nio.*;
  * @author Erik J. Tollerud
  */
 public class Material {
-    GL attachedGL;
+    GL2 attachedGL;
     private int face;
     
     private float[] ambient;
@@ -65,7 +65,7 @@ public class Material {
     /** Creates a new instance of Material from the OpenGL default material settings */
     public Material() {
         attachedGL = null;
-        face = GL.GL_FRONT_AND_BACK;
+        face = GL2.GL_FRONT_AND_BACK;
         float[] localAmb = {0.2f,0.2f,0.2f,1.0f};
         ambient = localAmb;
         float[] localDiff = {0.8f,0.8f,0.8f,1.0f};
@@ -82,7 +82,7 @@ public class Material {
      * @param gl the OpenGL context to attach
      * @param face the face to use for configuring the material
      */
-    public Material(GL gl, int face) {
+    public Material(GL2 gl, int face) {
         this.attachedGL = gl;
         this.face = face;
         this.specular = new float[4];
@@ -95,14 +95,14 @@ public class Material {
      * Creates a new instance of material, with the specified GL context attached. Settings are applied to front and back.
      * @param gl the OpenGL context to attach
      */
-    public Material(GL gl) {
-        this(gl,GL.GL_FRONT_AND_BACK);
+    public Material(GL2 gl) {
+        this(gl,GL2.GL_FRONT_AND_BACK);
     }
     /**
      * Attached the specified OpenGL context to this object
      * @param gl the OpenGL context to attach this to
      */
-    public void setAttachedGL(GL gl) {
+    public void setAttachedGL(GL2 gl) {
         this.attachedGL = gl;
     }
     /**
@@ -132,21 +132,21 @@ public class Material {
      * Sets the OpenGL State in the supplied context based on the settings in this Material.
      * @param gl the OpenGL Context upon which to apply the settings from this Material.
      */
-    public void apply(GL gl) {
-        gl.glMaterialfv(face,GL.GL_SPECULAR,specular,0);
-        gl.glMaterialfv(face,GL.GL_EMISSION,emissive,0);
-        gl.glMaterialfv(face,GL.GL_AMBIENT,ambient,0);
-        gl.glMaterialfv(face,GL.GL_DIFFUSE,diffuse,0);
-        gl.glMaterialf(face,GL.GL_SHININESS,shininess);
+    public void apply(GL2 gl) {
+        gl.glMaterialfv(face,GL2.GL_SPECULAR,specular,0);
+        gl.glMaterialfv(face,GL2.GL_EMISSION,emissive,0);
+        gl.glMaterialfv(face,GL2.GL_AMBIENT,ambient,0);
+        gl.glMaterialfv(face,GL2.GL_DIFFUSE,diffuse,0);
+        gl.glMaterialf(face,GL2.GL_SHININESS,shininess);
     }
     /**
      * Sets the settings in this Material from the specified OpenGL context's state.
      * @param gl the OpenGL Context to use in setting this Material's settings.
      */
-    public void retrieve(GL gl) {
+    public void retrieve(GL2 gl) {
         int retrievalFace = face;
-        if (face == GL.GL_FRONT_AND_BACK)
-            retrievalFace = GL.GL_FRONT;
+        if (face == GL2.GL_FRONT_AND_BACK)
+            retrievalFace = GL2.GL_FRONT;
         
         FloatBuffer buff = FloatBuffer.allocate(17);
         
@@ -182,23 +182,23 @@ public class Material {
     /**
      * Specifies the face for subsequent apply method calls to apply and retrieve the material settings.  If
      * GL_FRONT_AND_BACK, will retrieve from GL_FRONT.
-     * @param face the face to apply material settings upon.  Must be GL.GL_FRONT_AND_BACK, GL.GL_FRONT, or GL.GL_BACK
+     * @param face the face to apply material settings upon.  Must be GL2.GL_FRONT_AND_BACK, GL2.GL_FRONT, or GL2.GL_BACK
      * @throws sddm.lighting.LightingException if an invalid input is provided
      */
     public void setFace(int face) throws LightingException {
-        if(face==GL.GL_FRONT_AND_BACK)
-            this.face = GL.GL_FRONT_AND_BACK;
-        else if(face == GL.GL_FRONT)
-            this.face = GL.GL_FRONT;
-        else if(face == GL.GL_BACK)
-            this.face = GL.GL_BACK;
+        if(face==GL2.GL_FRONT_AND_BACK)
+            this.face = GL2.GL_FRONT_AND_BACK;
+        else if(face == GL2.GL_FRONT)
+            this.face = GL2.GL_FRONT;
+        else if(face == GL2.GL_BACK)
+            this.face = GL2.GL_BACK;
         else
             throw new LightingException("Attempted to set face to an invalid value");
     }
     
     /**
      * Determines what face the material settings are applied to or retrieved from.
-     * @return the face used - can be GL.GL_FRONT_AND_BACK, GL.GL_FRONT, or GL.GL_BACK
+     * @return the face used - can be GL2.GL_FRONT_AND_BACK, GL2.GL_FRONT, or GL2.GL_BACK
      */
     public int getFace() {
         return face;
@@ -210,7 +210,7 @@ public class Material {
      */
     public void setSpecular(Color specular) {
         if (this.attachedGL != null)
-            attachedGL.glMaterialfv(face,GL.GL_SPECULAR,specular.getRGBComponents(null),0);
+            attachedGL.glMaterialfv(face,GL2.GL_SPECULAR,specular.getRGBComponents(null),0);
         this.specular = specular.getRGBComponents(null);
     }
     
@@ -228,7 +228,7 @@ public class Material {
      */
     public void setShininess(float shininess) {
         if (this.attachedGL != null)
-            attachedGL.glMaterialf(face,GL.GL_SHININESS,shininess);
+            attachedGL.glMaterialf(face,GL2.GL_SHININESS,shininess);
         this.shininess = shininess;
     }
     
@@ -246,7 +246,7 @@ public class Material {
      */
     public void setEmissive(Color emissive) {
         if (this.attachedGL != null)
-            attachedGL.glMaterialfv(face,GL.GL_EMISSION,emissive.getRGBComponents(null),0);
+            attachedGL.glMaterialfv(face,GL2.GL_EMISSION,emissive.getRGBComponents(null),0);
         this.emissive = emissive.getRGBComponents(null);
     }
     
@@ -264,7 +264,7 @@ public class Material {
      */
     public void setAmbient(Color ambient) {
          if (this.attachedGL != null)
-            attachedGL.glMaterialfv(face,GL.GL_AMBIENT,ambient.getRGBComponents(null),0);
+            attachedGL.glMaterialfv(face,GL2.GL_AMBIENT,ambient.getRGBComponents(null),0);
         this.ambient = ambient.getRGBComponents(null);
     }
     
@@ -282,7 +282,7 @@ public class Material {
      */
     public void setDiffuse(Color diffuse) {
         if (this.attachedGL != null)
-            attachedGL.glMaterialfv(face,GL.GL_DIFFUSE,diffuse.getRGBComponents(null),0);
+            attachedGL.glMaterialfv(face,GL2.GL_DIFFUSE,diffuse.getRGBComponents(null),0);
         this.diffuse = diffuse.getRGBComponents(null);
     }
     
@@ -319,7 +319,7 @@ public class Material {
      * @param gl the OpenGL context to apply this color to.
      * @param ambient the ambient color to be applied.
      */
-    public static void applyGlobalAmbient(GL gl, Color ambient) {
+    public static void applyGlobalAmbient(GL2 gl, Color ambient) {
         gl.glLightModelfv(gl.GL_LIGHT_MODEL_AMBIENT,ambient.getRGBComponents(null),0);
     }
     /**
@@ -327,7 +327,7 @@ public class Material {
      * @param gl the OpenGL Context from which to get the color.
      * @return the ambient color in the specified OpenGL Context.
      */
-    public static Color getGlobalAmbient(GL gl) {
+    public static Color getGlobalAmbient(GL2 gl) {
         FloatBuffer buff = FloatBuffer.allocate(4);
         gl.glGetFloatv(gl.GL_LIGHT_MODEL_AMBIENT, buff);
         return new Color(buff.get(),buff.get(),buff.get(),buff.get());

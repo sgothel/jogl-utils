@@ -74,7 +74,7 @@ public class GLTextureElement extends TextureElement {
   }
 
   private void switchTextures(Texture2 prev, Texture2 texture) {
-    GL gl = GLU.getCurrentGL();
+    GL2 gl = GLU.getCurrentGL().getGL2();
     Texture prevTexture = null;
     Texture curTexture  = null;
     int texEnvMode = 0;
@@ -96,12 +96,12 @@ public class GLTextureElement extends TextureElement {
       curTexture.bind();
       int glEnvMode = 0;
       switch (texEnvMode) {
-        case Texture2.MODULATE:   glEnvMode = GL.GL_MODULATE; break;
-        case Texture2.DECAL:      glEnvMode = GL.GL_DECAL;    break;
-        case Texture2.BLEND:      glEnvMode = GL.GL_BLEND;    break;
-        case Texture2.REPLACE:    glEnvMode = GL.GL_REPLACE;  break;
+        case Texture2.MODULATE:   glEnvMode = GL2.GL_MODULATE; break;
+        case Texture2.DECAL:      glEnvMode = GL2.GL_DECAL;    break;
+        case Texture2.BLEND:      glEnvMode = GL2.GL_BLEND;    break;
+        case Texture2.REPLACE:    glEnvMode = GL2.GL_REPLACE;  break;
       }
-      gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, glEnvMode);
+      gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, glEnvMode);
     }
   }
 }

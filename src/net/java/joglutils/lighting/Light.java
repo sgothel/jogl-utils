@@ -57,7 +57,7 @@ public class Light {
     static HashMap<GL,Boolean> shaderBuiltin = new HashMap<GL,Boolean>();
     static HashMap<GL,Integer> shaderProgNums = new HashMap<GL,Integer>();
     
-    private GL attachedGL;
+    private GL2 attachedGL;
     private int lightNumber;
     
     //Light defaults are determined by constructor
@@ -111,7 +111,7 @@ public class Light {
      * @param gl the OpenGL context to attach the light to
      * @throws net.java.joglutils.lighting.LightingException if the light number is invalid or is already in use by another Light. Light is detached from any OpenGL Context.
      */
-    public Light(GL gl)  throws LightingException {
+    public Light(GL2 gl)  throws LightingException {
         this();
         
         this.attachedGL = gl;
@@ -130,7 +130,7 @@ public class Light {
      * @param lightNumber the light number to be used (must be on [0,7])
      * @throws net.java.joglutils.lighting.LightingException if the light number is invalid or is already in use by another Light. Light is detached from any OpenGL Context.
      */
-    public Light(GL gl, int lightNumber) throws LightingException {
+    public Light(GL2 gl, int lightNumber) throws LightingException {
         this();
         if (lightNumber < 0 || lightNumber > maxNumberOfLightsInGL(gl))
             throw new LightingException("Requested light not availible in specified OpenGL context");
@@ -201,7 +201,7 @@ public class Light {
      * @param gl the OpenGL context to attach this to
      * @throws net.java.joglutils.lighting.LightingException if the specified context has no free lights. Light is detached from any OpenGL Context.
      */
-    public void setAttachedGL(GL gl) throws LightingException {
+    public void setAttachedGL(GL2 gl) throws LightingException {
         this.unassignLightNumber(this.attachedGL,this.lightNumber);
         if(!this.hasFreeLights(gl)) {
             this.attachedGL = null;
@@ -275,7 +275,7 @@ public class Light {
      * @param gl the OpenGL context to use.
      * @throws net.java.joglutils.lighting.LightingException if the light number stored in this Light is invalid on the specified context.
      */
-    public void apply(GL gl) throws LightingException {
+    public void apply(GL2 gl) throws LightingException {
         apply(gl,this.lightNumber);
     }
     /**
@@ -284,7 +284,7 @@ public class Light {
      * @param gl the OpenGL context to use.
      * @throws net.java.joglutils.lighting.LightingException if the light number stored in this Light is invalid on the specified context.
      */
-    public void retrieve(GL gl) throws LightingException {
+    public void retrieve(GL2 gl) throws LightingException {
         retrieve(gl,this.lightNumber);
         
     }
@@ -293,7 +293,7 @@ public class Light {
      * @param gl the OpenGL context to use.
      * @throws net.java.joglutils.lighting.LightingException if the light number stored in this Light is invalid on the specified context.
      */
-    public void enable(GL gl) throws LightingException {
+    public void enable(GL2 gl) throws LightingException {
         enable(gl,this.lightNumber);
     }
     /**
@@ -301,7 +301,7 @@ public class Light {
      * @param gl the OpenGL context to use.
      * @throws net.java.joglutils.lighting.LightingException if the light number stored in this Light is invalid on the specified context.
      */
-    public void disable(GL gl) throws LightingException {
+    public void disable(GL2 gl) throws LightingException {
         disable(gl,this.lightNumber);
     }
     /**
@@ -311,30 +311,30 @@ public class Light {
      * @param lightNumber the number of the light to use (should be on [0,7]).
      * @throws net.java.joglutils.lighting.LightingException if the requested light is not valid on the specified context.
      */
-    public void apply(GL gl, int lightNumber) throws LightingException {
+    public void apply(GL2 gl, int lightNumber) throws LightingException {
        if(!this.isLightNumberValid(gl, lightNumber))
             throw new LightingException("attempted to apply Light settings to invalid lightNumber for the requested OpenGL context");
         
         int lightID = numToID(lightNumber);
         
         //set color components
-        gl.glLightfv(lightID,GL.GL_AMBIENT,ambient,0);
-        gl.glLightfv(lightID,GL.GL_DIFFUSE,diffuse,0);
-        gl.glLightfv(lightID,GL.GL_SPECULAR,specular,0);
+        gl.glLightfv(lightID,GL2.GL_AMBIENT,ambient,0);
+        gl.glLightfv(lightID,GL2.GL_DIFFUSE,diffuse,0);
+        gl.glLightfv(lightID,GL2.GL_SPECULAR,specular,0);
         //OpenGL position information is contanied in Light lightPosition and light distance
         float[] position = new float[4];
         position[0] = lightPosition[0];
         position[1] = lightPosition[1];
         position[2] = lightPosition[2];
         position[3] = lightW;
-        gl.glLightfv(lightID,GL.GL_POSITION,position,0);
+        gl.glLightfv(lightID,GL2.GL_POSITION,position,0);
         //set other parameters
-        gl.glLightfv(lightID,GL.GL_SPOT_DIRECTION,spotDirection,0);
-        gl.glLightf(lightID,GL.GL_SPOT_CUTOFF,spotCutoff);
-        gl.glLightf(lightID,GL.GL_SPOT_EXPONENT,spotExponent);
-        gl.glLightf(lightID,GL.GL_CONSTANT_ATTENUATION,constantAttenuation);
-        gl.glLightf(lightID,GL.GL_LINEAR_ATTENUATION,linearAttenuation);
-        gl.glLightf(lightID,GL.GL_QUADRATIC_ATTENUATION,quadraticAttenuation);
+        gl.glLightfv(lightID,GL2.GL_SPOT_DIRECTION,spotDirection,0);
+        gl.glLightf(lightID,GL2.GL_SPOT_CUTOFF,spotCutoff);
+        gl.glLightf(lightID,GL2.GL_SPOT_EXPONENT,spotExponent);
+        gl.glLightf(lightID,GL2.GL_CONSTANT_ATTENUATION,constantAttenuation);
+        gl.glLightf(lightID,GL2.GL_LINEAR_ATTENUATION,linearAttenuation);
+        gl.glLightf(lightID,GL2.GL_QUADRATIC_ATTENUATION,quadraticAttenuation);
         
         this.lightNumber = lightNumber;
     }
@@ -345,7 +345,7 @@ public class Light {
      * @param lightNumber the number of the light to use (should be on [0,7]).
      * @throws net.java.joglutils.lighting.LightingException if the requested light is not valid on the specified context.
      */
-    public void retrieve(GL gl, int lightNumber) throws LightingException{
+    public void retrieve(GL2 gl, int lightNumber) throws LightingException{
         if(!this.isLightNumberValid(gl, lightNumber))
             throw new LightingException("attempted to retrieve Light settings to invalid lightNumber for the requested OpenGL context");
         
@@ -353,29 +353,29 @@ public class Light {
         FloatBuffer buff = FloatBuffer.allocate(24);
         
         //get color components  - 4 each
-        gl.glGetLightfv(lightID,GL.GL_AMBIENT,buff);
+        gl.glGetLightfv(lightID,GL2.GL_AMBIENT,buff);
         buff.get(this.ambient);
-        gl.glGetLightfv(lightID,GL.GL_DIFFUSE,buff);
+        gl.glGetLightfv(lightID,GL2.GL_DIFFUSE,buff);
         buff.get(this.diffuse);
-        gl.glGetLightfv(lightID,GL.GL_SPECULAR,buff);
+        gl.glGetLightfv(lightID,GL2.GL_SPECULAR,buff);
         buff.get(this.specular);
         //get light position - 4 (including distance)
-        gl.glGetLightfv(lightID,GL.GL_POSITION,buff);
+        gl.glGetLightfv(lightID,GL2.GL_POSITION,buff);
         buff.get(this.lightPosition);
         this.lightW = buff.get();
         //get spot direction- 3
-        gl.glGetLightfv(lightID,GL.GL_SPOT_DIRECTION,buff);
+        gl.glGetLightfv(lightID,GL2.GL_SPOT_DIRECTION,buff);
         buff.get(this.spotDirection);
         //get individual floats - 1 each
-        gl.glGetLightfv(lightID,GL.GL_SPOT_CUTOFF,buff);
+        gl.glGetLightfv(lightID,GL2.GL_SPOT_CUTOFF,buff);
         this.spotCutoff = buff.get();
-        gl.glGetLightfv(lightID,GL.GL_SPOT_EXPONENT,buff);
+        gl.glGetLightfv(lightID,GL2.GL_SPOT_EXPONENT,buff);
         this.spotExponent = buff.get();
-        gl.glGetLightfv(lightID,GL.GL_CONSTANT_ATTENUATION,buff);
+        gl.glGetLightfv(lightID,GL2.GL_CONSTANT_ATTENUATION,buff);
         this.constantAttenuation = buff.get();
-        gl.glGetLightfv(lightID,GL.GL_LINEAR_ATTENUATION,buff);
+        gl.glGetLightfv(lightID,GL2.GL_LINEAR_ATTENUATION,buff);
         this.linearAttenuation = buff.get();
-        gl.glGetLightfv(lightID,GL.GL_QUADRATIC_ATTENUATION,buff);
+        gl.glGetLightfv(lightID,GL2.GL_QUADRATIC_ATTENUATION,buff);
         this.quadraticAttenuation = buff.get();
         
         this.lightNumber = lightNumber;
@@ -386,7 +386,7 @@ public class Light {
      * @param lightNumber the number of the light to use (should be on [0,7]).
      * @throws net.java.joglutils.lighting.LightingException if the requested light is not valid on the specified context.
      */
-    public void enable(GL gl, int lightNumber) throws LightingException {
+    public void enable(GL2 gl, int lightNumber) throws LightingException {
         if(!this.isLightNumberValid(gl, lightNumber))
             throw new LightingException("attempted to enable Light on with an invalid lightNumber for the requested OpenGL context");
         gl.glEnable(numToID(lightNumber));
@@ -440,7 +440,7 @@ public class Light {
             if (result != null) {
                 int lightID = result+lightNumber;
                 java.nio.IntBuffer buffer = java.nio.IntBuffer.allocate(1);
-                gl.glGetIntegerv(GL.GL_CURRENT_PROGRAM,buffer);
+                gl.glGetIntegerv(GL2.GL_CURRENT_PROGRAM,buffer);
                 int currProgram = buffer.get();
                 
                 if (currProgram == lightID)
@@ -455,7 +455,7 @@ public class Light {
      * @param lightNumber the number of the light to use (should be on [0,7]).
      * @throws net.java.joglutils.lighting.LightingException if the requested light is not valid on the specified context.
      */
-    public void disable(GL gl, int lightNumber) throws LightingException {
+    public void disable(GL2 gl, int lightNumber) throws LightingException {
         if(!this.isLightNumberValid(gl, lightNumber))
             throw new LightingException("attempted to disable Light on with an invalid lightNumber for the requested OpenGL context");
         gl.glDisable(numToID(lightNumber));
@@ -479,7 +479,7 @@ public class Light {
     public void setAmbient(Color ambient) {
         this.ambient = ambient.getRGBComponents(null);
         if (this.attachedGL != null)
-            this.attachedGL.glLightfv(numToID(lightNumber),GL.GL_AMBIENT,this.ambient,0);
+            this.attachedGL.glLightfv(numToID(lightNumber),GL2.GL_AMBIENT,this.ambient,0);
     }
     
     /**
@@ -497,7 +497,7 @@ public class Light {
     public void setDiffuse(Color diffuse) {
         this.diffuse = diffuse.getRGBComponents(null);
         if (this.attachedGL != null)
-            this.attachedGL.glLightfv(numToID(lightNumber),GL.GL_DIFFUSE,this.diffuse,0);
+            this.attachedGL.glLightfv(numToID(lightNumber),GL2.GL_DIFFUSE,this.diffuse,0);
         
     }
     
@@ -516,7 +516,7 @@ public class Light {
     public void setSpecular(Color specular) {
         this.specular = specular.getRGBComponents(null);
         if (this.attachedGL != null)
-            this.attachedGL.glLightfv(numToID(lightNumber),GL.GL_SPECULAR,this.specular,0);
+            this.attachedGL.glLightfv(numToID(lightNumber),GL2.GL_SPECULAR,this.specular,0);
     }
     
     /**
@@ -540,7 +540,7 @@ public class Light {
             position[1] = lightPosition[1];
             position[2] = lightPosition[2];
             position[3] = this.lightW;
-            this.attachedGL.glLightfv(numToID(lightNumber),GL.GL_POSITION,position,0);
+            this.attachedGL.glLightfv(numToID(lightNumber),GL2.GL_POSITION,position,0);
         }
         this.lightPosition = lightPosition.clone();
     }
@@ -572,7 +572,7 @@ public class Light {
      */
     public void setSpotDirection(float[] spotDirection) {
         if (this.attachedGL != null)
-            this.attachedGL.glLightfv(numToID(lightNumber),GL.GL_SPOT_DIRECTION,spotDirection,0);
+            this.attachedGL.glLightfv(numToID(lightNumber),GL2.GL_SPOT_DIRECTION,spotDirection,0);
         this.spotDirection = spotDirection.clone();
     }
     
@@ -608,7 +608,7 @@ public class Light {
             position[1] = this.lightPosition[1];
             position[2] = this.lightPosition[2];
             position[3] = lightW;
-            this.attachedGL.glLightfv(numToID(lightNumber),GL.GL_POSITION,position,0);
+            this.attachedGL.glLightfv(numToID(lightNumber),GL2.GL_POSITION,position,0);
         }
         this.lightW = lightW;
     }
@@ -633,7 +633,7 @@ public class Light {
      */
     public void setSpotCutoff(float spotCutoff) {
         if (this.attachedGL != null)
-            this.attachedGL.glLightf(numToID(lightNumber),GL.GL_SPOT_CUTOFF,spotCutoff);
+            this.attachedGL.glLightf(numToID(lightNumber),GL2.GL_SPOT_CUTOFF,spotCutoff);
         this.spotCutoff = spotCutoff;
     }
     
@@ -651,7 +651,7 @@ public class Light {
      */
     public void setSpotExponent(float spotExponent) {
         if (this.attachedGL != null)
-            this.attachedGL.glLightf(numToID(lightNumber),GL.GL_SPOT_EXPONENT,spotExponent);
+            this.attachedGL.glLightf(numToID(lightNumber),GL2.GL_SPOT_EXPONENT,spotExponent);
         this.spotExponent = spotExponent;
     }
     
@@ -670,7 +670,7 @@ public class Light {
      */
     public void setConstantAttenuation(float constantAttenuation) {
         if (this.attachedGL != null)
-            this.attachedGL.glLightf(numToID(lightNumber),GL.GL_CONSTANT_ATTENUATION,constantAttenuation);
+            this.attachedGL.glLightf(numToID(lightNumber),GL2.GL_CONSTANT_ATTENUATION,constantAttenuation);
         this.constantAttenuation = constantAttenuation;
     }
     
@@ -689,7 +689,7 @@ public class Light {
      */
     public void setLinearAttenuation(float linearAttenuation) {
         if (this.attachedGL != null)
-            this.attachedGL.glLightf(numToID(lightNumber),GL.GL_LINEAR_ATTENUATION,linearAttenuation);
+            this.attachedGL.glLightf(numToID(lightNumber),GL2.GL_LINEAR_ATTENUATION,linearAttenuation);
         this.linearAttenuation = linearAttenuation;
     }
     
@@ -708,7 +708,7 @@ public class Light {
      */
     public void setQuadraticAttenuation(float quadraticAttenuation) {
         if (this.attachedGL != null)
-            this.attachedGL.glLightf(numToID(lightNumber),GL.GL_QUADRATIC_ATTENUATION,quadraticAttenuation);
+            this.attachedGL.glLightf(numToID(lightNumber),GL2.GL_QUADRATIC_ATTENUATION,quadraticAttenuation);
         this.quadraticAttenuation = quadraticAttenuation;
     }
     
@@ -728,7 +728,7 @@ public class Light {
      * @param gl the OpenGL context to test
      * @return the maximum number of lights (highest possible in OpenGL is 8)
      */
-    public static int maxNumberOfLightsInGL(GL gl) {
+    public static int maxNumberOfLightsInGL(GL2 gl) {
         java.nio.IntBuffer buff = java.nio.IntBuffer.allocate(1);
         gl.glGetIntegerv(gl.GL_MAX_LIGHTS,buff);
         return buff.get();
@@ -743,28 +743,28 @@ public class Light {
     public static int idToNum(int lightID) throws LightingException {
         int retNum = -1;
         switch (lightID) {
-            case GL.GL_LIGHT0:
+            case GL2.GL_LIGHT0:
                 retNum = 0;
                 break;
-            case GL.GL_LIGHT1:
+            case GL2.GL_LIGHT1:
                 retNum = 1;
                 break;
-            case GL.GL_LIGHT2:
+            case GL2.GL_LIGHT2:
                 retNum = 2;
                 break;
-            case GL.GL_LIGHT3:
+            case GL2.GL_LIGHT3:
                 retNum = 3;
                 break;
-            case GL.GL_LIGHT4:
+            case GL2.GL_LIGHT4:
                 retNum = 4;
                 break;
-            case GL.GL_LIGHT5:
+            case GL2.GL_LIGHT5:
                 retNum = 5;
                 break;
-            case GL.GL_LIGHT6:
+            case GL2.GL_LIGHT6:
                 retNum = 6;
                 break;
-            case GL.GL_LIGHT7:
+            case GL2.GL_LIGHT7:
                 retNum = 7;
                 break;
             default:
@@ -784,28 +784,28 @@ public class Light {
         int retID = -1;
         switch (lightNum) {
             case 0:
-                retID = GL.GL_LIGHT0;
+                retID = GL2.GL_LIGHT0;
                 break;
             case 1:
-                retID = GL.GL_LIGHT1;
+                retID = GL2.GL_LIGHT1;
                 break;
             case 2:
-                retID = GL.GL_LIGHT2;
+                retID = GL2.GL_LIGHT2;
                 break;
             case 3:
-                retID = GL.GL_LIGHT3;
+                retID = GL2.GL_LIGHT3;
                 break;
             case 4:
-                retID = GL.GL_LIGHT4;
+                retID = GL2.GL_LIGHT4;
                 break;
             case 5:
-                retID = GL.GL_LIGHT5;
+                retID = GL2.GL_LIGHT5;
                 break;
             case 6:
-                retID = GL.GL_LIGHT6;
+                retID = GL2.GL_LIGHT6;
                 break;
             case 7:
-                retID = GL.GL_LIGHT7;
+                retID = GL2.GL_LIGHT7;
                 break;
             default:
                 throw new LightingException("tried to determine ID of a number not on [0,7]");
@@ -818,7 +818,7 @@ public class Light {
      * @param gl the openGL context to test
      * @return true if another Light object can be attached to this GL context
      */
-    public static boolean hasFreeLights(GL gl) {
+    public static boolean hasFreeLights(GL2 gl) {
         boolean[] lights = assignedLights.get(gl);
         if (lights == null)
             return true;
@@ -881,7 +881,7 @@ public class Light {
      * @throws net.java.joglutils.lighting.LightingException if the OpenGL context does not support GLSL shaders or the shader did not sucessfully compile and link
      */
     public static void initializePhongShader() throws LightingException {
-        initializePhongShader(javax.media.opengl.glu.GLU.getCurrentGL());
+        initializePhongShader(javax.media.opengl.glu.GLU.getCurrentGL().getGL2());
     }
     
     /**
@@ -889,7 +889,7 @@ public class Light {
      * @param gl the openGL context on which to initialize the shader
      * @throws net.java.joglutils.lighting.LightingException if the OpenGL context does not support GLSL shaders or the shader did not sucessfully compile and link
      */
-    public static void initializePhongShader(GL gl) throws LightingException {
+    public static void initializePhongShader(GL2 gl) throws LightingException {
         /* Old way that only works for light zero
         //program source
         final String[] fragSource = {
@@ -943,8 +943,8 @@ public class Light {
          
         if(builtin) {
             progID = gl.glCreateProgram();
-            int vertID = gl.glCreateShader(GL.GL_VERTEX_SHADER);
-            int fragID = gl.glCreateShader(GL.GL_FRAGMENT_SHADER);
+            int vertID = gl.glCreateShader(GL2.GL_VERTEX_SHADER);
+            int fragID = gl.glCreateShader(GL2.GL_FRAGMENT_SHADER);
          
             gl.glShaderSource(vertID,vertSource.length,vertSource,vertLengths,0);
             gl.glShaderSource(fragID,fragSource.length,fragSource,fragLengths,0);
@@ -958,9 +958,9 @@ public class Light {
             gl.glLinkProgram(progID);
          
             int[] getProgArray = new int[1];
-            gl.glGetProgramiv(progID,GL.GL_LINK_STATUS,getProgArray,0);
-            if (getProgArray[0] == GL.GL_FALSE) {
-                gl.glGetProgramiv(progID,GL.GL_INFO_LOG_LENGTH,getProgArray,0);
+            gl.glGetProgramiv(progID,GL2.GL_LINK_STATUS,getProgArray,0);
+            if (getProgArray[0] == GL2.GL_FALSE) {
+                gl.glGetProgramiv(progID,GL2.GL_INFO_LOG_LENGTH,getProgArray,0);
                 int logLength = getProgArray[0];
                 byte[] logArray = new byte[logLength];
                 gl.glGetProgramInfoLog(progID,logLength,getProgArray,0,logArray,0);
@@ -970,8 +970,8 @@ public class Light {
          
         } else {
             progID = gl.glCreateProgramObjectARB();
-            int vertID = gl.glCreateShaderObjectARB(GL.GL_VERTEX_SHADER_ARB);
-            int fragID = gl.glCreateShaderObjectARB(GL.GL_FRAGMENT_SHADER_ARB);
+            int vertID = gl.glCreateShaderObjectARB(GL2.GL_VERTEX_SHADER_ARB);
+            int fragID = gl.glCreateShaderObjectARB(GL2.GL_FRAGMENT_SHADER_ARB);
          
             gl.glShaderSourceARB(vertID,vertSource.length,vertSource,vertLengths,0);
             gl.glShaderSourceARB(fragID,fragSource.length,fragSource,fragLengths,0);
@@ -985,9 +985,9 @@ public class Light {
             gl.glLinkProgramARB(progID);
          
             int[] getProgArray = new int[1];
-            gl.glGetObjectParameterivARB(progID,GL.GL_OBJECT_LINK_STATUS_ARB,getProgArray,0);
-            if (getProgArray[0] == GL.GL_FALSE) {
-                gl.glGetObjectParameterivARB(progID,GL.GL_OBJECT_INFO_LOG_LENGTH_ARB,getProgArray,0);
+            gl.glGetObjectParameterivARB(progID,GL2.GL_OBJECT_LINK_STATUS_ARB,getProgArray,0);
+            if (getProgArray[0] == GL2.GL_FALSE) {
+                gl.glGetObjectParameterivARB(progID,GL2.GL_OBJECT_INFO_LOG_LENGTH_ARB,getProgArray,0);
                 int logLength = getProgArray[0];
                 byte[] logArray = new byte[logLength];
                 gl.glGetInfoLogARB(progID,logLength,getProgArray,0,logArray,0);
@@ -1016,7 +1016,7 @@ public class Light {
                     throw new LightingException("Couldn't generate shader programs in numerical order - can't use Phong Shading");
             }
             
-            int vertID = gl.glCreateShader(GL.GL_VERTEX_SHADER);
+            int vertID = gl.glCreateShader(GL2.GL_VERTEX_SHADER);
             String[] vertSource = generatePhongVertexShaderSource();
             gl.glShaderSource(vertID,vertSource.length,vertSource,generateShaderLengths(vertSource),0);
             
@@ -1024,7 +1024,7 @@ public class Light {
             //generate program for each light and compile and link
             for (int currID = progID;currID < (8+progID);++currID) {
                 
-                int fragID = gl.glCreateShader(GL.GL_FRAGMENT_SHADER);
+                int fragID = gl.glCreateShader(GL2.GL_FRAGMENT_SHADER);
                 String[] fragSource = generatePhongFragmentShaderSource(currID-progID);
                 gl.glShaderSource(fragID,fragSource.length,fragSource,generateShaderLengths(fragSource),0);
                 
@@ -1037,9 +1037,9 @@ public class Light {
                 gl.glLinkProgram(currID);
                 
                 int[] getProgArray = new int[1];
-                gl.glGetProgramiv(currID,GL.GL_LINK_STATUS,getProgArray,0);
-                if (getProgArray[0] == GL.GL_FALSE) {
-                    gl.glGetProgramiv(currID,GL.GL_INFO_LOG_LENGTH,getProgArray,0);
+                gl.glGetProgramiv(currID,GL2.GL_LINK_STATUS,getProgArray,0);
+                if (getProgArray[0] == GL2.GL_FALSE) {
+                    gl.glGetProgramiv(currID,GL2.GL_INFO_LOG_LENGTH,getProgArray,0);
                     int logLength = getProgArray[0];
                     byte[] logArray = new byte[logLength];
                     gl.glGetProgramInfoLog(currID,logLength,getProgArray,0,logArray,0);
@@ -1056,7 +1056,7 @@ public class Light {
                     throw new LightingException("Couldn't generate shader programs in numerical order - can't use Phong Shading");
             }
             
-            int vertID = gl.glCreateShaderObjectARB(GL.GL_VERTEX_SHADER_ARB);
+            int vertID = gl.glCreateShaderObjectARB(GL2.GL_VERTEX_SHADER);
             String[] vertSource = generatePhongVertexShaderSource();
             gl.glShaderSourceARB(vertID,vertSource.length,vertSource,generateShaderLengths(vertSource),0);
             
@@ -1064,7 +1064,7 @@ public class Light {
             //generate program for each light and compile and link
             for (int currID = progID;currID < (8+progID);++currID) {
                 
-                int fragID = gl.glCreateShaderObjectARB(GL.GL_FRAGMENT_SHADER_ARB);
+                int fragID = gl.glCreateShaderObjectARB(GL2.GL_FRAGMENT_SHADER);
                 String[] fragSource = generatePhongFragmentShaderSource(currID-progID);
                 gl.glShaderSourceARB(fragID,fragSource.length,fragSource,generateShaderLengths(fragSource),0);
                 
@@ -1077,9 +1077,9 @@ public class Light {
                 gl.glLinkProgramARB(currID);
                 
                 int[] getProgArray = new int[1];
-                gl.glGetObjectParameterivARB(currID,GL.GL_OBJECT_LINK_STATUS_ARB,getProgArray,0);
-                if (getProgArray[0] == GL.GL_FALSE) {
-                    gl.glGetObjectParameterivARB(currID,GL.GL_OBJECT_INFO_LOG_LENGTH_ARB,getProgArray,0);
+                gl.glGetObjectParameterivARB(currID,GL2.GL_OBJECT_LINK_STATUS_ARB,getProgArray,0);
+                if (getProgArray[0] == GL2.GL_FALSE) {
+                    gl.glGetObjectParameterivARB(currID,GL2.GL_OBJECT_INFO_LOG_LENGTH_ARB,getProgArray,0);
                     int logLength = getProgArray[0];
                     byte[] logArray = new byte[logLength];
                     gl.glGetInfoLogARB(currID,logLength,getProgArray,0,logArray,0);
@@ -1100,7 +1100,7 @@ public class Light {
      **/
     
     public static void removePhongShader() throws LightingException  {
-        removePhongShader(javax.media.opengl.glu.GLU.getCurrentGL());
+        removePhongShader(javax.media.opengl.glu.GLU.getCurrentGL().getGL2());
     }
     
     /**
@@ -1109,7 +1109,7 @@ public class Light {
      * @param gl the OpenGL context to remove the Phong shader program from
      * @throws net.java.joglutils.lighting.LightingException if there is no Phong Shader initialized on this context
      */
-    public static void removePhongShader(GL gl) throws LightingException {
+    public static void removePhongShader(GL2 gl) throws LightingException {
         if (shaderBuiltin.containsKey(gl)) {
             int progID = shaderProgNums.remove(gl);
             if(shaderBuiltin.remove(gl)) {
@@ -1144,10 +1144,10 @@ public class Light {
     }
     
     //----------- Private internal functions/methods below this point------------
-    private static boolean isLightNumberValid(GL gl ,int lightNumber) {
+    private static boolean isLightNumberValid(GL2 gl ,int lightNumber) {
         return (lightNumber > -1 && lightNumber < maxNumberOfLightsInGL(gl));
     }
-    private static boolean isLightNumberFree(GL gl, int lightNumber) {
+    private static boolean isLightNumberFree(GL2 gl, int lightNumber) {
         boolean[] lights = assignedLights.get(gl);
         if (lights == null)
             return true;
@@ -1157,7 +1157,7 @@ public class Light {
         
     }
     
-    private static int findAndAssignFreeLightNumber(GL gl) {
+    private static int findAndAssignFreeLightNumber(GL2 gl) {
         boolean[] lights = assignedLights.get(gl);
         if (lights == null) {
             lights = new boolean[maxNumberOfLightsInGL(gl)];
@@ -1179,7 +1179,7 @@ public class Light {
         return -1;
         
     }
-    private static void assignLightNumber(GL gl, int lightNumber) {
+    private static void assignLightNumber(GL2 gl, int lightNumber) {
         //No range checking
         boolean[] lights = assignedLights.get(gl);
         if (lights == null) {
@@ -1191,7 +1191,7 @@ public class Light {
         assignedLights.put(gl,lights);
     }
     
-    private static void unassignLightNumber(GL gl, int lightNumber) {
+    private static void unassignLightNumber(GL2 gl, int lightNumber) {
         //No range checking
         boolean[] lights = assignedLights.get(gl);
         lights[lightNumber] = false;

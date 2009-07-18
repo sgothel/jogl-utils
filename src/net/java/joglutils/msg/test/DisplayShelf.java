@@ -48,6 +48,7 @@ import java.net.*;
 import javax.swing.*;
 
 import javax.media.opengl.*;
+import javax.media.opengl.awt.*;
 
 /**
  * A test implementing a 3D display shelf component.
@@ -134,7 +135,7 @@ public class DisplayShelf {
     }
 
     DisplayShelfRenderer renderer = new DisplayShelfRenderer(model);
-    GLCanvas canvas = new GLCanvas(new GLCapabilities(), null, renderer.getSharedContext(), null);
+    GLCanvas canvas = new GLCanvas(new GLCapabilities(GLProfile.getDefault()), null, renderer.getSharedContext(), null);
     canvas.setFocusable(true);
     canvas.addGLEventListener(renderer);
     f.add(canvas);

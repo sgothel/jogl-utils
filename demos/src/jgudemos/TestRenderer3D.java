@@ -7,7 +7,7 @@
  */
 package jgudemos;
 
-import com.geofx.opengl.util.TextRenderer3D;
+import net.java.joglutils.jogltext.TextRenderer3D;
 import com.sun.opengl.util.Animator;
 
 import java.awt.Font;
@@ -16,11 +16,9 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Rectangle2D;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCanvas;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.glu.GLU;
+import javax.media.opengl.*;
+import javax.media.opengl.awt.*;
+import javax.media.opengl.glu.*;
 
 /**
  * TestRenderer3D 
@@ -79,22 +77,22 @@ public class TestRenderer3D implements GLEventListener
 	 */
 	public void init(GLAutoDrawable drawable)
 	{
-		GL gl = drawable.getGL();
+		GL2 gl = drawable.getGL().getGL2();
 		System.out.println("init GL called.  GL Class: " + gl.getClass().getName() 
 					+ " and this: " + this.getClass().getName());
 
 		gl.setSwapInterval(1);
 		
 		gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		gl.glShadeModel(GL.GL_SMOOTH); 
+		gl.glShadeModel(GL2.GL_SMOOTH); 
 		
-		gl.glLightfv(GL.GL_LIGHT0, GL.GL_DIFFUSE, LightAmbient, 0);
-		gl.glLightfv(GL.GL_LIGHT0, GL.GL_DIFFUSE, LightDiffuse, 0);
+		gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, LightAmbient, 0);
+		gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, LightDiffuse, 0);
 
-		gl.glLightfv(GL.GL_LIGHT0, GL.GL_POSITION, LightPosition, 0);
+		gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, LightPosition, 0);
 
-		gl.glEnable(GL.GL_DEPTH_TEST);
-		gl.glDepthFunc(GL.GL_LESS);
+		gl.glEnable(GL2.GL_DEPTH_TEST);
+		gl.glDepthFunc(GL2.GL_LESS);
 		         
 		// Be sure to use a font name on your system otherwise you will get the default
 		tr3 = new TextRenderer3D(new Font("Times New Roman", Font.TRUETYPE_FONT, 3), 0.25f);   
@@ -106,7 +104,7 @@ public class TestRenderer3D implements GLEventListener
 	 */
 	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height)
 	{
-		GL gl = drawable.getGL();
+		GL2 gl = drawable.getGL().getGL2();
 		GLU glu = new GLU();
 
 		if (height <= 0)  // avoid a divide by zero error!
@@ -114,10 +112,10 @@ public class TestRenderer3D implements GLEventListener
 
 		final float h = (float) width / (float) height;
 		gl.glViewport(0, 0, width, height);
-		gl.glMatrixMode(GL.GL_PROJECTION);
+		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glLoadIdentity();
 		glu.gluPerspective(45.0f, h, 1.0, 20.0);
-		gl.glMatrixMode(GL.GL_MODELVIEW);
+		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glLoadIdentity();
 	}
 
@@ -127,10 +125,10 @@ public class TestRenderer3D implements GLEventListener
 	 */
 	public void display(GLAutoDrawable drawable)
 	{
-		GL gl = drawable.getGL();
+		GL2 gl = drawable.getGL().getGL2();
 
 		// Clear the drawing area
-		gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 		// Reset the current matrix to the "identity"
 		gl.glLoadIdentity();
 
@@ -144,12 +142,12 @@ public class TestRenderer3D implements GLEventListener
 		float offY = (float) rect.getCenterY();
 		float offZ = tr3.getDepth() / 2.0f;
 		
-		gl.glEnable(GL.GL_LIGHTING);
-		gl.glEnable(GL.GL_LIGHT0);
+		gl.glEnable(GL2.GL_LIGHTING);
+		gl.glEnable(GL2.GL_LIGHT0);
 		
-		gl.glMaterialfv(GL.GL_FRONT, GL.GL_SPECULAR, mat_specular, 0);
-		gl.glMaterialfv(GL.GL_FRONT, GL.GL_SHININESS, mat_shininess, 0);
-		gl.glMaterialfv(GL.GL_FRONT, GL.GL_AMBIENT_AND_DIFFUSE, mat_ambient_magenta, 0);
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, mat_specular, 0);
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SHININESS, mat_shininess, 0);
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT_AND_DIFFUSE, mat_ambient_magenta, 0);
 
         tr3.draw(str, -offX, offY, -offZ, 1.0f);	
 
@@ -157,10 +155,10 @@ public class TestRenderer3D implements GLEventListener
 		gl.glFlush();
 	}
 
-	/**
-	 * This method essentially always ignored.
-	 */
-	public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged)
+        /**
+         * No explicit cleanup necessary.
+         */
+        public void dispose(GLAutoDrawable drawable)
 	{
 	}
 }

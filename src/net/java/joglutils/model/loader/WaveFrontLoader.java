@@ -92,7 +92,7 @@ public class WaveFrontLoader implements iLoader {
                     continue;
                 }
                 
-                if (line.isEmpty()) {
+                if (line.length() == 0) {
                     // igonore empty lines
                     continue;
                 }

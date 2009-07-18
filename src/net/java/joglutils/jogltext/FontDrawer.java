@@ -157,7 +157,7 @@ public class FontDrawer {
      * @param str the string to render.
      * @param gl the OpenGL context in which to render the text.
      */
-    public void drawString(String str, GL gl) {
+    public void drawString(String str, GL2 gl) {
         drawString(str,new GLU(),gl);
     }
     
@@ -168,7 +168,7 @@ public class FontDrawer {
      * @param glu a GLU instance to use for the text rendering (provided to prevent continuous re-instantiation of a GLU object)
      * @param gl the OpenGL context in which to render the text.
      */
-    public void drawString(String str, GLU glu, GL gl) {
+    public void drawString(String str, GLU glu, GL2 gl) {
         GlyphVector gv = font.createGlyphVector(
                 new FontRenderContext(new AffineTransform(), true, true),
                 new StringCharacterIterator(str));
@@ -211,7 +211,7 @@ public class FontDrawer {
      * @param str the string to render.
      * @param gl the OpenGL context in which to render the text.
      */
-    public void drawString(String str, GL gl, float xOff, float yOff, float zOff) {
+    public void drawString(String str, GL2 gl, float xOff, float yOff, float zOff) {
         drawString(str,new GLU(),gl,xOff,yOff,zOff);
     }
     
@@ -225,9 +225,9 @@ public class FontDrawer {
      * @param glu a GLU instance to use for the text rendering (provided to prevent continuous re-instantiation of a GLU object)
      * @param gl the OpenGL context in which to render the text.
      */
-    public void drawString(String str, GLU glu, GL gl, float xOff, float yOff, float zOff) {
-        gl.glPushAttrib(GL.GL_TRANSFORM_BIT);
-        gl.glMatrixMode(GL.GL_MODELVIEW);
+    public void drawString(String str, GLU glu, GL2 gl, float xOff, float yOff, float zOff) {
+        gl.glPushAttrib(GL2.GL_TRANSFORM_BIT);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glPushMatrix();
         gl.glTranslatef(xOff,yOff,zOff);
         this.drawString(str,glu,gl);
@@ -235,11 +235,11 @@ public class FontDrawer {
         gl.glPopAttrib();
     }
     
-    private void tesselateFace(GLU glu, GL gl, PathIterator pi, int windingRule, boolean justBoundary) {
+    private void tesselateFace(GLU glu, GL2 gl, PathIterator pi, int windingRule, boolean justBoundary) {
         tesselateFace(glu,gl,pi,windingRule,justBoundary,0);
     }
     
-    private void tesselateFace(GLU glu, GL gl, PathIterator pi, int windingRule, boolean justBoundary,double tessZ) {
+    private void tesselateFace(GLU glu, GL2 gl, PathIterator pi, int windingRule, boolean justBoundary,double tessZ) {
         GLUtessellatorCallback aCallback = new GLUtesselatorCallbackImpl(gl);
         GLUtessellator tess = glu.gluNewTess();
         
@@ -261,9 +261,9 @@ public class FontDrawer {
         }
         
         if (justBoundary) {
-            glu.gluTessProperty(tess, GLU.GLU_TESS_BOUNDARY_ONLY, GL.GL_TRUE);
+            glu.gluTessProperty(tess, GLU.GLU_TESS_BOUNDARY_ONLY, GL2.GL_TRUE);
         } else {
-            glu.gluTessProperty(tess, GLU.GLU_TESS_BOUNDARY_ONLY, GL.GL_FALSE);
+            glu.gluTessProperty(tess, GLU.GLU_TESS_BOUNDARY_ONLY, GL2.GL_FALSE);
         }
         
         glu.gluTessBeginPolygon(tess, (double[])null);
@@ -289,19 +289,19 @@ public class FontDrawer {
         glu.gluDeleteTess(tess);
     }
     
-    private void drawSidesNoNorm(GL gl, PathIterator pi, boolean justBoundary,float tessZ) {
+    private void drawSidesNoNorm(GL2 gl, PathIterator pi, boolean justBoundary,float tessZ) {
         //TODO: texture coords
         
         if (justBoundary)
-            gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_LINE);
+            gl.glPolygonMode(GL2.GL_FRONT_AND_BACK,GL2.GL_LINE);
         else
-            gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_FILL);
+            gl.glPolygonMode(GL2.GL_FRONT_AND_BACK,GL2.GL_FILL);
         
         for(float[] coords = new float[6];!pi.isDone();pi.next()) {
             float[] currRender = new float[3];
             switch(pi.currentSegment(coords)) {
                 case PathIterator.SEG_MOVETO:
-                    gl.glBegin(GL.GL_QUAD_STRIP);
+                    gl.glBegin(GL2.GL_QUAD_STRIP);
                     currRender[0] = coords[0];
                     currRender[1] = coords[1];
                     currRender[2] = 0;
@@ -332,20 +332,20 @@ public class FontDrawer {
         }
     }
     
-    private void drawSidesFlatNorm(GL gl, PathIterator pi, boolean justBoundary,float tessZ) {
+    private void drawSidesFlatNorm(GL2 gl, PathIterator pi, boolean justBoundary,float tessZ) {
         //TODO: texture coords
         
         if (justBoundary)
-            gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_LINE);
+            gl.glPolygonMode(GL2.GL_FRONT_AND_BACK,GL2.GL_LINE);
         else
-            gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_FILL);
+            gl.glPolygonMode(GL2.GL_FRONT_AND_BACK,GL2.GL_FILL);
         
         float[] lastCoord = new float[3];
         float[] firstCoord = new float[3];
         for(float[] coords = new float[6];!pi.isDone();pi.next()) {
             switch(pi.currentSegment(coords)) {
                 case PathIterator.SEG_MOVETO:
-                    gl.glBegin(GL.GL_QUADS);
+                    gl.glBegin(GL2.GL_QUADS);
                     lastCoord[0] = coords[0];
                     lastCoord[1] = coords[1];
                     firstCoord[0] = coords[0];
@@ -386,15 +386,15 @@ public class FontDrawer {
     }
     
     
-    private void drawSidesAvgNorm(GL gl, PathIterator pi, boolean justBoundary,float tessZ) {
+    private void drawSidesAvgNorm(GL2 gl, PathIterator pi, boolean justBoundary,float tessZ) {
         //TODO: improve performance with some form of caching?
         //TODO: texture coords
         //TODO: check last coord - might not quite be correct?
         
         if (justBoundary)
-            gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_LINE);
+            gl.glPolygonMode(GL2.GL_FRONT_AND_BACK,GL2.GL_LINE);
         else
-            gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_FILL);
+            gl.glPolygonMode(GL2.GL_FRONT_AND_BACK,GL2.GL_FILL);
         
         
         float[] firstCoord = null;
@@ -408,7 +408,7 @@ public class FontDrawer {
                     firstCoord = new float[3];
                     firstCoord[0] = coords[0];
                     firstCoord[1] = coords[1];
-                    gl.glBegin(GL.GL_QUAD_STRIP);
+                    gl.glBegin(GL2.GL_QUAD_STRIP);
                     break;
                 case PathIterator.SEG_LINETO:
                     if (secondCoord == null) {
@@ -478,9 +478,9 @@ public class FontDrawer {
     }
     
     private class GLUtesselatorCallbackImpl extends javax.media.opengl.glu.GLUtessellatorCallbackAdapter {
-        private GL gl;
+        private GL2 gl;
         
-        public GLUtesselatorCallbackImpl(GL gl) {
+        public GLUtesselatorCallbackImpl(GL2 gl) {
             this.gl = gl;
         }
         

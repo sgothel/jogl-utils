@@ -18,15 +18,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCanvas;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.glu.GLU;
-import javax.media.opengl.glu.GLUquadric;
+import javax.media.opengl.*;
+import javax.media.opengl.awt.*;
+import javax.media.opengl.glu.*;
 import javax.vecmath.Point3f;
 
-import com.geofx.opengl.util.TextRenderer3D;
+import net.java.joglutils.jogltext.TextRenderer3D;
+
 import com.sun.opengl.util.Animator;
 
 /**
@@ -53,7 +51,7 @@ public class BouncingText3D implements GLEventListener
 	private ArrayList<TextInfo3D> textInfo = new ArrayList<TextInfo3D>();
 
 	private GLU glu = new GLU();
-	protected GLUquadric QUADRIC = glu.gluNewQuadric();
+        protected GLUquadric QUADRIC;
 
 	/**
 	 * Main entry point for the app.  The only argument that is parsed 
@@ -111,7 +109,9 @@ public class BouncingText3D implements GLEventListener
 	 */
 	public void init(GLAutoDrawable drawable)
 	{
-		GL gl = drawable.getGL();
+                QUADRIC = glu.gluNewQuadric();                
+
+		GL2 gl = drawable.getGL().getGL2();
 		System.out.println("INIT GL IS: " + gl.getClass().getName());
 
 		System.out.println("init GL called.  GL Class: " + gl.getClass().getName() 
@@ -121,18 +121,18 @@ public class BouncingText3D implements GLEventListener
 
 		// Setup the drawing area and shading mode
 		gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		gl.glShadeModel(GL.GL_SMOOTH); 
+		gl.glShadeModel(GL2.GL_SMOOTH); 
 		
-		gl.glLightfv(GL.GL_LIGHT0, GL.GL_DIFFUSE, LightAmbient, 0);
-		gl.glLightfv(GL.GL_LIGHT0, GL.GL_DIFFUSE, LightDiffuse, 0);
-		gl.glLightfv(GL.GL_LIGHT0, GL.GL_POSITION, LightPosition, 0);
+		gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, LightAmbient, 0);
+		gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, LightDiffuse, 0);
+		gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, LightPosition, 0);
 
-		gl.glEnable(GL.GL_DEPTH_TEST);
-		gl.glDepthFunc(GL.GL_LESS);
+		gl.glEnable(GL2.GL_DEPTH_TEST);
+		gl.glDepthFunc(GL2.GL_LESS);
 
-		gl.glEnable(GL.GL_BLEND);
-		gl.glEnable(GL.GL_LINE_SMOOTH);		
-		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+		gl.glEnable(GL2.GL_BLEND);
+		gl.glEnable(GL2.GL_LINE_SMOOTH);		
+		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 
 		// Note that it has to be a TRUETYPE font - not OpenType.  Apparently, AWT can't
 		// handle CFF glyphs
@@ -153,18 +153,18 @@ public class BouncingText3D implements GLEventListener
 	 */
 	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height)
 	{
-		GL gl = drawable.getGL();
+		GL2 gl = drawable.getGL().getGL2();
 
 		if (height <= 0)   // avoid a divide by zero error!
 			height = 1;
 		
 		final float h = (float) width / (float) height;
 		gl.glViewport(0, 0, width, height);
-		gl.glMatrixMode(GL.GL_PROJECTION);
+		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glLoadIdentity();
 		glu.gluPerspective(45.0f, h, 1.0, 20.0);
 		
-		gl.glMatrixMode(GL.GL_MODELVIEW);
+		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glLoadIdentity();
 	}
 
@@ -174,13 +174,13 @@ public class BouncingText3D implements GLEventListener
 	 */
 	public void display(GLAutoDrawable drawable)
 	{
-		GL gl = drawable.getGL();
+		GL2 gl = drawable.getGL().getGL2();
 
 		// Clear the drawing area
-		gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 
-		gl.glMaterialfv(GL.GL_FRONT, GL.GL_SPECULAR, mat_specular, 0);
-		gl.glMaterialfv(GL.GL_FRONT, GL.GL_SHININESS, mat_shininess, 0);
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, mat_specular, 0);
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SHININESS, mat_shininess, 0);
 
 		// Reset the current matrix to the "identity"
 		gl.glLoadIdentity();
@@ -191,8 +191,8 @@ public class BouncingText3D implements GLEventListener
 	
 		try
 		{
-			gl.glEnable(GL.GL_LIGHTING);
-			gl.glEnable(GL.GL_LIGHT0);
+			gl.glEnable(GL2.GL_LIGHTING);
+			gl.glEnable(GL2.GL_LIGHT0);
 
 			drawAxes(gl);
 		
@@ -202,10 +202,10 @@ public class BouncingText3D implements GLEventListener
 				
 				updateTextInfo( info );
 					
-				gl.glPushAttrib(GL.GL_TRANSFORM_BIT);
-				gl.glMatrixMode(GL.GL_MODELVIEW);
+				gl.glPushAttrib(GL2.GL_TRANSFORM_BIT);
+				gl.glMatrixMode(GL2.GL_MODELVIEW);
 				gl.glPushMatrix();
-				gl.glEnable( GL.GL_NORMALIZE);
+				gl.glEnable( GL2.GL_NORMALIZE);
 				
 				gl.glTranslatef(info.position.x, info.position.y, info.position.z);
 				gl.glRotatef(info.angle.x, 1, 0, 0);
@@ -214,7 +214,7 @@ public class BouncingText3D implements GLEventListener
 				
 				// System.out.println(" x,y,z: " + info.position.x + " " + info.position.y + " " + info.position.z + " angle: " + info.angle );
 			
-				gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT_AND_DIFFUSE, info.material, 0);
+				gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, info.material, 0);
 
 				tr3.call(info.index);
 				
@@ -229,10 +229,10 @@ public class BouncingText3D implements GLEventListener
 		}
 	}
 
-	/**
-	 * This method essentially always ignored.
-	 */
-	public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged)
+        /**
+         * No explicit cleanup necessary.
+         */
+	public void dispose(GLAutoDrawable drawable)
 	{
 	}
 	
@@ -399,7 +399,7 @@ public class BouncingText3D implements GLEventListener
 	}
 	
 	// draw some striped-pole axes for visdual reference
-	protected void drawAxes(GL gl)
+	protected void drawAxes(GL2 gl)
 	{
 		float[]			mat_ambient_red = { 1.0f, 0.0f, 0.0f, 1.0f };
 		float[]			mat_ambient_green = { 0.0f, 1.0f, 0.0f, 1.0f };
@@ -413,7 +413,7 @@ public class BouncingText3D implements GLEventListener
 	}
 
 	// draw a single striped pole axis
-	private void drawAxis(GL gl, int rot, float[] material )
+	private void drawAxis(GL2 gl, int rot, float[] material )
 	{
 		float[]			mat_ambient_grey = { 0.5f, 0.5f, 0.5f, 1.0f };
 		final  double AXIS_RADIUS =	0.01;
@@ -434,9 +434,9 @@ public class BouncingText3D implements GLEventListener
 		while ( pos < AXIS_HEIGHT/2.0f )
 		{
 			if ((i++ & 1)==0)
-				gl.glMaterialfv(GL.GL_FRONT, GL.GL_AMBIENT_AND_DIFFUSE, material, 0);
+				gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT_AND_DIFFUSE, material, 0);
 			else
-				gl.glMaterialfv(GL.GL_FRONT, GL.GL_AMBIENT_AND_DIFFUSE, mat_ambient_grey, 0);
+				gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT_AND_DIFFUSE, mat_ambient_grey, 0);
 				
 			glu.gluCylinder(QUADRIC, AXIS_RADIUS, AXIS_RADIUS, AXIS_STEP, 8, 1);
 			gl.glTranslatef(0.0f, 0.0f, AXIS_STEP);

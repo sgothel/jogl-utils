@@ -55,10 +55,8 @@ import java.text.StringCharacterIterator;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.glu.GLU;
-import javax.media.opengl.glu.GLUtessellator;
-import javax.media.opengl.glu.GLUtessellatorCallback;
+import javax.media.opengl.*;
+import javax.media.opengl.glu.*;
 import javax.vecmath.Vector3f;
 
 /**
@@ -84,7 +82,7 @@ public class TextRenderer3D
 	private Vector3f normal = new Vector3f();
 
 	private GLU 	glu = new GLU();
-	private GL 		gl = GLU.getCurrentGL();
+        private GL2 		gl = GLU.getCurrentGL().getGL2();
 
 	private int lastIndex = -1;
 	private ArrayList<Integer> listIndex = new ArrayList<Integer>();
@@ -225,10 +223,10 @@ public class TextRenderer3D
 
 	public void draw( String str, float xOff, float yOff, float zOff, float scaleFactor )
 	{
-		gl.glPushAttrib(GL.GL_TRANSFORM_BIT);
-		gl.glMatrixMode(GL.GL_MODELVIEW);
+		gl.glPushAttrib(GL2.GL_TRANSFORM_BIT);
+		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glPushMatrix();
-		gl.glEnable( GL.GL_NORMALIZE);
+		gl.glEnable( GL2.GL_NORMALIZE);
 		
 		gl.glScalef(scaleFactor, scaleFactor, scaleFactor);
 		gl.glTranslatef(xOff, yOff, zOff);
@@ -295,7 +293,7 @@ public class TextRenderer3D
 	public int compile( String str, float xOff, float yOff, float zOff, float scaleFactor )
 	{		
 		int index = gl.glGenLists(1);
-		gl.glNewList( index, GL.GL_COMPILE);
+		gl.glNewList( index, GL2.GL_COMPILE);
 		draw( str, xOff, yOff, zOff, scaleFactor);
 		gl.glEndList();
 		
@@ -312,7 +310,7 @@ public class TextRenderer3D
 	public int compile( String str )
 	{		
 		int index = gl.glGenLists(1);
-		gl.glNewList( index, GL.GL_COMPILE);
+		gl.glNewList( index, GL2.GL_COMPILE);
 		draw( str );
 		gl.glEndList();
 		
@@ -400,8 +398,8 @@ public class TextRenderer3D
 	 */
 	public Rectangle2D  getBounds( String str, float scaleFactor  )
 	{
-		gl.glPushAttrib(GL.GL_TRANSFORM_BIT);
-		gl.glMatrixMode(GL.GL_MODELVIEW);
+		gl.glPushAttrib(GL2.GL_TRANSFORM_BIT);
+		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glPushMatrix();
 		
 		gl.glScalef(scaleFactor, scaleFactor, scaleFactor);
@@ -420,12 +418,12 @@ public class TextRenderer3D
 	
 	// construct the sides of each glyph by walking around and extending each vertex
 	// out to the depth of the extrusion
-	private void drawSides(GL gl, PathIterator pi, boolean justBoundary, float depth)
+	private void drawSides(GL2 gl, PathIterator pi, boolean justBoundary, float depth)
 	{
 		if (justBoundary)
-			gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
+			gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
 		else
-			gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL);
+			gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
 
 		float[] lastCoord = new float[3];
 		float[] firstCoord = new float[3];
@@ -436,7 +434,7 @@ public class TextRenderer3D
 			switch (pi.currentSegment(coords))
 			{
 				case PathIterator.SEG_MOVETO:
-					gl.glBegin(GL.GL_QUADS);
+					gl.glBegin(GL2.GL_QUADS);
 					lastCoord[0] = coords[0];
 					lastCoord[1] = coords[1];
 					firstCoord[0] = coords[0];
@@ -487,7 +485,7 @@ public class TextRenderer3D
 	}
 
 	// simple convenience for calculating and setting the normal
-	private void setNormal ( GL gl, float x1, float y1, float z1, float x2, float y2, float z2 )
+	private void setNormal ( GL2 gl, float x1, float y1, float z1, float x2, float y2, float z2 )
 	{
 		vecA.set( x1, y1, z1);
 		vecB.set( x2, y2, z2);
@@ -497,7 +495,7 @@ public class TextRenderer3D
 	}
 
 	// routine that tesselates the current set of glyphs
-	private void tesselateFace(GLU glu, GL gl, PathIterator pi, boolean justBoundary, double tessZ)
+	private void tesselateFace(GLU glu, GL2 gl, PathIterator pi, boolean justBoundary, double tessZ)
 	{
 		GLUtessellatorCallback aCallback = new GLUtesselatorCallbackImpl(gl);
 		GLUtessellator tess = glu.gluNewTess();
@@ -516,9 +514,9 @@ public class TextRenderer3D
 			glu.gluTessProperty(tess, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_NONZERO);
 	
 		if (justBoundary)
-			glu.gluTessProperty(tess, GLU.GLU_TESS_BOUNDARY_ONLY, GL.GL_TRUE);
+			glu.gluTessProperty(tess, GLU.GLU_TESS_BOUNDARY_ONLY, GL2.GL_TRUE);
 		else
-			glu.gluTessProperty(tess, GLU.GLU_TESS_BOUNDARY_ONLY, GL.GL_FALSE);
+			glu.gluTessProperty(tess, GLU.GLU_TESS_BOUNDARY_ONLY, GL2.GL_FALSE);
 
 		glu.gluTessBeginPolygon(tess, (double[]) null);
 
@@ -550,9 +548,9 @@ public class TextRenderer3D
 	// Private class that implements the required callbacks for the tesselator
 	private class GLUtesselatorCallbackImpl extends javax.media.opengl.glu.GLUtessellatorCallbackAdapter
 	{
-		private GL gl;
+		private GL2 gl;
 
-		public GLUtesselatorCallbackImpl(GL gl)
+		public GLUtesselatorCallbackImpl(GL2 gl)
 		{
 			this.gl = gl;
 		}
@@ -578,7 +576,7 @@ public class TextRenderer3D
 
 	//--------------- diagnostic utilities -----------------------------------------
 	/*
-	private void dumpShape(GL gl, GeneralPath path)
+	private void dumpShape(GL2 gl, GeneralPath path)
 	{
 		float[] coords = new float[6];
 		int		count = 1;

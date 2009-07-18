@@ -68,7 +68,7 @@ public class GLModelMatrixElement extends ModelMatrixElement {
     this.state = state;
 
     // Cause side-effects in OpenGL
-    GL gl = GLU.getCurrentGL();
+    GL2 gl = GLU.getCurrentGL().getGL2();
     gl.glPushMatrix();
   }
 
@@ -76,7 +76,7 @@ public class GLModelMatrixElement extends ModelMatrixElement {
     super.pop(state, previousTopElement);
 
     // Cause side-effects in OpenGL
-    GL gl = GLU.getCurrentGL();
+    GL2 gl = GLU.getCurrentGL().getGL2();
     gl.glPopMatrix();
   }
 
@@ -85,7 +85,7 @@ public class GLModelMatrixElement extends ModelMatrixElement {
     // Cause side-effects in OpenGL
     // Recompute the complete modelview matrix
     Mat4f mat = ViewingMatrixElement.getInstance(state).getMatrix();
-    GL gl = GLU.getCurrentGL();
+    GL2 gl = GLU.getCurrentGL().getGL2();
     if (gl.isExtensionAvailable("GL_VERSION_1_3")) {
         gl.glLoadTransposeMatrixf(mat.getRowMajorData(), 0);
     } else {
@@ -97,7 +97,7 @@ public class GLModelMatrixElement extends ModelMatrixElement {
 
   public void multElt(Mat4f matrix) {
     super.multElt(matrix);
-    GL gl = GLU.getCurrentGL();
+    GL2 gl = GLU.getCurrentGL().getGL2();
     if (gl.isExtensionAvailable("GL_VERSION_1_3")) {
         gl.glMultTransposeMatrixf(matrix.getRowMajorData(), 0);
     } else {

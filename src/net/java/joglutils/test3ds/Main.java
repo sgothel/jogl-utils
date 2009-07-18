@@ -40,12 +40,8 @@ import com.sun.opengl.util.Animator;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import javax.media.opengl.GL;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCanvas;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLDrawableFactory;
-import javax.media.opengl.GLEventListener;
+import javax.media.opengl.*;
+import javax.media.opengl.awt.*;
 import javax.media.opengl.glu.GLU;
 
 public class Main {
@@ -84,8 +80,8 @@ public class Main {
 
         public void display(GLAutoDrawable gLDrawable)
         {
-            final GL gl = gLDrawable.getGL();
-            gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+            final GL2 gl = gLDrawable.getGL().getGL2();
+            gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
             gl.glLoadIdentity();
 
             gl.glPushMatrix();
@@ -97,12 +93,7 @@ public class Main {
         }
 
 
-        /** Called when the display mode has been changed.  <B>!! CURRENTLY UNIMPLEMENTED IN JOGL !!</B>
-         * @param gLDrawable The GLDrawable object.
-         * @param modeChanged Indicates if the video mode has changed.
-         * @param deviceChanged Indicates if the video device has changed.
-         */
-        public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {}
+        public void dispose(GLAutoDrawable drawable) {}
 
         /** Called by the drawable immediately after the OpenGL context is
          * initialized for the first time. Can be used to perform one-time OpenGL
@@ -111,13 +102,13 @@ public class Main {
          */
         public void init(GLAutoDrawable gLDrawable)
         {
-            final GL gl = gLDrawable.getGL();
+            final GL2 gl = gLDrawable.getGL().getGL2();
 
             gl.glClearColor(0.0f, 0.0f, 0.0f, 0.3f);
             gl.glClearDepth(1.0f);
-            gl.glEnable(GL.GL_DEPTH_TEST);
-            gl.glDepthFunc(GL.GL_LEQUAL);
-            gl.glHint(GL.GL_PERSPECTIVE_CORRECTION_HINT, GL.GL_NICEST);
+            gl.glEnable(GL2.GL_DEPTH_TEST);
+            gl.glDepthFunc(GL2.GL_LEQUAL);
+            gl.glHint(GL2.GL_PERSPECTIVE_CORRECTION_HINT, GL2.GL_NICEST);
 
             if (!model.isLoaded())
                 model.load(gLDrawable, "globe.3ds");
@@ -139,17 +130,17 @@ public class Main {
          */
         public void reshape(GLAutoDrawable gLDrawable, int x, int y, int width, int height)
         {
-            final GL gl = gLDrawable.getGL();
+            final GL2 gl = gLDrawable.getGL().getGL2();
             final GLU glu = new GLU();
 
             if (height <= 0) // avoid a divide by zero error!
                 height = 1;
             final float h = (float)width / (float)height;
             gl.glViewport(0, 0, width, height);
-            gl.glMatrixMode(GL.GL_PROJECTION);
+            gl.glMatrixMode(GL2.GL_PROJECTION);
             gl.glLoadIdentity();
             gl.glOrtho(-1000, 1000, -1000, 1000, -10000, 10000);
-            gl.glMatrixMode(GL.GL_MODELVIEW);
+            gl.glMatrixMode(GL2.GL_MODELVIEW);
             gl.glLoadIdentity();
         }
     }

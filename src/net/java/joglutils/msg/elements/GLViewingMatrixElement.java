@@ -75,7 +75,7 @@ public class GLViewingMatrixElement extends ViewingMatrixElement {
     // Must push the combined viewing and modelview matrices down to OpenGL
     Mat4f mdl = ModelMatrixElement.getInstance(state).getMatrix();
     temp.mul(matrix, mdl);
-    GL gl = GLU.getCurrentGL();
+    GL2 gl = GLU.getCurrentGL().getGL2();
     if (gl.isExtensionAvailable("GL_VERSION_1_3")) {
         gl.glLoadTransposeMatrixf(temp.getRowMajorData(), 0);
     } else {

@@ -106,7 +106,7 @@ public class FontDrawerDemo {
             }
             
             public void init(GLAutoDrawable drawable) {
-                drawable.setGL(new DebugGL(drawable.getGL()));
+                drawable.setGL(new DebugGL2(drawable.getGL().getGL2()));
                 glu = new GLU();
                 switch(argsFin.length) {
                     case 6:
@@ -127,7 +127,7 @@ public class FontDrawerDemo {
                 dttf.setNormal(FontDrawer.NormalMode.FLAT);
                 
                 xrot = 0;yrot = 0;zrot = 0;
-                GL gl = drawable.getGL();
+                GL2 gl = drawable.getGL().getGL2();
                 // lt = new net.java.joglutils.lighting.Light(gl);
                 //mt = new net.java.joglutils.lighting.Material(gl);
                 
@@ -138,14 +138,14 @@ public class FontDrawerDemo {
                 //  lt.enable();
                 //  lt.apply();
                 //mt.apply();
-                gl.glColorMaterial( GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT_AND_DIFFUSE ) ;
+                gl.glColorMaterial( GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE ) ;
                 float[] mamb = {0,0,0,0};
-                gl.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT,mamb,0);
+                gl.glLightModelfv(GL2.GL_LIGHT_MODEL_AMBIENT,mamb,0);
                 
-                gl.glEnable(GL.GL_DEPTH_TEST);
-                gl.glEnable(GL.GL_LIGHTING);
-                gl.glEnable(GL.GL_LIGHT0);
-                gl.glEnable(GL.GL_NORMALIZE);
+                gl.glEnable(GL2.GL_DEPTH_TEST);
+                gl.glEnable(GL2.GL_LIGHTING);
+                gl.glEnable(GL2.GL_LIGHT0);
+                gl.glEnable(GL2.GL_NORMALIZE);
                 
                 
                 
@@ -153,9 +153,9 @@ public class FontDrawerDemo {
                 gl.glClearColor(0.3f,0.5f,0.2f,0);
             }
             
-            public void drawAxis(GL gl)  {
-                gl.glDisable(GL.GL_LIGHTING);
-                gl.glBegin(GL.GL_LINES);
+            public void drawAxis(GL2 gl)  {
+                gl.glDisable(GL2.GL_LIGHTING);
+                gl.glBegin(GL2.GL_LINES);
                 gl.glColor3f(1,0,0);
                 gl.glVertex3i(0,0,0);
                 gl.glVertex3i(10,0,0);
@@ -166,27 +166,27 @@ public class FontDrawerDemo {
                 gl.glVertex3i(0,0,0);
                 gl.glVertex3i(0,0,10);
                 gl.glEnd();
-                gl.glEnable(GL.GL_LIGHTING);
+                gl.glEnable(GL2.GL_LIGHTING);
             }
             
             public void display(GLAutoDrawable drawable) {
-                GL gl = drawable.getGL();
-                gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+                GL2 gl = drawable.getGL().getGL2();
+                gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
                 
-                gl.glMatrixMode(GL.GL_PROJECTION);
+                gl.glMatrixMode(GL2.GL_PROJECTION);
                 gl.glLoadIdentity();
                 //glu.gluPerspective(90,1,0.001,10);
                 //gl.glFrustum(-1.5f,1.5f,-1.5f,1.5f,1,5);
                 gl.glOrtho(-1.5,1.5,-1.5,1.5,-5,5);
                 
-                gl.glMatrixMode(GL.GL_MODELVIEW);
+                gl.glMatrixMode(GL2.GL_MODELVIEW);
                 gl.glLoadIdentity();
                 
                 //Manual lighting activation before transform
-                gl.glLightfv(GL.GL_LIGHT0, GL.GL_AMBIENT, light_ambient,0);
-                gl.glLightfv(GL.GL_LIGHT0, GL.GL_DIFFUSE, light_diffuse,0);
-                gl.glLightfv(GL.GL_LIGHT0, GL.GL_SPECULAR, light_specular,0);
-                gl.glLightfv(GL.GL_LIGHT0, GL.GL_POSITION, light_position,0);
+                gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_AMBIENT, light_ambient,0);
+                gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, light_diffuse,0);
+                gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_SPECULAR, light_specular,0);
+                gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, light_position,0);
                 
                 glu.gluLookAt(0,0,2,0,0,0,0,1,0);
                 //drawAxis(gl);
@@ -209,7 +209,10 @@ public class FontDrawerDemo {
                 dttf.drawString(lowerStr.toString(),glu,gl,-0.8f,-0.8f,0);
             }
             
-            public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {
+            /**
+             * No explicit cleanup necessary.
+             */
+            public void dispose(GLAutoDrawable drawable) {
             }
             
         };

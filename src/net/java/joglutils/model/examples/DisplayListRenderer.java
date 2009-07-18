@@ -10,16 +10,14 @@
 package net.java.joglutils.model.examples;
 
 import net.java.joglutils.model.*;
-import com.sun.opengl.util.texture.Texture;
-import com.sun.opengl.util.texture.TextureCoords;
-import com.sun.opengl.util.texture.TextureIO;
+import com.sun.opengl.util.texture.*;
+import com.sun.opengl.util.texture.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import javax.imageio.ImageIO;
-import javax.media.opengl.GL;
-import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.*;
 import net.java.joglutils.model.ResourceRetriever;
 import net.java.joglutils.model.geometry.Bounds;
 import net.java.joglutils.model.geometry.Material;
@@ -56,13 +54,13 @@ public class DisplayListRenderer implements iModel3DRenderer {
     
     public void render(Object context, Model model)
     {
-        GL gl = null;
+        GL2 gl = null;
         
-        if (context instanceof GL)
-            gl = (GL) context;
+        if (context instanceof GL2)
+            gl = (GL2) context;
         
         else if (context instanceof GLAutoDrawable)
-            gl = ((GLAutoDrawable) context).getGL();
+            gl = ((GLAutoDrawable) context).getGL().getGL2();
         
         if (gl == null) {
             return;
@@ -81,22 +79,22 @@ public class DisplayListRenderer implements iModel3DRenderer {
         }
         
         // save some current state variables
-        boolean isTextureEnabled = gl.glIsEnabled(GL.GL_TEXTURE_2D);
-        boolean isLightingEnabled = gl.glIsEnabled(GL.GL_LIGHTING);
-        boolean isMaterialEnabled = gl.glIsEnabled(GL.GL_COLOR_MATERIAL);
+        boolean isTextureEnabled = gl.glIsEnabled(GL2.GL_TEXTURE_2D);
+        boolean isLightingEnabled = gl.glIsEnabled(GL2.GL_LIGHTING);
+        boolean isMaterialEnabled = gl.glIsEnabled(GL2.GL_COLOR_MATERIAL);
         
         // check lighting
-        if (!model.isUsingLighting()) { gl.glDisable(GL.GL_LIGHTING); }
+        if (!model.isUsingLighting()) { gl.glDisable(GL2.GL_LIGHTING); }
         
         // check texture
-        if (model.isUsingTexture()) { gl.glEnable(GL.GL_TEXTURE_2D); }
-        else { gl.glDisable(GL.GL_TEXTURE_2D); }
+        if (model.isUsingTexture()) { gl.glEnable(GL2.GL_TEXTURE_2D); }
+        else { gl.glDisable(GL2.GL_TEXTURE_2D); }
         
         // check wireframe
-        if (model.isRenderingAsWireframe()) { gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE); }
-        else { gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL); }
+        if (model.isRenderingAsWireframe()) { gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE); }
+        else { gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL); }
         
-        gl.glDisable(GL.GL_COLOR_MATERIAL);
+        gl.glDisable(GL2.GL_COLOR_MATERIAL);
         
         gl.glPushMatrix();
         
@@ -115,7 +113,7 @@ public class DisplayListRenderer implements iModel3DRenderer {
             gl.glCallList(displayList);
         
         // Disabled lighting for drawing the boundary lines so they are all white (or whatever I chose)
-        gl.glDisable(GL.GL_LIGHTING);
+        gl.glDisable(GL2.GL_LIGHTING);
         if (model.isRenderModelBounds())
             gl.glCallList(modelBoundsList);
         if (model.isRenderObjectBounds())
@@ -125,21 +123,21 @@ public class DisplayListRenderer implements iModel3DRenderer {
 
         // Reset the flags back for lighting and texture
         if (isTextureEnabled) {
-            gl.glEnable(GL.GL_TEXTURE_2D);
+            gl.glEnable(GL2.GL_TEXTURE_2D);
         } else {
-            gl.glDisable(GL.GL_TEXTURE_2D);
+            gl.glDisable(GL2.GL_TEXTURE_2D);
         }
 
         if (isLightingEnabled) {
-            gl.glEnable(GL.GL_LIGHTING);
+            gl.glEnable(GL2.GL_LIGHTING);
         } else {
-            gl.glDisable(GL.GL_LIGHTING);
+            gl.glDisable(GL2.GL_LIGHTING);
         }
 
         if (isMaterialEnabled) {
-            gl.glEnable(GL.GL_COLOR_MATERIAL);
+            gl.glEnable(GL2.GL_COLOR_MATERIAL);
         } else {
-            gl.glDisable(GL.GL_COLOR_MATERIAL);
+            gl.glDisable(GL2.GL_COLOR_MATERIAL);
         }
     }
     
@@ -150,7 +148,7 @@ public class DisplayListRenderer implements iModel3DRenderer {
      * @param file
      * @return
      */
-    private int initialize(GL gl, Model model) 
+    private int initialize(GL2 gl, Model model) 
     {
         if (this.isDebugging)
             System.out.println("Initialize Model: " + model.getSource());
@@ -217,7 +215,7 @@ public class DisplayListRenderer implements iModel3DRenderer {
         
         if (this.isDebugging)
             System.out.println("        Model List");         
-        gl.glNewList(compiledList, GL.GL_COMPILE);
+        gl.glNewList(compiledList, GL2.GL_COMPILE);
             genList(gl, model);
         gl.glEndList();
         
@@ -225,7 +223,7 @@ public class DisplayListRenderer implements iModel3DRenderer {
 
         if (this.isDebugging)
             System.out.println("        Boundary List");                 
-        gl.glNewList(modelBoundsList, GL.GL_COMPILE);
+        gl.glNewList(modelBoundsList, GL2.GL_COMPILE);
             genModelBoundsList(gl, model);
         gl.glEndList();
         
@@ -233,7 +231,7 @@ public class DisplayListRenderer implements iModel3DRenderer {
         
         if (this.isDebugging)
             System.out.println("        Object Boundary List");                         
-        gl.glNewList(objectBoundsList, GL.GL_COMPILE);
+        gl.glNewList(objectBoundsList, GL2.GL_COMPILE);
             genObjectBoundsList(gl, model);
         gl.glEndList();
         
@@ -264,7 +262,7 @@ public class DisplayListRenderer implements iModel3DRenderer {
                 return;
             }
             
-            texture.put(id, TextureIO.newTexture(bufferedImage, true));
+            texture.put(id, AWTTextureIO.newTexture(bufferedImage, true));
         }
     }
     
@@ -273,7 +271,7 @@ public class DisplayListRenderer implements iModel3DRenderer {
      * 
      * @param gl
      */
-    private void genList(GL gl, Model model) {
+    private void genList(GL2 gl, Model model) {
         TextureCoords coords;
         
         for (int i=0; i<model.getNumberOfMeshes(); i++) {
@@ -288,7 +286,7 @@ public class DisplayListRenderer implements iModel3DRenderer {
                 Texture t = texture.get(tempObj.materialID);
                 
                 // switch to texture mode and push a new matrix on the stack
-                gl.glMatrixMode(GL.GL_TEXTURE);
+                gl.glMatrixMode(GL2.GL_TEXTURE);
                 gl.glPushMatrix();
 
                 // check to see if the texture needs flipping
@@ -298,14 +296,14 @@ public class DisplayListRenderer implements iModel3DRenderer {
                 }
 
                 // switch to modelview matrix and push a new matrix on the stack
-                gl.glMatrixMode(GL.GL_MODELVIEW);
+                gl.glMatrixMode(GL2.GL_MODELVIEW);
                 gl.glPushMatrix();
 
                 // This is required to repeat textures...because some are not and so only
                 // part of the model gets filled in....Might be a way to check if this is
                 // required per object but I'm not sure...would need to research this.
-                gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_REPEAT);
-                gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_REPEAT);
+                gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
+                gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
 
                 // enable, bind and get texture coordinates
                 t.enable();
@@ -329,11 +327,11 @@ public class DisplayListRenderer implements iModel3DRenderer {
                         float[] rgba = new float[4];
                         
                         Material material = model.getMaterial(tempObj.faces[j].materialID);
-                        gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, material.diffuseColor.getRGBComponents(rgba), 0);
-                        gl.glMaterialfv(GL.GL_FRONT, GL.GL_AMBIENT, material.ambientColor.getRGBComponents(rgba), 0);
-                        gl.glMaterialfv(GL.GL_FRONT, GL.GL_SPECULAR, material.specularColor.getRGBComponents(rgba), 0);
-                        gl.glMaterialf(GL.GL_FRONT, GL.GL_SHININESS, material.shininess);
-                        gl.glMaterialfv(GL.GL_FRONT, GL.GL_EMISSION, material.emissive.getRGBComponents(rgba), 0);
+                        gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, material.diffuseColor.getRGBComponents(rgba), 0);
+                        gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT, material.ambientColor.getRGBComponents(rgba), 0);
+                        gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, material.specularColor.getRGBComponents(rgba), 0);
+                        gl.glMaterialf(GL2.GL_FRONT, GL2.GL_SHININESS, material.shininess);
+                        gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_EMISSION, material.emissive.getRGBComponents(rgba), 0);
                     }
                 }
 
@@ -341,7 +339,7 @@ public class DisplayListRenderer implements iModel3DRenderer {
                 int vertexIndex = 0;
                 int normalIndex = 0;
                 int textureIndex = 0;
-                gl.glBegin(GL.GL_POLYGON);
+                gl.glBegin(GL2.GL_POLYGON);
                 //TODO: the number of vertices for a face is not always 3
                 for (int whichVertex=0; whichVertex<tempObj.faces[j].vertIndex.length; whichVertex++) {
                     vertexIndex = tempObj.faces[j].vertIndex[whichVertex];
@@ -387,10 +385,10 @@ public class DisplayListRenderer implements iModel3DRenderer {
                 if (t != null)
                     t.disable();
             
-                gl.glMatrixMode(GL.GL_TEXTURE);
+                gl.glMatrixMode(GL2.GL_TEXTURE);
                 gl.glPopMatrix();
 
-                gl.glMatrixMode(GL.GL_MODELVIEW);
+                gl.glMatrixMode(GL2.GL_MODELVIEW);
                 gl.glPopMatrix();
             }
         }
@@ -406,7 +404,7 @@ public class DisplayListRenderer implements iModel3DRenderer {
      * @param gl
      * @param id
      */
-    public void renderBoundsOfObject(GL gl, int id, Model model) {
+    public void renderBoundsOfObject(GL2 gl, int id, Model model) {
         if (id >=0 && id <= model.getNumberOfMeshes()) {
             if (model.getMesh(id).bounds != null) {
                 drawBounds(gl, model.getMesh(id).bounds);
@@ -422,7 +420,7 @@ public class DisplayListRenderer implements iModel3DRenderer {
      * @param gLDrawable
      */
     private void genModelBoundsList(GLAutoDrawable gLDrawable, Model model) {
-        GL gl = gLDrawable.getGL();
+        GL2 gl = gLDrawable.getGL().getGL2();
         drawBounds(gl, model.getBounds());
     }
     
@@ -432,7 +430,7 @@ public class DisplayListRenderer implements iModel3DRenderer {
      * 
      * @param gl
      */
-    private void genModelBoundsList(GL gl, Model model) {
+    private void genModelBoundsList(GL2 gl, Model model) {
         drawBounds(gl, model.getBounds());
     }
     
@@ -442,7 +440,7 @@ public class DisplayListRenderer implements iModel3DRenderer {
      * @param gLDrawable
      */
     private void genObjectBoundsList(GLAutoDrawable gLDrawable, Model model) {
-        GL gl = gLDrawable.getGL();
+        GL2 gl = gLDrawable.getGL().getGL2();
         genObjectBoundsList(gl, model);
     }  
     
@@ -451,7 +449,7 @@ public class DisplayListRenderer implements iModel3DRenderer {
      * 
      * @param gl
      */
-    private void genObjectBoundsList(GL gl, Model model) {
+    private void genObjectBoundsList(GL2 gl, Model model) {
         for (int i=0; i<model.getNumberOfMeshes(); i++) {
             if (model.getMesh(i).bounds != null) {
                 drawBounds(gl, model.getMesh(i).bounds);
@@ -466,9 +464,9 @@ public class DisplayListRenderer implements iModel3DRenderer {
      * @param gl
      * @param bounds
      */
-    private void drawBounds(GL gl, Bounds bounds) {      
+    private void drawBounds(GL2 gl, Bounds bounds) {      
         // Front Face
-        gl.glBegin(GL.GL_LINE_LOOP);
+        gl.glBegin(GL2.GL_LINE_LOOP);
             gl.glVertex3f(bounds.min.x, bounds.min.y, bounds.min.z);
             gl.glVertex3f(bounds.max.x, bounds.min.y, bounds.min.z);
             gl.glVertex3f(bounds.max.x, bounds.max.y, bounds.min.z);
@@ -476,7 +474,7 @@ public class DisplayListRenderer implements iModel3DRenderer {
         gl.glEnd();
 
         // Back Face
-        gl.glBegin(GL.GL_LINE_LOOP);
+        gl.glBegin(GL2.GL_LINE_LOOP);
             gl.glVertex3f(bounds.min.x, bounds.min.y, bounds.max.z);
             gl.glVertex3f(bounds.max.x, bounds.min.y, bounds.max.z);
             gl.glVertex3f(bounds.max.x, bounds.max.y, bounds.max.z);
@@ -484,7 +482,7 @@ public class DisplayListRenderer implements iModel3DRenderer {
         gl.glEnd();            
 
         // Connect the corners between the front and back face.
-        gl.glBegin(GL.GL_LINES);
+        gl.glBegin(GL2.GL_LINES);
             gl.glVertex3f(bounds.min.x, bounds.min.y, bounds.min.z);
             gl.glVertex3f(bounds.min.x, bounds.min.y, bounds.max.z);
 
@@ -538,7 +536,7 @@ public class DisplayListRenderer implements iModel3DRenderer {
                 return -1;
         }
 
-        public void remove(Object objID, GL gl, int howMany) {
+        public void remove(Object objID, GL2 gl, int howMany) {
             Integer list = listCache.get(objID);
 
             if(list != null)
@@ -552,7 +550,7 @@ public class DisplayListRenderer implements iModel3DRenderer {
          * object being passed in.   If the object already has a display list 
          * allocated, the existing ID is returned.
          */
-        public int generateList(Object objID, GL gl, int howMany) {
+        public int generateList(Object objID, GL2 gl, int howMany) {
             Integer list = null;        
 
             list = listCache.get(objID);

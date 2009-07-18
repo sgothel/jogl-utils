@@ -37,6 +37,8 @@
 
 package net.java.joglutils.msg.math;
 
+import java.nio.*;
+
 /** A (very incomplete) 4x4 matrix class. Representation assumes
     row-major order and multiplication by column vectors on the
     right. */
@@ -260,10 +262,28 @@ public class Mat4f {
     }
   }
 
+  /** Copies data in column-major (OpenGL format) order into passed
+      float buffer, which must have 16 or more remaining elements. */
+  public void getColumnMajorData(FloatBuffer out) {
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        out.put(4 * j + i, get(i, j));
+      }
+    }
+  }
+
   /** Returns the matrix data in row-major format, which is the
       opposite of OpenGL's convention. */
   public float[] getRowMajorData() {
     return data;
+  }
+
+  /** Stores the matrix data into the passed FloatBuffer in row-major
+      format, which is the opposite of OpenGL's convention. */
+  public void getRowMajorData(FloatBuffer out) {
+    for (int i = 0; i < 16; i++) {
+      out.put(i, data[i]);
+    }
   }
 
   public Matf toMatf() {

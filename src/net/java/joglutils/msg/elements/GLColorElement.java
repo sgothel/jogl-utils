@@ -89,12 +89,12 @@ public class GLColorElement extends ColorElement {
     if (this.enabled == enabled)
       return;  // No OpenGL work to do
     this.enabled = enabled;
-    GL gl = GLU.getCurrentGL();
+    GL2 gl = GLU.getCurrentGL().getGL2();
     if (enabled) {
-      gl.glColorPointer(4, GL.GL_FLOAT, 0, colors);
-      gl.glEnableClientState(GL.GL_COLOR_ARRAY);
+      gl.glColorPointer(4, GL2.GL_FLOAT, 0, colors);
+      gl.glEnableClientState(GL2.GL_COLOR_ARRAY);
     } else {
-      gl.glDisableClientState(GL.GL_COLOR_ARRAY);
+      gl.glDisableClientState(GL2.GL_COLOR_ARRAY);
       // Assume we have to reset the current color to the default
       gl.glColor4f(1, 1, 1, 1);
     }

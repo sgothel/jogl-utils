@@ -43,8 +43,9 @@ import java.net.*;
 import java.util.*;
 
 import javax.media.opengl.*;
-import com.sun.opengl.util.j2d.*;
+import com.sun.opengl.util.awt.*;
 import com.sun.opengl.util.texture.*;
+import com.sun.opengl.util.texture.awt.*;
 
 import net.java.joglutils.msg.actions.*;
 import net.java.joglutils.msg.elements.*;
@@ -127,7 +128,7 @@ public class Texture2 extends Node {
       Texture is fetched. */
   public void setTexture(BufferedImage image, boolean mipmap) {
     disposeTextureRenderer();
-    data = TextureIO.newTextureData(image, mipmap);
+    data = AWTTextureIO.newTextureData(image, mipmap);
     dirty = true;
   }
   

@@ -37,6 +37,7 @@
 package net.java.joglutils;
 
 import javax.media.opengl.*;
+import javax.media.opengl.awt.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -69,7 +70,7 @@ public class GLJFrame extends JFrame {
     public GLJFrame(String title, GLEventListener listener) {
         super(title);
         this.listener = listener;
-        this.caps = new GLCapabilities();
+        this.caps = new GLCapabilities(GLProfile.getDefault());
         this.chooser = null; //can be null because that will choose the default
         initComponents();
         ((GLCanvas)mainCanvas).addGLEventListener(listener);
