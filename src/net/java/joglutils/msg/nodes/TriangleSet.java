@@ -1,21 +1,21 @@
 /*
  * Copyright (c) 2007 Sun Microsystems, Inc. All Rights Reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * - Redistribution of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * - Redistribution in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in the
  *   documentation and/or other materials provided with the distribution.
- * 
+ *
  * Neither the name of Sun Microsystems, Inc. or the names of
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
- * 
+ *
  * This software is provided "AS IS," without a warranty of any kind. ALL
  * EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES,
  * INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A
@@ -28,25 +28,39 @@
  * DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY,
  * ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF
  * SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * 
+ *
  * You acknowledge that this software is not designed or intended for use
  * in the design, construction, operation or maintenance of any nuclear
  * facility.
- * 
+ *
  */
 
 package net.java.joglutils.msg.nodes;
 
-import java.nio.*;
-import java.util.*;
+import java.nio.FloatBuffer;
 
-import javax.media.opengl.*;
-import com.sun.opengl.util.texture.*;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
+import com.jogamp.opengl.fixedfunc.GLPointerFunc;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureCoords;
 
-import net.java.joglutils.msg.actions.*;
-import net.java.joglutils.msg.elements.*;
-import net.java.joglutils.msg.math.*;
-import net.java.joglutils.msg.misc.*;
+import net.java.joglutils.msg.actions.Action;
+import net.java.joglutils.msg.actions.GLRenderAction;
+import net.java.joglutils.msg.elements.ColorElement;
+import net.java.joglutils.msg.elements.CoordinateElement;
+import net.java.joglutils.msg.elements.GLTextureCoordinateElement;
+import net.java.joglutils.msg.elements.GLTextureElement;
+import net.java.joglutils.msg.elements.TextureCoordinateElement;
+import net.java.joglutils.msg.elements.TextureElement;
+import net.java.joglutils.msg.math.Mat4f;
+import net.java.joglutils.msg.math.Vec2f;
+import net.java.joglutils.msg.math.Vec3f;
+import net.java.joglutils.msg.math.Vec4f;
+import net.java.joglutils.msg.misc.PrimitiveVertex;
+import net.java.joglutils.msg.misc.State;
+import net.java.joglutils.msg.misc.TriangleCallback;
 
 /** A TriangleSet assembles the coordinates specified by a Coordinate3
     node, and any auxiliary nodes such as a TextureCoordinate2 node,
@@ -56,7 +70,7 @@ public class TriangleSet extends TriangleBasedShape {
   private int numTriangles;
 
   /** Sets the number of triangles this TriangleSet references. */
-  public void setNumTriangles(int numTriangles) {
+  public void setNumTriangles(final int numTriangles) {
     this.numTriangles = numTriangles;
   }
 
@@ -65,65 +79,65 @@ public class TriangleSet extends TriangleBasedShape {
     return numTriangles;
   }
 
-  public void render(GLRenderAction action) {
-    State state = action.getState();
+  public void render(final GLRenderAction action) {
+    final State state = action.getState();
     if (!CoordinateElement.isEnabled(state))
       return;
 
     if (CoordinateElement.get(state) != null) {
       // OK, we have coordinates to send down, at least
 
-      GL2 gl = action.getGL();
+      final GL2 gl = action.getGL();
 
       Texture tex = null;
       boolean haveTexCoords = false;
 
-      if (GLTextureElement.isEnabled(state) &&
-          GLTextureCoordinateElement.isEnabled(state)) {
-        Texture2 texNode = GLTextureElement.get(state);
+      if (TextureElement.isEnabled(state) &&
+          TextureCoordinateElement.isEnabled(state)) {
+        final Texture2 texNode = TextureElement.get(state);
         if (texNode != null) {
-          tex = texNode.getTexture();
+          tex = texNode.getTexture(gl);
         }
-        haveTexCoords = (GLTextureCoordinateElement.get(state) != null);
+        haveTexCoords = (TextureCoordinateElement.get(state) != null);
       }
 
       if (tex != null) {
         // Set up the texture matrix to uniformly map [0..1] to the used
         // portion of the texture image
-        gl.glMatrixMode(GL2.GL_TEXTURE);
+        gl.glMatrixMode(GL.GL_TEXTURE);
         gl.glPushMatrix();
         if (gl.isExtensionAvailable("GL_VERSION_1_3")) {
             gl.glLoadTransposeMatrixf(getTextureMatrix(tex).getRowMajorData(), 0);
         } else {
-            float[] tmp = new float[16];
+            final float[] tmp = new float[16];
             getTextureMatrix(tex).getColumnMajorData(tmp);
             gl.glLoadMatrixf(tmp, 0);
         }
-        gl.glMatrixMode(GL2.GL_MODELVIEW);
+        gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
       } else if (haveTexCoords) {
         // Want to turn off the use of texture coordinates to avoid errors
         // FIXME: not 100% sure whether we need to do this, but think we should
-        gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+        gl.glDisableClientState(GLPointerFunc.GL_TEXTURE_COORD_ARRAY);
       }
 
       // For now, assume the triangle set and the number of available
       // coordinates match -- may want to add debugging information
       // for this later
-      gl.glDrawArrays(GL2.GL_TRIANGLES, 0, 3 * getNumTriangles());
+      gl.glDrawArrays(GL.GL_TRIANGLES, 0, 3 * getNumTriangles());
 
       if (tex != null) {
-        gl.glMatrixMode(GL2.GL_TEXTURE);
+        gl.glMatrixMode(GL.GL_TEXTURE);
         gl.glPopMatrix();
-        gl.glMatrixMode(GL2.GL_MODELVIEW);
+        gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
       } else if (haveTexCoords) {
         // Might want this the next time we render a shape
-        gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+        gl.glEnableClientState(GLPointerFunc.GL_TEXTURE_COORD_ARRAY);
       }
     }
   }
 
-  public void generateTriangles(Action action, TriangleCallback cb) {
-    State state = action.getState();
+  public void generateTriangles(final Action action, final TriangleCallback cb) {
+    final State state = action.getState();
     FloatBuffer coords    = null;
     FloatBuffer texCoords = null;
     // FIXME: normals and lighting not supported yet
@@ -144,9 +158,9 @@ public class TriangleSet extends TriangleBasedShape {
     if (ColorElement.isEnabled(state)) {
       colors = ColorElement.get(state);
     }
-    PrimitiveVertex v0 = new PrimitiveVertex();
-    PrimitiveVertex v1 = new PrimitiveVertex();
-    PrimitiveVertex v2 = new PrimitiveVertex();
+    final PrimitiveVertex v0 = new PrimitiveVertex();
+    final PrimitiveVertex v1 = new PrimitiveVertex();
+    final PrimitiveVertex v2 = new PrimitiveVertex();
     v0.setCoord(new Vec3f());
     v1.setCoord(new Vec3f());
     v2.setCoord(new Vec3f());
@@ -220,14 +234,14 @@ public class TriangleSet extends TriangleBasedShape {
 
   // Helper routine for setting up a texture matrix to allow texture
   // coords in the scene graph to always be specified from (0..1)
-  private Mat4f textureMatrix = new Mat4f();
-  private Mat4f getTextureMatrix(Texture texture) {
+  private final Mat4f textureMatrix = new Mat4f();
+  private Mat4f getTextureMatrix(final Texture texture) {
     textureMatrix.makeIdent();
-    TextureCoords coords = texture.getImageTexCoords();
+    final TextureCoords coords = texture.getImageTexCoords();
     // Horizontal scale
     textureMatrix.set(0, 0, coords.right() - coords.left());
     // Vertical scale (may be negative if texture needs to be flipped vertically)
-    float vertScale = coords.top() - coords.bottom();
+    final float vertScale = coords.top() - coords.bottom();
     textureMatrix.set(1, 1, vertScale);
     textureMatrix.set(0, 3, coords.left());
     textureMatrix.set(1, 3, coords.bottom());

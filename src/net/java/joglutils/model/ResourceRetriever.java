@@ -3,8 +3,8 @@ package net.java.joglutils.model;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Utility class that allows transparent reading of files from the current 

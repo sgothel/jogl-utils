@@ -36,8 +36,6 @@
 
 package net.java.joglutils.model.geometry;
 
-import java.util.Vector;
-
 public class Mesh
 {
     public int numOfVerts = 0;

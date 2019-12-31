@@ -1,21 +1,21 @@
 /*
  * Copyright (c) 2007 Sun Microsystems, Inc. All Rights Reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * - Redistribution of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * - Redistribution in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in the
  *   documentation and/or other materials provided with the distribution.
- * 
+ *
  * Neither the name of Sun Microsystems, Inc. or the names of
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
- * 
+ *
  * This software is provided "AS IS," without a warranty of any kind. ALL
  * EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES,
  * INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A
@@ -28,11 +28,11 @@
  * DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY,
  * ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF
  * SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * 
+ *
  * You acknowledge that this software is not designed or intended for use
  * in the design, construction, operation or maintenance of any nuclear
  * facility.
- * 
+ *
  */
 
 package net.java.joglutils.msg.test;
@@ -42,13 +42,15 @@ import java.awt.DisplayMode;
 import java.awt.Frame;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.event.*;
-import java.net.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.net.URL;
 
-import javax.swing.*;
+import javax.swing.DefaultListModel;
 
-import javax.media.opengl.*;
-import javax.media.opengl.awt.*;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.awt.GLCanvas;
 
 /**
  * A test implementing a 3D display shelf component.
@@ -57,11 +59,11 @@ import javax.media.opengl.awt.*;
  */
 
 public class DisplayShelf {
-  public static void main(String[] args) {
-    Frame f = new Frame("Display Shelf test");
+  public static void main(final String[] args) {
+    final Frame f = new Frame("Display Shelf test");
     f.setLayout(new BorderLayout());
     f.addWindowListener(new WindowAdapter() {
-        public void windowClosing(WindowEvent e) {
+        public void windowClosing(final WindowEvent e) {
           new Thread(new Runnable() {
               public void run() {
                 System.exit(0);
@@ -71,7 +73,7 @@ public class DisplayShelf {
       });
 
     // The images to configure the shelf with
-    String[] images = {
+    final String[] images = {
       "http://download.java.net/media/jogl/builds/ds_tmp/mzi.jsepedzf.200x200-75.jpg",
       "http://download.java.net/media/jogl/builds/ds_tmp/dj.wvbmknhn.200x200-75.jpg",
       "http://download.java.net/media/jogl/builds/ds_tmp/mzi.oorrjicu.200x200-75.jpg",
@@ -125,23 +127,23 @@ public class DisplayShelf {
       "http://download.java.net/media/jogl/builds/ds_tmp/dj.zfqfgoas.200x200-75.jpg",
       "http://download.java.net/media/jogl/builds/ds_tmp/mzi.uswlslxx.200x200-75.jpg"
     };
-    DefaultListModel model = new DefaultListModel();
-    for (String str : images) {
+    final DefaultListModel model = new DefaultListModel();
+    for (final String str : images) {
       try {
         model.addElement(new URL(str));
-      } catch (Exception e) {
+      } catch (final Exception e) {
         e.printStackTrace();
       }
     }
 
-    DisplayShelfRenderer renderer = new DisplayShelfRenderer(model);
-    GLCanvas canvas = new GLCanvas(new GLCapabilities(GLProfile.getDefault()), null, renderer.getSharedContext(), null);
+    final DisplayShelfRenderer renderer = new DisplayShelfRenderer(model);
+    final GLCanvas canvas = new GLCanvas(new GLCapabilities(GLProfile.getDefault()), null, null);
     canvas.setFocusable(true);
     canvas.addGLEventListener(renderer);
     f.add(canvas);
-    GraphicsDevice dev = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-    DisplayMode curMode = dev.getDisplayMode();
-    int height = (int) (0.5f * curMode.getWidth());
+    final GraphicsDevice dev = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+    final DisplayMode curMode = dev.getDisplayMode();
+    final int height = (int) (0.5f * curMode.getWidth());
     f.setSize(curMode.getWidth(), height);
     f.setLocation(0, (curMode.getHeight() - height) / 2);
     f.setVisible(true);

@@ -37,13 +37,10 @@
 
 package net.java.joglutils.msg.elements;
 
-import java.nio.*;
-import javax.media.opengl.*;
-import javax.media.opengl.glu.*;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.glu.GLU;
 
-import net.java.joglutils.msg.math.*;
-import net.java.joglutils.msg.misc.*;
-import net.java.joglutils.msg.nodes.*;
+import net.java.joglutils.msg.misc.State;
 
 /** Represents the depth test state of the OpenGL fixed-function
     pipeline and causes side-effects in OpenGL for rendering. */

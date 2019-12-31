@@ -37,7 +37,7 @@
 
 package net.java.joglutils.msg.math;
 
-import java.nio.*;
+import java.nio.FloatBuffer;
 
 /** A (very incomplete) 4x4 matrix class. Representation assumes
     row-major order and multiplication by column vectors on the

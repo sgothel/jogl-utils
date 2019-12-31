@@ -10,26 +10,32 @@
    - built into its build directory.
    -->
 <project name="joglutils" basedir="." default="all">
-    <property name="top.dir"         value=".." />
-    <property name="src.dir"         value="${top.dir}/src" />
-    <property name="demos.src.dir"   value="${top.dir}/demos/src" />
-    <property name="output.dir"      value="${top.dir}/build" />
-    <property name="output.tmp.dir"  value="${top.dir}/build/classes" />
-    <property name="output.jar"      value="${output.dir}/joglutils.jar" />
-    <property name="demos.jar"       value="${output.dir}/joglutils-demos.jar" />
-    <property name="jogl.jar"        value="${top.dir}/../jogl/build/jogl/jogl.all.jar" />
-    <property name="nativewindow.jar" value="${top.dir}/../jogl/build/nativewindow/nativewindow.all.jar" />
-    <property name="swinglayout.jar" value="lib/swing-layout-1.0.jar" />
-    <property name="jogl-demos-util.jar" value="lib/jogl-demos-util.jar" />
+    <condition property="rootrel.build" value="build">
+      <not>
+          <isset property="rootrel.build"/>
+      </not>
+    </condition>
+
+    <property name="top.dir"             value=".." />
+    <property name="src.dir"             value="${top.dir}/src" />
+    <property name="demos.src.dir"       value="${top.dir}/demos/src" />
+    <property name="output.dir"          value="${top.dir}/${rootrel.build}" />
+    <property name="output.tmp.dir"      value="${top.dir}/${rootrel.build}/classes" />
+    <property name="output.jar"          value="${output.dir}/joglutils.jar" />
+    <property name="demos.jar"           value="${output.dir}/joglutils-demos.jar" />
+    <property name="gluegen-rt.jar"      value="${top.dir}/../gluegen/${rootrel.build}/gluegen-rt.jar" />
+    <property name="jogl.jar"            value="${top.dir}/../jogl/${rootrel.build}/jar/jogl-all.jar" />
+    <property name="jogl-demos-util.jar" value="${top.dir}/../jogl-demos/${rootrel.build}/jogl-demos-util.jar" />
+    <property name="swinglayout.jar"     value="lib/swing-layout-1.0.jar" />
     <path id="build.classpath">
+        <pathelement location="${gluegen-rt.jar}" />
         <pathelement location="${jogl.jar}" />
-        <pathelement location="${nativewindow.jar}" />
         <pathelement location="${jogl-demos-util.jar}" />
         <pathelement location="${swinglayout.jar}" />
     </path>
     <path id="demos.build.classpath">
+        <pathelement location="${gluegen-rt.jar}" />
         <pathelement location="${jogl.jar}" />
-        <pathelement location="${nativewindow.jar}" />
         <pathelement location="${jogl-demos-util.jar}" />
         <pathelement location="${swinglayout.jar}" />
         <pathelement location="${output.jar}" />
@@ -43,7 +49,7 @@
         <javadoc packagenames="${javadoc.packagenames}"
                  sourcepath="${src.dir}"
                  destdir="${javadoc.dir}"
-                 source="1.5"
+                 source="1.8"
                  linkoffline="${javadoc.link} 5-packages" >
         </javadoc>
     </target>
@@ -57,14 +63,14 @@
                  sourcepath="${src.dir}"
                  destdir="${msg.javadoc.dir}" windowtitle="${msg.javadoc.windowtitle}"
                  overview="${msg.javadoc.overview}" 
-                 source="1.5"
+                 source="1.8"
                  linkoffline="${javadoc.link} 5-packages" >
         </javadoc>
     </target>
 
     <target name="compile">
         <mkdir dir="${output.tmp.dir}" />
-        <javac destdir="${output.tmp.dir}" source="5" debug="true" debuglevel="source,lines">
+        <javac destdir="${output.tmp.dir}" source="1.8" debug="true" debuglevel="source,lines">
             <src path="${src.dir}" />
             <classpath refid="build.classpath" />
         </javac>
@@ -79,7 +85,7 @@
     </target>
 
     <target name="joglutils-demos.jar" depends="joglutils.jar">
-        <javac destdir="${output.tmp.dir}" source="5" debug="true" debuglevel="source,lines">
+        <javac destdir="${output.tmp.dir}" source="1.8" debug="true" debuglevel="source,lines">
             <src path="${demos.src.dir}" />
             <classpath refid="demos.build.classpath" />
         </javac>

@@ -37,7 +37,9 @@
 
 package net.java.joglutils.msg.nodes;
 
-import net.java.joglutils.msg.actions.*;
+import net.java.joglutils.msg.actions.Action;
+import net.java.joglutils.msg.actions.GLRenderAction;
+import net.java.joglutils.msg.actions.RayPickAction;
 
 /** The base class for all nodes in the scene graph. */
 

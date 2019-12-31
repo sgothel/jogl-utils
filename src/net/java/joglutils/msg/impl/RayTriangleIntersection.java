@@ -37,7 +37,8 @@
 
 package net.java.joglutils.msg.impl;
 
-import net.java.joglutils.msg.math.*;
+import net.java.joglutils.msg.math.Line;
+import net.java.joglutils.msg.math.Vec3f;
 
 /** Intersection of ray with triangle. Computes parameteric t along
     with barycentric coordinates (u, v) indicating weight of vert1 and

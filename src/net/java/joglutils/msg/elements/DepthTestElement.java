@@ -36,11 +36,8 @@
 
 package net.java.joglutils.msg.elements;
 
-import javax.media.opengl.*;
-
-import net.java.joglutils.msg.math.*;
-import net.java.joglutils.msg.misc.*;
-import net.java.joglutils.msg.nodes.*;
+import net.java.joglutils.msg.misc.State;
+import net.java.joglutils.msg.misc.StateIndex;
 
 /** Represents the depth test state of the OpenGL fixed-function pipeline. */
 

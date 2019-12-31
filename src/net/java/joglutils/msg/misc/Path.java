@@ -37,9 +37,9 @@
 
 package net.java.joglutils.msg.misc;
 
-import java.util.*;
+import java.util.ArrayList;
 
-import net.java.joglutils.msg.nodes.*;
+import net.java.joglutils.msg.nodes.Node;
 
 /** Represents a path through the scene graph. The topmost node is at
     index 0 and subsequent child nodes are at later indices. */

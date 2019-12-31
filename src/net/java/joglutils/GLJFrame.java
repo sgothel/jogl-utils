@@ -1,21 +1,21 @@
 /*
  * Copyright (c) 2006 Erik Tollerud (erik.tollerud@gmail.com) All Rights Reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- *   
+ *
  * - Redistribution of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- *    
+ *
  * - Redistribution in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- *   
+ *
  * The names of Erik Tollerud, Sun Microsystems, Inc. or the names of
  * contributors may not be used to endorse or promote products derived from
  * this software without specific prior written permission.
- *    
+ *
  * This software is provided "AS IS," without a warranty of any kind. ALL
  * EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES,
  * INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A
@@ -23,12 +23,12 @@
  * SUN MICROSYSTEMS, INC. ("SUN"), AND SUN'S LICENSORS SHALL NOT BE LIABLE FOR
  * ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR
  * DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES. IN NO EVENT WILL ERIK
- * TOLLERUD, SUN, OR SUN'S LICENSORS BE LIABLE FOR ANY LOST REVENUE, PROFIT 
+ * TOLLERUD, SUN, OR SUN'S LICENSORS BE LIABLE FOR ANY LOST REVENUE, PROFIT
  * OR DATA, OR FOR DIRECT, INDIRECT, SPECIAL, CONSEQUENTIAL, INCIDENTAL OR
  * PUNITIVE DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY,
  * ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF BEN
  * CHAPPELL OR SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- *   
+ *
  * You acknowledge that this software is not designed or intended for use
  * in the design, construction, operation or maintenance of any nuclear
  * facility.
@@ -36,30 +36,45 @@
 
 package net.java.joglutils;
 
-import javax.media.opengl.*;
-import javax.media.opengl.awt.*;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import com.sun.opengl.util.Animator;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.event.InputMethodListener;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLCapabilitiesChooser;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.util.Animator;
 
 /**
- * A JFrame containing a heavyweight {@link GLCanvas} with a single attached {@link GLEventListener}. 
+ * A JFrame containing a heavyweight {@link GLCanvas} with a single attached {@link GLEventListener}.
  * Note: the default close operation has been changed to exit rather than dispose.
  * @author Erik J. Tollerud
  */
 public class GLJFrame extends JFrame {
     private GLEventListener listener;
     private GLCapabilities caps;
-    private GLCapabilitiesChooser chooser;
+    private final GLCapabilitiesChooser chooser;
     private Animator animator;
     private GLContext contextToShareWith;
-    
+
     /**
      * Creates new form GLJFrame
      * @param listener the GLEventListener to attach to the GLCanvas
      */
-    public GLJFrame(GLEventListener listener) {
+    public GLJFrame(final GLEventListener listener) {
         this("OpenGL Window", listener);
     }
     /**
@@ -67,7 +82,7 @@ public class GLJFrame extends JFrame {
      * @param title the title for the window
      * @param listener the GLEventListener to attach to the GLCanvas
      */
-    public GLJFrame(String title, GLEventListener listener) {
+    public GLJFrame(final String title, final GLEventListener listener) {
         super(title);
         this.listener = listener;
         this.caps = new GLCapabilities(GLProfile.getDefault());
@@ -85,7 +100,7 @@ public class GLJFrame extends JFrame {
      * @param listener the GLEventListener to attach to the GLCanvas
      * @param contextToShareWith the context to share with
      */
-    public GLJFrame(String title, GLEventListener listener, GLCapabilities caps,GLCapabilitiesChooser chooser,GLContext contextToShareWith) {
+    public GLJFrame(final String title, final GLEventListener listener, final GLCapabilities caps,final GLCapabilitiesChooser chooser,final GLContext contextToShareWith) {
         super(title);
         this.listener = listener;
         this.caps = caps;
@@ -95,17 +110,17 @@ public class GLJFrame extends JFrame {
         ((GLCanvas)mainCanvas).addGLEventListener(listener);
         animator = null;
     }
-    
+
     /**
      * Creates new form GLJFrame
      * @param title title for the window
      * @param listener the GLEventListener to attach to the GLCanvas
      * @param capabilities the GLCapabilities to request for the GLCanvas
      */
-    public GLJFrame(String title, GLEventListener listener, GLCapabilities capabilities) {
+    public GLJFrame(final String title, final GLEventListener listener, final GLCapabilities capabilities) {
         this(title,listener,capabilities,null,null);
     }
-    
+
     /**
      * Creates new form GLJFrame
      * @param title title for the window
@@ -113,27 +128,27 @@ public class GLJFrame extends JFrame {
      * @param capabilities the GLCapabilities to request for the GLCanvas
      * @param chooser the capabilities chooser to use in creating the GLCanvas on this frame
      */
-    public GLJFrame(String title, GLEventListener listener, GLCapabilities capabilities, GLCapabilitiesChooser chooser) {
+    public GLJFrame(final String title, final GLEventListener listener, final GLCapabilities capabilities, final GLCapabilitiesChooser chooser) {
         this(title,listener,capabilities,chooser,null);
     }
-    
+
     /**
      * Creates new form GLJFrame
      * @param listener the GLEventListener to attach to the GLCanvas
      * @param contextToShareWith the context to share with
      * @see javax.media.opengl.GLCanvas#javax.media.opengl.GLCanvas(javax.media.opengl.GLCapabilities,javax.media.opengl.GLCapabilitiesChooser,javax.media.opengl.GLContext,javax.media.opengl.GraphicsDevice)
      */
-    public GLJFrame(GLEventListener listener, GLContext contextToShareWith) {
+    public GLJFrame(final GLEventListener listener, final GLContext contextToShareWith) {
         this(listener);
         this.contextToShareWith = contextToShareWith;
-        
+
     }
     /**
      * Creates new form GLJFrame
      * @param listener the GLEventListener to attach to the GLCanvas
      * @param capabilities the GLCapabilities to request for the GLCanvas
      */
-    public GLJFrame(GLEventListener listener, GLCapabilities capabilities) {
+    public GLJFrame(final GLEventListener listener, final GLCapabilities capabilities) {
         this("OpenGL Window", listener, capabilities);
     }
     /**
@@ -142,7 +157,7 @@ public class GLJFrame extends JFrame {
      * @param width the horizontal size for the GLCanvas in pixels
      * @param height the vertical size for the GLCanvas in pixels
      */
-    public GLJFrame(GLEventListener listener, int width, int height) {
+    public GLJFrame(final GLEventListener listener, final int width, final int height) {
         this("OpenGL Window",listener);
         mainCanvas.setSize(width,height);
         this.pack();
@@ -154,7 +169,7 @@ public class GLJFrame extends JFrame {
      * @param width the horizontal size for the GLCanvas in pixels
      * @param height the vertical size for the GLCanvas in pixels
      */
-    public GLJFrame(String title, GLEventListener listener, int width, int height) {
+    public GLJFrame(final String title, final GLEventListener listener, final int width, final int height) {
         this(title,listener);
         mainCanvas.setSize(width,height);
         this.pack();
@@ -164,7 +179,7 @@ public class GLJFrame extends JFrame {
      * @param listener the GLEventListener to attach to the GLCanvas
      * @param fullscreen if true, this window is generated in fullscreen mode
      */
-    public GLJFrame(GLEventListener listener, boolean fullscreen) {
+    public GLJFrame(final GLEventListener listener, final boolean fullscreen) {
         this("OpenGL Window",listener);
         this.setFullscreen(fullscreen);
     }
@@ -174,11 +189,11 @@ public class GLJFrame extends JFrame {
      * @param listener the GLEventListener to attach to the GLCanvas
      * @param fullscreen if true, this window is generated in fullscreen mode
      */
-    public GLJFrame(String title, GLEventListener listener, boolean fullscreen) {
+    public GLJFrame(final String title, final GLEventListener listener, final boolean fullscreen) {
         this(title,listener);
         this.setFullscreen(fullscreen);
     }
-    
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -186,10 +201,11 @@ public class GLJFrame extends JFrame {
      */
     // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
     private void initComponents() {
-        mainCanvas = new GLCanvas(caps,chooser,contextToShareWith,null);
+        mainCanvas = new GLCanvas(caps,chooser,null);
+        ((GLCanvas)mainCanvas).setSharedContext(contextToShareWith);
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
-            public void componentResized(java.awt.event.ComponentEvent evt) {
+            public void componentResized(final java.awt.event.ComponentEvent evt) {
                 formComponentResized(evt);
             }
         });
@@ -199,11 +215,11 @@ public class GLJFrame extends JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-    
-    private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentResized
+
+    private void formComponentResized(final java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentResized
         this.mainCanvas.setSize(this.getRootPane().getSize());
     }//GEN-LAST:event_formComponentResized
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private java.awt.Canvas mainCanvas;
     // End of variables declaration//GEN-END:variables
@@ -211,11 +227,11 @@ public class GLJFrame extends JFrame {
      * Sets the event listener attached to the GLcanvas.  Note that this method does not repaint this component, so it will not immediately update.
      * @param listener the GLEventListener to attach to the GLCanvas
      */
-    public void setGLEventListener(GLEventListener listener) {
+    public void setGLEventListener(final GLEventListener listener) {
         ((GLCanvas)this.mainCanvas).removeGLEventListener(this.listener);
         this.listener = listener;
         ((GLCanvas)this.mainCanvas).addGLEventListener(listener);
-        
+
     }
     /**
      * Retrieves the event listener for the GLJFrame
@@ -229,17 +245,17 @@ public class GLJFrame extends JFrame {
      * @param fs the mode to set this window to - true for full screen, false for windowed mode
      * @return true if full screen exclusive mode is supported, false if not.
      */
-    public boolean setFullscreen(boolean fs) {
+    public boolean setFullscreen(final boolean fs) {
         //TODO: fix to make double-buffered and return to non-fs mode properly (use initComponents()?)
-        GraphicsDevice dev = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-        boolean visible = this.isVisible();
+        final GraphicsDevice dev = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        final boolean visible = this.isVisible();
         if (fs) {
             this.dispose();
             this.setUndecorated(true);
             this.setResizable(false);
             try{
                 dev.setFullScreenWindow(this);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 dev.setFullScreenWindow(null);
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(this,"Could not enter fullscreen exclusive mode.","Fullscreen error",JOptionPane.ERROR_MESSAGE);
@@ -259,9 +275,9 @@ public class GLJFrame extends JFrame {
      * @param width the new horizontal size for the GLCanvass in pixels
      * @param height the new vertical size for the GLCanvass in pixels
      */
-    public void setSize(int width, int height) {
-        
-        java.awt.GraphicsDevice dev = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+    public void setSize(final int width, final int height) {
+
+        final java.awt.GraphicsDevice dev = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
         if (dev.getFullScreenWindow() != this) {
             mainCanvas.setSize(width,height);
             this.pack();
@@ -272,8 +288,8 @@ public class GLJFrame extends JFrame {
      * Resizes this GLJFrame to match a GLCanvas of the specified size. This has no effect if fullscreen mode is active.
      * @param d the new size for the GLCanvass in pixels
      */
-    public void setSize(java.awt.Dimension d) {
-        java.awt.GraphicsDevice dev = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+    public void setSize(final java.awt.Dimension d) {
+        final java.awt.GraphicsDevice dev = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
         if (dev.getFullScreenWindow() != this) {
             mainCanvas.setSize(d);
             this.pack();
@@ -284,7 +300,7 @@ public class GLJFrame extends JFrame {
      * @return true if this window is in fullscreen mode
      */
     public boolean isFullscreen() {
-        java.awt.GraphicsDevice dev = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        final java.awt.GraphicsDevice dev = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
         return (dev.getFullScreenWindow() == this);
     }
     /**
@@ -298,41 +314,41 @@ public class GLJFrame extends JFrame {
      * Rebuilds the GLCanvas with the specified capbilities. Will dispose and re-create the JFrame and GLCanvas with the new capabilities.
      * @param caps the capabilities to be copied into this GLJFrame
      */
-    public void setGLCapabilities(GLCapabilities caps) {
+    public void setGLCapabilities(final GLCapabilities caps) {
         //get old setup
-        boolean vis = this.isVisible();
+        final boolean vis = this.isVisible();
         this.caps = (GLCapabilities)caps.clone();
-        boolean fs = this.isFullscreen();
-        java.awt.Dimension d = this.mainCanvas.getSize();
-        
+        final boolean fs = this.isFullscreen();
+        final java.awt.Dimension d = this.mainCanvas.getSize();
+
         this.dispose();
-        
+
         //re-form canvas with new caps
         this.mainCanvas = new GLCanvas(caps);
         this.getContentPane().removeAll();
         this.add(mainCanvas);
-        
-        
+
+
         mainCanvas.setSize(d);
-        
-        GLCanvas glc = (GLCanvas) mainCanvas;
+
+        final GLCanvas glc = (GLCanvas) mainCanvas;
         //re-apply GLEventListener
         glc.addGLEventListener(listener);
         //re-apply input listeners from the JPanel listeners
-        for(InputMethodListener l : this.getInputMethodListeners())
+        for(final InputMethodListener l : this.getInputMethodListeners())
             glc.addInputMethodListener(l);
-        for(KeyListener l : this.getKeyListeners())
+        for(final KeyListener l : this.getKeyListeners())
             glc.addKeyListener(l);
-        for(MouseListener l : this.getMouseListeners())
+        for(final MouseListener l : this.getMouseListeners())
             glc.addMouseListener(l);
-        for(MouseMotionListener l : this.getMouseMotionListeners())
+        for(final MouseMotionListener l : this.getMouseMotionListeners())
             glc.addMouseMotionListener(l);
-        for(MouseWheelListener l : this.getMouseWheelListeners())
+        for(final MouseWheelListener l : this.getMouseWheelListeners())
             glc.addMouseWheelListener(l);
-        
+
         this.setFullscreen(fs);
         this.setVisible(vis);
-        
+
     }
     /**
      * Repaint the JFrame and render the GLCanvas if no animator is present.  If animator is attached and running, only repaints the JFrame.
@@ -348,29 +364,29 @@ public class GLJFrame extends JFrame {
      * Removes InputMethodListeners, KeyListeners,MouseListeners, MouseMotionListeners, and MouseWheelListeners from this and the GLCanvas.
      */
     public void clearInputListeners() {
-        InputMethodListener[] imls = super.getInputMethodListeners();
-        KeyListener[] kls = super.getKeyListeners();
-        MouseListener[] mls = super.getMouseListeners();
-        MouseMotionListener[] mmls = super.getMouseMotionListeners();
-        MouseWheelListener[] mwls = super.getMouseWheelListeners();
-        for(InputMethodListener l : imls) {
+        final InputMethodListener[] imls = super.getInputMethodListeners();
+        final KeyListener[] kls = super.getKeyListeners();
+        final MouseListener[] mls = super.getMouseListeners();
+        final MouseMotionListener[] mmls = super.getMouseMotionListeners();
+        final MouseWheelListener[] mwls = super.getMouseWheelListeners();
+        for(final InputMethodListener l : imls) {
             mainCanvas.removeInputMethodListener(l);
             super.removeInputMethodListener(l);
         }
-        
-        for(KeyListener l : kls){
+
+        for(final KeyListener l : kls){
             mainCanvas.removeKeyListener(l);
             super.removeKeyListener(l);
         }
-        for(MouseListener l : mls){
+        for(final MouseListener l : mls){
             mainCanvas.removeMouseListener(l);
             super.removeMouseListener(l);
         }
-        for(MouseMotionListener l : mmls){
+        for(final MouseMotionListener l : mmls){
             mainCanvas.removeMouseMotionListener(l);
             super.removeMouseMotionListener(l);
         }
-        for(MouseWheelListener l : mwls){
+        for(final MouseWheelListener l : mwls){
             mainCanvas.removeMouseWheelListener(l);
             super.removeMouseWheelListener(l);
         }
@@ -399,7 +415,7 @@ public class GLJFrame extends JFrame {
      * Specifies an {@link Animator} for updating the GLCanvas, and starts it.
      * @param anim Animator to use to animate the GLCanvas
      */
-    public void setAnimator(Animator anim) {
+    public void setAnimator(final Animator anim) {
         this.setAnimator(anim,true);
     }
     /**
@@ -407,7 +423,7 @@ public class GLJFrame extends JFrame {
      * @param anim Animator  to use to animate the GLCanvas
      * @param start starts the animator if true, just sets it if not
      */
-    public void setAnimator(Animator anim, boolean start) {
+    public void setAnimator(final Animator anim, final boolean start) {
         if (this.animator != null) {
             this.animator.stop();
             this.animator.remove((GLCanvas)mainCanvas);
@@ -432,61 +448,61 @@ public class GLJFrame extends JFrame {
     public boolean isAnimated() {
         return (animator!=null);
     }
-    
+
     /**
      * Removes the specified key listener so that it no longer receives key events from this component and the GLCanvas. This method performs no function, nor does it throw an exception, if the listener specified by the argument was not previously added to this component. if the listener is null, no exception is thrown and no action is performed.
      * @param l the key listener.
      */
-    public void removeKeyListener(KeyListener l) {
+    public void removeKeyListener(final KeyListener l) {
         super.removeKeyListener(l);
         mainCanvas.removeKeyListener(l);
     }
-    
+
     /**
      * Adds the specified key listener to receive key events from this component and the GLCanvas. If l is null, no exception is thrown and no action is performed.
      * @param l the key listener.
      */
-    public void addKeyListener(KeyListener l) {
+    public void addKeyListener(final KeyListener l) {
         super.addKeyListener(l);
         mainCanvas.addKeyListener(l);
     }
-    
+
     /**
      * Removes the specified mouse listener so that it no longer receives mouse events from this component and the GLCanvas. This method performs no function, nor does it throw an exception, if the listener specified by the argument was not previously added. if the listener is null, no exception is thrown and no action is performed.
      * @param l the mouse listener
      */
-    public void removeMouseListener(MouseListener l) {
+    public void removeMouseListener(final MouseListener l) {
         super.removeMouseListener(l);
         mainCanvas.removeMouseListener(l);
     }
-    
+
     /**
      * Adds the specified mouse listener to receive mouse events from this component and the GLCanvas. if the listener is null, no exception is thrown and no action is performed.
      * @param l the mouse listener
      */
-    public void addMouseListener(MouseListener l) {
+    public void addMouseListener(final MouseListener l) {
         super.addMouseListener(l);
         mainCanvas.addMouseListener(l);
     }
-    
+
     /**
      * Removes the specified mouse wheel listener so that it no longer receives mouse wheel events from this component and the GLCanvas. This method performs no function, nor does it throw an exception, if the listener specified by the argument was not previously added. If l is null, no exception is thrown and no action is performed.
      * @param l the mouse wheel listener
      */
-    public void removeMouseWheelListener(MouseWheelListener l) {
+    public void removeMouseWheelListener(final MouseWheelListener l) {
         super.removeMouseWheelListener(l);
         mainCanvas.removeMouseWheelListener(l);
     }
-    
+
     /**
      * Removes the specified mouse motion listener so that it no longer receives mouse motion events from this component and the GLCanvas. This method performs no function, nor does it throw an exception, if the listener specified by the argument was not previously added. if the listener is null, no exception is thrown and no action is performed.
      * @param l the mouse motion listener.
      */
-    public void removeMouseMotionListener(MouseMotionListener l) {
+    public void removeMouseMotionListener(final MouseMotionListener l) {
         super.removeMouseMotionListener(l);
         mainCanvas.removeMouseMotionListener(l);
     }
-    
+
     /**
      *
      * Adds the specified mouse wheel listener to receive mouse wheel events from this component and the GLCanvas.
@@ -496,34 +512,34 @@ public class GLJFrame extends JFrame {
      * If l is null, no exception is thrown and no action is performed.
      * @param l the mouse wheel listener
      */
-    public void addMouseWheelListener(MouseWheelListener l) {
+    public void addMouseWheelListener(final MouseWheelListener l) {
         super.addMouseWheelListener(l);
         mainCanvas.addMouseWheelListener(l);
     }
-    
+
     /**
      * Adds the specified mouse motion listener to receive mouse motion events from this component and the GLCanvas. if the listener is null, no exception is thrown and no action is performed.
      * @param l the mouse motion listener.
      */
-    public void addMouseMotionListener(MouseMotionListener l) {
+    public void addMouseMotionListener(final MouseMotionListener l) {
         super.addMouseMotionListener(l);
         mainCanvas.addMouseMotionListener(l);
     }
-    
+
     /**
      * Removes the specified input method listener so that it no longer receives input method events from this component and the GLCanvas. This method performs no function, nor does it throw an exception, if the listener specified by the argument was not previously added. if the listener is null, no exception is thrown and no action is performed.
      * @param l the input method listener
      */
-    public void removeInputMethodListener(java.awt.event.InputMethodListener l) {
+    public void removeInputMethodListener(final java.awt.event.InputMethodListener l) {
         super.removeInputMethodListener(l);
         mainCanvas.removeInputMethodListener(l);
     }
-    
+
     /**
      * Adds the specified input method listener to receive input method events from this component and the GLCanvas. A component will only receive input method events from input methods if it also overrides getInputMethodRequests to return an InputMethodRequests instance. if the listener is null, no exception is thrown and no action is performed.
      * @param l the input method listener
      */
-    public void addInputMethodListener(java.awt.event.InputMethodListener l) {
+    public void addInputMethodListener(final java.awt.event.InputMethodListener l) {
         super.addInputMethodListener(l);
         mainCanvas.addInputMethodListener(l);
     }
@@ -540,7 +556,7 @@ public class GLJFrame extends JFrame {
      * @see javax.media.opengl.GLCanvas#setGL(javax.media.opengl.GL)
      * @param gl The pipeline to attach to this GLCanvas
      */
-    public void setGL(GL gl) {
+    public void setGL(final GL gl) {
         ((GLCanvas)mainCanvas).setGL(gl);
     }
     /**
@@ -551,7 +567,7 @@ public class GLJFrame extends JFrame {
     public GLContext getContext() {
         return ((GLCanvas)mainCanvas).getContext();
     }
-    
+
     /**
      * Retrieves a GLAutoDrawable view of the associated GLCanvas
      * @return a GLAutoDrawable corresponding to the GLCanvas on this GLJFrame
@@ -559,5 +575,5 @@ public class GLJFrame extends JFrame {
     public GLAutoDrawable getAutoDrawable() {
         return (GLAutoDrawable)mainCanvas;
     }
-    
+
 }

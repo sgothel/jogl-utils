@@ -1,0 +1,7 @@
+build
+build-temp
+temp/*
+.idea/workspace.xml
+.settings/*
+**~
+build*/

@@ -36,29 +36,35 @@
 
 package net.java.joglutils.test3ds;
 
-import com.sun.opengl.util.Animator;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import javax.media.opengl.*;
-import javax.media.opengl.awt.*;
-import javax.media.opengl.glu.GLU;
+
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2ES1;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
+import com.jogamp.opengl.glu.GLU;
+import com.jogamp.opengl.util.Animator;
 
 public class Main {
     /** Creates a new instance of Main */
     public Main() {
     }
 
-    public static void main(String[] args)
+    public static void main(final String[] args)
     {
-        Frame frame = new Frame();
-        GLCanvas canvas = new GLCanvas();
+        final Frame frame = new Frame();
+        final GLCanvas canvas = new GLCanvas();
         canvas.addGLEventListener(new Renderer());
         frame.add(canvas);
         frame.setSize(600, 600);
         final Animator animator = new Animator(canvas);
         frame.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
+            public void windowClosing(final WindowEvent e) {
               // Run this on another thread than the AWT event queue to
               // make sure the call to Animator.stop() completes before
               // exiting
@@ -76,12 +82,12 @@ public class Main {
 
     static class Renderer implements GLEventListener
     {
-        private MyModel model = new MyModel();
+        private final MyModel model = new MyModel();
 
-        public void display(GLAutoDrawable gLDrawable)
+        public void display(final GLAutoDrawable gLDrawable)
         {
             final GL2 gl = gLDrawable.getGL().getGL2();
-            gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
+            gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
             gl.glLoadIdentity();
 
             gl.glPushMatrix();
@@ -93,22 +99,22 @@ public class Main {
         }
 
 
-        public void dispose(GLAutoDrawable drawable) {}
+        public void dispose(final GLAutoDrawable drawable) {}
 
         /** Called by the drawable immediately after the OpenGL context is
          * initialized for the first time. Can be used to perform one-time OpenGL
          * initialization such as setup of lights and display lists.
          * @param gLDrawable The GLDrawable object.
          */
-        public void init(GLAutoDrawable gLDrawable)
+        public void init(final GLAutoDrawable gLDrawable)
         {
             final GL2 gl = gLDrawable.getGL().getGL2();
 
             gl.glClearColor(0.0f, 0.0f, 0.0f, 0.3f);
             gl.glClearDepth(1.0f);
-            gl.glEnable(GL2.GL_DEPTH_TEST);
-            gl.glDepthFunc(GL2.GL_LEQUAL);
-            gl.glHint(GL2.GL_PERSPECTIVE_CORRECTION_HINT, GL2.GL_NICEST);
+            gl.glEnable(GL.GL_DEPTH_TEST);
+            gl.glDepthFunc(GL.GL_LEQUAL);
+            gl.glHint(GL2ES1.GL_PERSPECTIVE_CORRECTION_HINT, GL.GL_NICEST);
 
             if (!model.isLoaded())
                 model.load(gLDrawable, "globe.3ds");
@@ -128,7 +134,7 @@ public class Main {
          * @param width The new width of the window.
          * @param height The new height of the window.
          */
-        public void reshape(GLAutoDrawable gLDrawable, int x, int y, int width, int height)
+        public void reshape(final GLAutoDrawable gLDrawable, final int x, final int y, final int width, int height)
         {
             final GL2 gl = gLDrawable.getGL().getGL2();
             final GLU glu = new GLU();
@@ -137,10 +143,10 @@ public class Main {
                 height = 1;
             final float h = (float)width / (float)height;
             gl.glViewport(0, 0, width, height);
-            gl.glMatrixMode(GL2.GL_PROJECTION);
+            gl.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
             gl.glLoadIdentity();
             gl.glOrtho(-1000, 1000, -1000, 1000, -10000, 10000);
-            gl.glMatrixMode(GL2.GL_MODELVIEW);
+            gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
             gl.glLoadIdentity();
         }
     }

@@ -37,7 +37,9 @@
 
 package net.java.joglutils.msg.misc;
 
-import net.java.joglutils.msg.math.*;
+import net.java.joglutils.msg.math.Vec2f;
+import net.java.joglutils.msg.math.Vec3f;
+import net.java.joglutils.msg.math.Vec4f;
 
 /** Represents a vertex on a primitive, including pieces of relevant
     information such as location, surface normal and texture

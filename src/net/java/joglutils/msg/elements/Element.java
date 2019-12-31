@@ -37,7 +37,8 @@
 
 package net.java.joglutils.msg.elements;
 
-import net.java.joglutils.msg.misc.*;
+import net.java.joglutils.msg.misc.State;
+import net.java.joglutils.msg.misc.StateIndex;
 
 /** Represents an element in the global {@link
     net.java.joglutils.msg.misc.State state}, such as the current 3D

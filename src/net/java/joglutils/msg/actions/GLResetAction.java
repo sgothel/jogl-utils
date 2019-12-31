@@ -37,10 +37,13 @@
 
 package net.java.joglutils.msg.actions;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
 
-import net.java.joglutils.msg.misc.*;
-import net.java.joglutils.msg.nodes.*;
+import net.java.joglutils.msg.misc.ActionTable;
+import net.java.joglutils.msg.misc.State;
+import net.java.joglutils.msg.nodes.Node;
+import net.java.joglutils.msg.nodes.ShaderNode;
+import net.java.joglutils.msg.nodes.Texture2;
 
 /** An action which resets the OpenGL state of notes holding on to
     server-side OpenGL objects. This is needed to clear out for

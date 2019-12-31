@@ -36,15 +36,22 @@
 
 package jgudemos;
 
-import net.java.joglutils.jogltext.*;
-import java.awt.geom.*;
-import java.awt.font.*;
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.media.opengl.*;
-import javax.media.opengl.glu.*;
-import com.sun.opengl.util.Animator;
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
+import java.awt.event.KeyEvent;
+
+import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
+import com.jogamp.opengl.DebugGL2;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.glu.GLU;
+import com.jogamp.opengl.util.Animator;
+
+import net.java.joglutils.jogltext.FontDrawer;
 
 /**
  * This Demo application uses the Lighting class and the FontDrawer class to render 3D text into a GLJFrame.

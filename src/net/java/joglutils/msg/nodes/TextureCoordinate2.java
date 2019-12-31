@@ -37,9 +37,12 @@
 
 package net.java.joglutils.msg.nodes;
 
-import net.java.joglutils.msg.actions.*;
-import net.java.joglutils.msg.collections.*;
-import net.java.joglutils.msg.elements.*;
+import net.java.joglutils.msg.actions.Action;
+import net.java.joglutils.msg.actions.GLRenderAction;
+import net.java.joglutils.msg.actions.RayPickAction;
+import net.java.joglutils.msg.collections.Vec2fCollection;
+import net.java.joglutils.msg.elements.GLTextureCoordinateElement;
+import net.java.joglutils.msg.elements.TextureCoordinateElement;
 
 /** Represents a set of 2-dimensional texture coordinates which can be
     used to texture geometric shapes. */

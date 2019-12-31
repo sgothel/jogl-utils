@@ -37,10 +37,10 @@
 
 package net.java.joglutils.msg.collections;
 
-import java.nio.*;
+import java.nio.FloatBuffer;
 
-import net.java.joglutils.msg.impl.*;
-import net.java.joglutils.msg.math.*;
+import net.java.joglutils.msg.impl.BufferFactory;
+import net.java.joglutils.msg.math.Vec4f;
 
 /** Provides the abstraction of a collection of Vec4f objects while
     allowing access to the backing store in the form of a direct

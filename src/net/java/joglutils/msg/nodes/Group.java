@@ -37,9 +37,11 @@
 
 package net.java.joglutils.msg.nodes;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-import net.java.joglutils.msg.actions.*;
+import net.java.joglutils.msg.actions.Action;
 
 /** A node which manages other Node instances. */
 

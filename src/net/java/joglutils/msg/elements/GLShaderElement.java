@@ -36,14 +36,12 @@
 
 package net.java.joglutils.msg.elements;
 
-import java.util.*;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.glu.GLU;
 
-import javax.media.opengl.*;
-import javax.media.opengl.glu.*;
-
-import net.java.joglutils.msg.math.*;
-import net.java.joglutils.msg.misc.*;
-import net.java.joglutils.msg.nodes.*;
+import net.java.joglutils.msg.misc.Shader;
+import net.java.joglutils.msg.misc.State;
+import net.java.joglutils.msg.nodes.ShaderNode;
 
 /** Represents the current shader, which is applied to any drawn
     geometry, and performs side-effects in OpenGL. */

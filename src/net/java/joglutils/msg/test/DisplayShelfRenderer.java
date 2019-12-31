@@ -1,21 +1,21 @@
 /*
  * Copyright (c) 2007 Sun Microsystems, Inc. All Rights Reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * - Redistribution of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * - Redistribution in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in the
  *   documentation and/or other materials provided with the distribution.
- * 
+ *
  * Neither the name of Sun Microsystems, Inc. or the names of
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
- * 
+ *
  * This software is provided "AS IS," without a warranty of any kind. ALL
  * EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES,
  * INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A
@@ -28,11 +28,11 @@
  * DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY,
  * ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF
  * SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * 
+ *
  * You acknowledge that this software is not designed or intended for use
  * in the design, construction, operation or maintenance of any nuclear
  * facility.
- * 
+ *
  */
 
 package net.java.joglutils.msg.test;
@@ -40,23 +40,48 @@ package net.java.joglutils.msg.test;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.event.*;
-import java.awt.image.*;
-import java.net.*;
-import java.util.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.*;
-import javax.swing.event.*;
+import javax.swing.ListModel;
 
-import javax.media.opengl.*;
-import javax.media.opengl.awt.*;
-import com.sun.opengl.util.awt.*;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLDrawableFactory;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLOffscreenAutoDrawable;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.awt.AWTGLAutoDrawable;
+import com.jogamp.opengl.util.awt.TextureRenderer;
 
-import net.java.joglutils.msg.actions.*;
-import net.java.joglutils.msg.collections.*;
-import net.java.joglutils.msg.math.*;
-import net.java.joglutils.msg.misc.*;
-import net.java.joglutils.msg.nodes.*;
+import net.java.joglutils.msg.actions.GLRenderAction;
+import net.java.joglutils.msg.actions.RayPickAction;
+import net.java.joglutils.msg.collections.Vec2fCollection;
+import net.java.joglutils.msg.collections.Vec3fCollection;
+import net.java.joglutils.msg.collections.Vec4fCollection;
+import net.java.joglutils.msg.math.Rotf;
+import net.java.joglutils.msg.math.Vec2f;
+import net.java.joglutils.msg.math.Vec3f;
+import net.java.joglutils.msg.math.Vec4f;
+import net.java.joglutils.msg.misc.Path;
+import net.java.joglutils.msg.misc.PickedPoint;
+import net.java.joglutils.msg.misc.SystemTime;
+import net.java.joglutils.msg.nodes.Blend;
+import net.java.joglutils.msg.nodes.Color4;
+import net.java.joglutils.msg.nodes.Coordinate3;
+import net.java.joglutils.msg.nodes.PerspectiveCamera;
+import net.java.joglutils.msg.nodes.Separator;
+import net.java.joglutils.msg.nodes.Texture2;
+import net.java.joglutils.msg.nodes.TextureCoordinate2;
+import net.java.joglutils.msg.nodes.Transform;
+import net.java.joglutils.msg.nodes.TriangleSet;
 
 /**
  * A test implementing a 3D display shelf component. This renderer is
@@ -66,22 +91,22 @@ import net.java.joglutils.msg.nodes.*;
  */
 
 public class DisplayShelfRenderer implements GLEventListener {
-  private float DEFAULT_ASPECT_RATIO = 0.665f;
+  private final float DEFAULT_ASPECT_RATIO = 0.665f;
   // This also affects the spacing
-  private float DEFAULT_HEIGHT = 1.5f;
-  private float DEFAULT_ON_SCREEN_FRAC = 0.5f;
-  private float EDITING_ON_SCREEN_FRAC = 0.95f;
-  private float offsetFrac;
+  private final float DEFAULT_HEIGHT = 1.5f;
+  private final float DEFAULT_ON_SCREEN_FRAC = 0.5f;
+  private final float EDITING_ON_SCREEN_FRAC = 0.95f;
+  private final float offsetFrac;
 
-  private float STACKED_SPACING_FRAC  = 0.3f;
-  private float SELECTED_SPACING_FRAC = 0.6f;
-  private float EDITED_SPACING_FRAC   = 1.5f;
+  private final float STACKED_SPACING_FRAC  = 0.3f;
+  private final float SELECTED_SPACING_FRAC = 0.6f;
+  private final float EDITED_SPACING_FRAC   = 1.5f;
 
   // This is how much we raise the geometry above the floor in single image mode
-  private float SINGLE_IMAGE_MODE_RAISE_FRAC = 2.0f;
+  private final float SINGLE_IMAGE_MODE_RAISE_FRAC = 2.0f;
 
   // The camera
-  private PerspectiveCamera camera;
+  private final PerspectiveCamera camera;
 
   static class TitleGraph {
     Object imageDescriptor;
@@ -90,24 +115,24 @@ public class DisplayShelfRenderer implements GLEventListener {
     Texture2  texture = new Texture2();
     Coordinate3 coords = new Coordinate3();
 
-    TitleGraph(Object imageDescriptor) {
+    TitleGraph(final Object imageDescriptor) {
       this.imageDescriptor = imageDescriptor;
     }
   }
 
   // This is used to avoid having to re-initialize textures during
   // resizes of Swing components
-  private GLPbuffer sharedPbuffer;
+  private final GLOffscreenAutoDrawable sharedPbuffer;
   private boolean firstInit = true;
 
   private AWTGLAutoDrawable drawable;
 
-  private Separator root;
+  private final Separator root;
   private Separator imageRoot;
-  private Fetcher<Integer> fetcher;
-  private ListModel model;
-  private List<TitleGraph> titles = new ArrayList<TitleGraph>();
-  private GLRenderAction ra = new GLRenderAction();
+  private final Fetcher<Integer> fetcher;
+  private final ListModel model;
+  private final List<TitleGraph> titles = new ArrayList<TitleGraph>();
+  private final GLRenderAction ra = new GLRenderAction();
   private int targetIndex;
   // This encodes both the current position and the horizontal animation alpha
   private float currentIndex;
@@ -116,7 +141,7 @@ public class DisplayShelfRenderer implements GLEventListener {
   private float currentZ;
   private float targetZ;
   // This is effectively a constant
-  private float viewingZ;
+  private final float viewingZ;
   // This is also currently effectively a constant, though we need to
   // compute it dynamically for each picture to get it to show up
   // centered
@@ -128,7 +153,7 @@ public class DisplayShelfRenderer implements GLEventListener {
   // If the difference between the current and target values of any of
   // the above are > EPSILON, then we will continue repainting
   private static final float EPSILON = 1.0e-3f;
-  private SystemTime time;
+  private final SystemTime time;
   private boolean animating;
   private boolean forceRecompute;
   // Single image mode toggle
@@ -144,18 +169,19 @@ public class DisplayShelfRenderer implements GLEventListener {
   private volatile boolean doneLoading;
 
   class DownloadListener implements ProgressListener<Integer> {
-    public void progressStart(ProgressEvent<Integer> evt) {}
-    public void progressUpdate(ProgressEvent<Integer> evt) {}
-    public void progressEnd(ProgressEvent<Integer> evt) {
-      updateImage(evt.getClientIdentifier());
+    public void progressStart(final ProgressEvent<Integer> evt) {}
+    public void progressUpdate(final ProgressEvent<Integer> evt) {}
+    public void progressEnd(final ProgressEvent<Integer> evt) {
+      updateImage(glp, evt.getClientIdentifier());
     }
   }
 
-  public DisplayShelfRenderer(ListModel model) {
+  public DisplayShelfRenderer(final ListModel model) {
     // Create a small pbuffer with which we share textures and display
     // lists to avoid having to reload textures during repeated calls
     // to init()
-    sharedPbuffer = GLDrawableFactory.getFactory(GLProfile.getDefault()).createGLPbuffer(new GLCapabilities(GLProfile.getDefault()), null, 1, 1, null);
+    final GLCapabilities glcaps = new GLCapabilities(GLProfile.getDefault());
+    sharedPbuffer = GLDrawableFactory.getFactory(GLProfile.getDefault()).createOffscreenAutoDrawable(null, glcaps, null, 8, 8);
     sharedPbuffer.display();
 
     this.fetcher = new BasicFetcher<Integer>();
@@ -184,7 +210,7 @@ public class DisplayShelfRenderer implements GLEventListener {
     return sharedPbuffer.getContext();
   }
 
-  public void setSingleImageMode(boolean singleImageMode, boolean animateTransition) {
+  public void setSingleImageMode(final boolean singleImageMode, final boolean animateTransition) {
     this.singleImageMode = singleImageMode;
     if (!animating) {
       time.rebase();
@@ -204,7 +230,7 @@ public class DisplayShelfRenderer implements GLEventListener {
     return titles.size();
   }
 
-  public void setTargetIndex(int index) {
+  public void setTargetIndex(final int index) {
     if (targetIndex == index)
       return;
 
@@ -222,12 +248,15 @@ public class DisplayShelfRenderer implements GLEventListener {
     return targetIndex;
   }
 
-  public void init(GLAutoDrawable d) {
+  private GLProfile glp = null;
+
+  public void init(final GLAutoDrawable d) {
     this.drawable = (AWTGLAutoDrawable) d;
-    GL gl = drawable.getGL();
+    final GL gl = drawable.getGL();
 
     if (firstInit) {
       firstInit = false;
+      glp = gl.getGLProfile();
 
       // Build the scene graph
 
@@ -241,45 +270,45 @@ public class DisplayShelfRenderer implements GLEventListener {
       imageRoot = new Separator();
 
       // The mirrored images under the floor
-      Separator mirrorRoot = new Separator();
+      final Separator mirrorRoot = new Separator();
 
-      Transform mirrorXform = new Transform();
+      final Transform mirrorXform = new Transform();
       // Mirror vertically
       mirrorXform.getTransform().set(1, 1, -1.0f);
       mirrorRoot.addChild(mirrorXform);
       // Assume we know what we're doing here with setting per-vertex
       // colors for each piece of geometry in one shot
-      Color4 colorNode = new Color4();
-      Vec4fCollection colors = new Vec4fCollection();
-      Vec4f fadeTop = new Vec4f(0.75f, 0.75f, 0.75f, 0.75f);
-      Vec4f fadeBot = new Vec4f(0.25f, 0.25f, 0.25f, 0.25f);
+      final Color4 colorNode = new Color4();
+      final Vec4fCollection colors = new Vec4fCollection();
+      final Vec4f fadeTop = new Vec4f(0.75f, 0.75f, 0.75f, 0.75f);
+      final Vec4f fadeBot = new Vec4f(0.25f, 0.25f, 0.25f, 0.25f);
       // First triangle
       colors.add(fadeTop);
       colors.add(fadeTop);
       colors.add(fadeBot);
-      // Second triangle    
+      // Second triangle
       colors.add(fadeTop);
       colors.add(fadeBot);
       colors.add(fadeBot);
       colorNode.setData(colors);
       mirrorRoot.addChild(colorNode);
 
-      TriangleSet tris = new TriangleSet();
+      final TriangleSet tris = new TriangleSet();
       tris.setNumTriangles(2);
 
       for (int i = 0; i < model.getSize(); i++) {
-        Object obj = model.getElementAt(i);
-        TitleGraph graph = new TitleGraph(obj);
+        final Object obj = model.getElementAt(i);
+        final TitleGraph graph = new TitleGraph(obj);
         titles.add(graph);
         computeCoords(graph.coords, DEFAULT_ASPECT_RATIO);
         graph.xform.getTransform().setTranslation(new Vec3f(i, 0, 0));
-        Separator sep = graph.sep;
+        final Separator sep = graph.sep;
         sep.addChild(graph.xform);
         sep.addChild(graph.coords);
         // Add in the clock texture at the beginning
         sep.addChild(clockTexture);
-        TextureCoordinate2 texCoordNode = new TextureCoordinate2();
-        Vec2fCollection texCoords = new Vec2fCollection();
+        final TextureCoordinate2 texCoordNode = new TextureCoordinate2();
+        final Vec2fCollection texCoords = new Vec2fCollection();
         // Texture coordinates for two triangles
         // First triangle
         texCoords.add(new Vec2f( 1,  1));
@@ -300,46 +329,46 @@ public class DisplayShelfRenderer implements GLEventListener {
       }
 
       // Now produce the floor geometry
-      float maxSpacing = DEFAULT_HEIGHT * Math.max(STACKED_SPACING_FRAC, Math.max(SELECTED_SPACING_FRAC, EDITED_SPACING_FRAC));
-      int i = model.getSize();
-      float minx = -i * maxSpacing;
-      float maxx = 2 * i * maxSpacing;
+      final float maxSpacing = DEFAULT_HEIGHT * Math.max(STACKED_SPACING_FRAC, Math.max(SELECTED_SPACING_FRAC, EDITED_SPACING_FRAC));
+      final int i = model.getSize();
+      final float minx = -i * maxSpacing;
+      final float maxx = 2 * i * maxSpacing;
       // Furthest back from the camera
-      float minz = -2 * DEFAULT_HEIGHT;
+      final float minz = -2 * DEFAULT_HEIGHT;
       // Assume this will be close enough to cover all of the mirrored geometry
-      float maxz =  DEFAULT_HEIGHT;
-      Separator floorRoot = new Separator();
-      Blend blend = new Blend();
+      final float maxz =  DEFAULT_HEIGHT;
+      final Separator floorRoot = new Separator();
+      final Blend blend = new Blend();
       blend.setEnabled(true);
       blend.setSourceFunc(Blend.ONE);
       blend.setDestFunc(Blend.ONE_MINUS_SRC_ALPHA);
       floorRoot.addChild(blend);
-      Coordinate3 floorCoords = new Coordinate3();
+      final Coordinate3 floorCoords = new Coordinate3();
       floorCoords.setData(new Vec3fCollection());
       // First triangle
       floorCoords.getData().add(new Vec3f(maxx, 0, minz));
       floorCoords.getData().add(new Vec3f(minx, 0, minz));
       floorCoords.getData().add(new Vec3f(minx, 0, maxz));
-      // Second triangle    
+      // Second triangle
       floorCoords.getData().add(new Vec3f(maxx, 0, minz));
       floorCoords.getData().add(new Vec3f(minx, 0, maxz));
       floorCoords.getData().add(new Vec3f(maxx, 0, maxz));
       floorRoot.addChild(floorCoords);
       // Colors
-      Vec4f gray = new Vec4f(0.4f, 0.4f, 0.4f, 0.4f);
-      Vec4f clearGray = new Vec4f(0.0f, 0.0f, 0.0f, 0.0f);
-      Color4 floorColors = new Color4();
+      final Vec4f gray = new Vec4f(0.4f, 0.4f, 0.4f, 0.4f);
+      final Vec4f clearGray = new Vec4f(0.0f, 0.0f, 0.0f, 0.0f);
+      final Color4 floorColors = new Color4();
       floorColors.setData(new Vec4fCollection());
       // First triangle
       floorColors.getData().add(gray);
       floorColors.getData().add(gray);
       floorColors.getData().add(clearGray);
-      // Second triangle    
+      // Second triangle
       floorColors.getData().add(gray);
       floorColors.getData().add(clearGray);
       floorColors.getData().add(clearGray);
       floorRoot.addChild(floorColors);
-    
+
       floorRoot.addChild(tris);
 
       // Now set up the overall scene graph
@@ -351,7 +380,7 @@ public class DisplayShelfRenderer implements GLEventListener {
       // Attach listeners (this is only for testing for now)
       drawable.addMouseListener(new MListener());
       drawable.addKeyListener(new KeyAdapter() {
-          public void keyPressed(KeyEvent e) {
+          public void keyPressed(final KeyEvent e) {
             switch (e.getKeyCode()) {
             case KeyEvent.VK_SPACE:
               setSingleImageMode(!getSingleImageMode(), true);
@@ -379,22 +408,22 @@ public class DisplayShelfRenderer implements GLEventListener {
 
       // Get the loading started
       for (int j = 0; j < titles.size(); j++) {
-        updateImage(j);
+        updateImage(glp, j);
       }
     }
   }
 
-  public void display(GLAutoDrawable drawable) {
+  public void display(final GLAutoDrawable drawable) {
     // Recompute position of camera and orientation of images
-    boolean repaintAgain = recompute();
+    final boolean repaintAgain = recompute();
 
     if (!doneLoading) {
       if (!repaintAgain) {
         time.update();
       }
 
-      TextureRenderer rend = clockTexture.getTextureRenderer();
-      Graphics2D g = rend.createGraphics();
+      final TextureRenderer rend = clockTexture.getTextureRenderer();
+      final Graphics2D g = rend.createGraphics();
       drawClock(g, (int) (time.time() * 30),
                 0, 0, rend.getWidth(), rend.getHeight());
       g.dispose();
@@ -402,7 +431,7 @@ public class DisplayShelfRenderer implements GLEventListener {
     }
 
     // Redraw
-    GL gl = drawable.getGL();
+    final GL gl = drawable.getGL();
     gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
     ra.apply(root);
 
@@ -414,30 +443,30 @@ public class DisplayShelfRenderer implements GLEventListener {
     }
   }
 
-  public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
+  public void reshape(final GLAutoDrawable drawable, final int x, final int y, final int width, final int height) {
   }
 
-  public void dispose(GLAutoDrawable drawable) {}
+  public void dispose(final GLAutoDrawable drawable) {}
 
   //----------------------------------------------------------------------
   // Internals only below this point
   //
 
-  private void computeCoords(Coordinate3 coordNode, float aspectRatio) {
+  private void computeCoords(final Coordinate3 coordNode, final float aspectRatio) {
     Vec3fCollection coords = coordNode.getData();
     if (coords == null) {
       coords = new Vec3fCollection();
-      Vec3f zero = new Vec3f();
+      final Vec3f zero = new Vec3f();
       for (int i = 0; i < 6; i++) {
         coords.add(zero);
       }
       coordNode.setData(coords);
     }
     // Now compute the actual values
-    Vec3f lowerLeft  = new Vec3f(-0.5f * DEFAULT_HEIGHT * aspectRatio, 0, 0);
-    Vec3f lowerRight = new Vec3f( 0.5f * DEFAULT_HEIGHT * aspectRatio, 0, 0);
-    Vec3f upperLeft  = new Vec3f(-0.5f * DEFAULT_HEIGHT * aspectRatio, DEFAULT_HEIGHT, 0);
-    Vec3f upperRight = new Vec3f( 0.5f * DEFAULT_HEIGHT * aspectRatio, DEFAULT_HEIGHT, 0);
+    final Vec3f lowerLeft  = new Vec3f(-0.5f * DEFAULT_HEIGHT * aspectRatio, 0, 0);
+    final Vec3f lowerRight = new Vec3f( 0.5f * DEFAULT_HEIGHT * aspectRatio, 0, 0);
+    final Vec3f upperLeft  = new Vec3f(-0.5f * DEFAULT_HEIGHT * aspectRatio, DEFAULT_HEIGHT, 0);
+    final Vec3f upperRight = new Vec3f( 0.5f * DEFAULT_HEIGHT * aspectRatio, DEFAULT_HEIGHT, 0);
     // First triangle
     coords.set(0, upperRight);
     coords.set(1, upperLeft);
@@ -448,27 +477,27 @@ public class DisplayShelfRenderer implements GLEventListener {
     coords.set(5, lowerRight);
   }
 
-  private static void drawClock(Graphics2D g, int minsPastMidnight,
-                                int x, int y, int width, int height) {
+  private static void drawClock(final Graphics2D g, final int minsPastMidnight,
+                                final int x, final int y, final int width, final int height) {
     g.setColor(Color.DARK_GRAY);
     g.fillRect(x, y, width, height);
     g.setColor(Color.GRAY);
-    int midx = (int) (x + (width / 2.0f));
-    int midy = (int) (y + (height / 2.0f));
-    int sz = (int) (0.8f * Math.min(width, height));
+    final int midx = (int) (x + (width / 2.0f));
+    final int midy = (int) (y + (height / 2.0f));
+    final int sz = (int) (0.8f * Math.min(width, height));
     g.setStroke(new BasicStroke(sz / 20.0f,
                                 BasicStroke.CAP_ROUND,
                                 BasicStroke.JOIN_MITER));
-    int arcSz = (int) (0.4f * sz);
-    int smallHandSz = (int) (0.3f * sz);
-    int bigHandSz   = (int) (0.4f * sz);
+    final int arcSz = (int) (0.4f * sz);
+    final int smallHandSz = (int) (0.3f * sz);
+    final int bigHandSz   = (int) (0.4f * sz);
     g.drawRoundRect(midx - (sz / 2), midy - (sz / 2),
                     sz, sz,
                     arcSz, arcSz);
-    float hour = minsPastMidnight / 60.0f;
-    int   min  = minsPastMidnight % 60;
-    float hourAngle = hour * 2.0f * (float) Math.PI / 12;
-    float minAngle  = min * 2.0f * (float) Math.PI / 60;
+    final float hour = minsPastMidnight / 60.0f;
+    final int   min  = minsPastMidnight % 60;
+    final float hourAngle = hour * 2.0f * (float) Math.PI / 12;
+    final float minAngle  = min * 2.0f * (float) Math.PI / 60;
 
     g.drawLine(midx, midy,
                midx + (int) (smallHandSz * Math.cos(hourAngle)),
@@ -479,13 +508,13 @@ public class DisplayShelfRenderer implements GLEventListener {
   }
 
   private void startClockAnimation() {
-    Thread clockAnimThread = new Thread(new Runnable() {
+    final Thread clockAnimThread = new Thread(new Runnable() {
         public void run() {
           while (!doneLoading) {
             drawable.repaint();
             try {
               Thread.sleep(100);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
             }
           }
         }
@@ -493,19 +522,19 @@ public class DisplayShelfRenderer implements GLEventListener {
     clockAnimThread.start();
   }
 
-  private void updateImage(int id) {
-    TitleGraph graph = titles.get(id);
+  private void updateImage(final GLProfile glp, final int id) {
+    final TitleGraph graph = titles.get(id);
     // Re-fetch
-    BufferedImage img = fetcher.getImage(graph.imageDescriptor,
+    final BufferedImage img = fetcher.getImage(graph.imageDescriptor,
                                          Integer.valueOf(id),
                                          -1);
     if (img != null) {
       // We don't need the image descriptor any more
       graph.imageDescriptor = null;
       graph.sep.replaceChild(clockTexture, graph.texture);
-      graph.texture.setTexture(img, false);
+      graph.texture.setTexture(glp, img, false);
       // Figure out the new aspect ratio based on the image's width and height
-      float aspectRatio = (float) img.getWidth() / (float) img.getHeight();
+      final float aspectRatio = (float) img.getWidth() / (float) img.getHeight();
       // Compute new coordinates
       computeCoords(graph.coords, aspectRatio);
       // Schedule a repaint
@@ -514,7 +543,7 @@ public class DisplayShelfRenderer implements GLEventListener {
 
     // See whether we're completely done loading
     boolean done = true;
-    for (TitleGraph cur : titles) {
+    for (final TitleGraph cur : titles) {
       if (cur.imageDescriptor != null) {
         done = false;
         break;
@@ -525,7 +554,7 @@ public class DisplayShelfRenderer implements GLEventListener {
     }
   }
 
-  private void recomputeTargetYZ(boolean animate) {
+  private void recomputeTargetYZ(final boolean animate) {
     if (singleImageMode) {
       // Compute a target Y and Z depth based on the image we want to view
 
@@ -558,7 +587,7 @@ public class DisplayShelfRenderer implements GLEventListener {
     forceRecompute = false;
 
     time.update();
-    float deltaT = (float) time.deltaT();
+    final float deltaT = (float) time.deltaT();
 
     // Make the animation speed independent of frame rate
     currentIndex = currentIndex + (targetIndex - currentIndex) * deltaT * ANIM_SCALE_FACTOR;
@@ -566,32 +595,32 @@ public class DisplayShelfRenderer implements GLEventListener {
     currentY = currentY + (targetY - currentY) * deltaT * ANIM_SCALE_FACTOR;
     // An alpha of 0 indicates we're fully in viewing mode
     // An alpha of 1 indicates we're fully in editing mode
-    float zAlpha = (currentZ - viewingZ) / (editingZ - viewingZ);
+    final float zAlpha = (currentZ - viewingZ) / (editingZ - viewingZ);
 
     // Recompute the positions and orientations of each title, and the position of the camera
-    int firstIndex  = (int) Math.floor(currentIndex);
+    final int firstIndex  = (int) Math.floor(currentIndex);
     int secondIndex = (int) Math.ceil(currentIndex);
     if (secondIndex == firstIndex) {
       secondIndex = firstIndex + 1;
     }
 
-    float alpha = currentIndex - firstIndex;
+    final float alpha = currentIndex - firstIndex;
 
     int idx = 0;
     float curPos = 0.0f;
-    float stackedSpacing  = DEFAULT_HEIGHT * (zAlpha * EDITED_SPACING_FRAC + (1.0f - zAlpha) * STACKED_SPACING_FRAC);
-    float selectedSpacing = DEFAULT_HEIGHT * (zAlpha * EDITED_SPACING_FRAC + (1.0f - zAlpha) * SELECTED_SPACING_FRAC);
-    float angle = (1.0f - zAlpha) * ROT_ANGLE;
-    float y = zAlpha * DEFAULT_HEIGHT * SINGLE_IMAGE_MODE_RAISE_FRAC;
-    Rotf posAngle = new Rotf(Vec3f.Y_AXIS,  angle);
-    Rotf negAngle = new Rotf(Vec3f.Y_AXIS, -angle);
+    final float stackedSpacing  = DEFAULT_HEIGHT * (zAlpha * EDITED_SPACING_FRAC + (1.0f - zAlpha) * STACKED_SPACING_FRAC);
+    final float selectedSpacing = DEFAULT_HEIGHT * (zAlpha * EDITED_SPACING_FRAC + (1.0f - zAlpha) * SELECTED_SPACING_FRAC);
+    final float angle = (1.0f - zAlpha) * ROT_ANGLE;
+    final float y = zAlpha * DEFAULT_HEIGHT * SINGLE_IMAGE_MODE_RAISE_FRAC;
+    final Rotf posAngle = new Rotf(Vec3f.Y_AXIS,  angle);
+    final Rotf negAngle = new Rotf(Vec3f.Y_AXIS, -angle);
     float offset = 0;
 
     // Only bump the selected title out of the list if we're in viewing mode and close to it
     if (Math.abs(targetIndex - currentIndex) < 3.0) {
       offset = (1.0f - zAlpha) * offsetFrac * DEFAULT_HEIGHT;
     }
-    for (TitleGraph graph : titles) {
+    for (final TitleGraph graph : titles) {
       if (idx < firstIndex) {
         graph.xform.getTransform().setRotation(posAngle);
         graph.xform.getTransform().setTranslation(new Vec3f(curPos, y, 0));
@@ -605,7 +634,7 @@ public class DisplayShelfRenderer implements GLEventListener {
         curPos += (1.0f - alpha) * (selectedSpacing - stackedSpacing);
 
         // The camera is glued to this position
-        float cameraPos = curPos + alpha * selectedSpacing;
+        final float cameraPos = curPos + alpha * selectedSpacing;
 
         // Interpolate
         graph.xform.getTransform().setRotation(new Rotf(Vec3f.Y_AXIS, alpha * angle));
@@ -636,16 +665,16 @@ public class DisplayShelfRenderer implements GLEventListener {
   class MListener extends MouseAdapter {
     RayPickAction ra = new RayPickAction();
 
-    public void mousePressed(MouseEvent e) {
+    public void mousePressed(final MouseEvent e) {
       ra.setPoint(e.getX(), e.getY(), e.getComponent());
       // Apply to the scene root
       ra.apply(root);
-      List<PickedPoint> pickedPoints = ra.getPickedPoints();
+      final List<PickedPoint> pickedPoints = ra.getPickedPoints();
       Path p = null;
       if (!pickedPoints.isEmpty())
         p = pickedPoints.get(0).getPath();
       if (p != null && p.size() > 1) {
-        int idx = imageRoot.findChild(p.get(p.size() - 2));
+        final int idx = imageRoot.findChild(p.get(p.size() - 2));
         if (idx >= 0) {
           setTargetIndex(idx);
           // Need to keep the slider and this mechanism in sync

@@ -36,17 +36,19 @@
 
 package net.java.joglutils.msg.nodes;
 
-import java.awt.image.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import javax.media.opengl.*;
+import com.jogamp.opengl.GLException;
 
-import net.java.joglutils.msg.actions.*;
-import net.java.joglutils.msg.elements.*;
-import net.java.joglutils.msg.math.*;
-import net.java.joglutils.msg.misc.*;
+import net.java.joglutils.msg.actions.Action;
+import net.java.joglutils.msg.actions.GLRenderAction;
+import net.java.joglutils.msg.actions.GLResetAction;
+import net.java.joglutils.msg.elements.GLShaderElement;
+import net.java.joglutils.msg.elements.ShaderElement;
+import net.java.joglutils.msg.misc.Shader;
 
 /** Represents a vertex/fragment shader. */
 public class ShaderNode extends Node {

@@ -38,12 +38,18 @@
 package net.java.joglutils.msg.actions;
 
 import java.awt.Component;
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import net.java.joglutils.msg.math.*;
-import net.java.joglutils.msg.misc.*;
-import net.java.joglutils.msg.nodes.*;
+import net.java.joglutils.msg.math.Line;
+import net.java.joglutils.msg.math.Vec2f;
+import net.java.joglutils.msg.misc.ActionTable;
+import net.java.joglutils.msg.misc.PickedPoint;
+import net.java.joglutils.msg.misc.State;
+import net.java.joglutils.msg.nodes.Camera;
+import net.java.joglutils.msg.nodes.Node;
 
 public class RayPickAction extends Action {
   // Boilerplate

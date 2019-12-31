@@ -37,8 +37,8 @@
 
 package net.java.joglutils.msg.nodes;
 
-import net.java.joglutils.msg.actions.*;
-import net.java.joglutils.msg.misc.*;
+import net.java.joglutils.msg.actions.Action;
+import net.java.joglutils.msg.misc.State;
 
 /** Represents a push / pop of OpenGL state, "separating" the
     sub-graph below this separator from the nodes which follow it in

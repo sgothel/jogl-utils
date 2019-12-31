@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" output="classes" path="src"/>
+	<classpathentry kind="src" path="demos/src"/>
+	<classpathentry kind="var" path="JRE_LIB" sourcepath="JRE_SRC"/>
+	<classpathentry kind="lib" path="/usr/local/projects/JogAmp/jogl-demos/build/jogl-demos-util.jar"/>
+	<classpathentry kind="lib" path="/usr/local/projects/JogAmp/jogl-utils/make/lib/swing-layout-1.0.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jogamp"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

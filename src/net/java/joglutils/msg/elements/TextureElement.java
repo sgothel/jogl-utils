@@ -37,11 +37,9 @@
 
 package net.java.joglutils.msg.elements;
 
-import java.nio.*;
-import javax.media.opengl.*;
-
-import net.java.joglutils.msg.misc.*;
-import net.java.joglutils.msg.nodes.*;
+import net.java.joglutils.msg.misc.State;
+import net.java.joglutils.msg.misc.StateIndex;
+import net.java.joglutils.msg.nodes.Texture2;
 
 /** Represents the current texture, which is applied to any drawn
     geometry if texture coordinates are also supplied. */

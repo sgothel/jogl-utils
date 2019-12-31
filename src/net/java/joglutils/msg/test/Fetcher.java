@@ -30,7 +30,7 @@
 
 package net.java.joglutils.msg.test;
 
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
 
 /** 
  * Defines how elements in the ListModel associated with the

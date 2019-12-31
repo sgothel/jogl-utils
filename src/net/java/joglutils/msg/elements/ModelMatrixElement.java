@@ -37,8 +37,9 @@
 
 package net.java.joglutils.msg.elements;
 
-import net.java.joglutils.msg.math.*;
-import net.java.joglutils.msg.misc.*;
+import net.java.joglutils.msg.math.Mat4f;
+import net.java.joglutils.msg.misc.State;
+import net.java.joglutils.msg.misc.StateIndex;
 
 /** Represents the model matrix, which is the transformation applied
     to objects in the scene. */

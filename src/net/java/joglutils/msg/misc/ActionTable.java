@@ -37,11 +37,13 @@
 
 package net.java.joglutils.msg.misc;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.Map;
 
-import net.java.joglutils.msg.actions.*;
-import net.java.joglutils.msg.nodes.*;
+import net.java.joglutils.msg.actions.Action;
+import net.java.joglutils.msg.nodes.Node;
 
 /** Keeps track of methods which are attached to a particular Action
     type for a given set of Node types. This mechanism is different

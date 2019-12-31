@@ -37,9 +37,16 @@
 
 package net.java.joglutils.msg.nodes;
 
-import net.java.joglutils.msg.actions.*;
-import net.java.joglutils.msg.elements.*;
-import net.java.joglutils.msg.math.*;
+import net.java.joglutils.msg.actions.Action;
+import net.java.joglutils.msg.actions.GLRenderAction;
+import net.java.joglutils.msg.actions.RayPickAction;
+import net.java.joglutils.msg.elements.GLModelMatrixElement;
+import net.java.joglutils.msg.elements.GLProjectionMatrixElement;
+import net.java.joglutils.msg.elements.GLViewingMatrixElement;
+import net.java.joglutils.msg.elements.ModelMatrixElement;
+import net.java.joglutils.msg.elements.ProjectionMatrixElement;
+import net.java.joglutils.msg.elements.ViewingMatrixElement;
+import net.java.joglutils.msg.math.Mat4f;
 
 /** Represents a generalized 4x4 matrix transformation. */
 

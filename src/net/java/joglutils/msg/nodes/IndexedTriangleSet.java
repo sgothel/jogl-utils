@@ -37,10 +37,10 @@
 
 package net.java.joglutils.msg.nodes;
 
-import java.nio.*;
+import java.nio.IntBuffer;
 
-import net.java.joglutils.msg.actions.*;
-import net.java.joglutils.msg.misc.*;
+import net.java.joglutils.msg.actions.Action;
+import net.java.joglutils.msg.misc.TriangleCallback;
 
 /** An IndexedTriangleSet assembles the coordinates specified by a
     Coordinate3 node, and any auxiliary nodes such as a

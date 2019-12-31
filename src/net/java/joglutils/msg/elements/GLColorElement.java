@@ -37,11 +37,12 @@
 
 package net.java.joglutils.msg.elements;
 
-import java.nio.*;
-import javax.media.opengl.*;
-import javax.media.opengl.glu.*;
+import java.nio.FloatBuffer;
 
-import net.java.joglutils.msg.misc.*;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.glu.GLU;
+
+import net.java.joglutils.msg.misc.State;
 
 /** Represents the current set of colors, which are applied on a
     per-vertex basis to any drawn geometry, and causes side-effects in

@@ -37,9 +37,10 @@
 
 package net.java.joglutils.msg.misc;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import net.java.joglutils.msg.elements.*;
+import net.java.joglutils.msg.elements.Element;
 
 /** Represents a collection of state elements, which are updated by
     actions during scene graph traversal. */

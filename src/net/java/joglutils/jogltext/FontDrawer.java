@@ -36,12 +36,23 @@
 
 package net.java.joglutils.jogltext;
 
-import java.awt.*;
-import java.awt.geom.*;
-import java.awt.font.*;
-import java.text.*;
-import javax.media.opengl.*;
-import javax.media.opengl.glu.*;
+import java.awt.Font;
+import java.awt.font.FontRenderContext;
+import java.awt.font.GlyphVector;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.PathIterator;
+import java.text.StringCharacterIterator;
+
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2ES3;
+import com.jogamp.opengl.GL2GL3;
+import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
+import com.jogamp.opengl.glu.GLU;
+import com.jogamp.opengl.glu.GLUtessellator;
+import com.jogamp.opengl.glu.GLUtessellatorCallback;
+import com.jogamp.opengl.glu.GLUtessellatorCallbackAdapter;
 
 /**
  *  This class renders a TrueType Font into OpenGL
@@ -51,22 +62,22 @@ import javax.media.opengl.glu.*;
  *@created    January 29, 2004
  */
 public class FontDrawer {
-    
+
     public enum NormalMode {NONE, FLAT, AVERAGED};
-    
+
     private Font font;
     private float depth;
-    
+
     private boolean edgeOnly;
     private NormalMode normalMode;
-    
+
     /**
-     * Intstantiates a new FontDrawer initially rendering in the specified font. 
-     * 
+     * Intstantiates a new FontDrawer initially rendering in the specified font.
+     *
      * @param font the initial font for this FontDrawer
      * @throws java.lang.NullPointerException if the supplied font is null
      */
-    public FontDrawer(Font font) throws NullPointerException {
+    public FontDrawer(final Font font) throws NullPointerException {
         if (font == null)
             throw new NullPointerException("Can't use a null font to create a FontDrawer");
         this.font = font;
@@ -74,18 +85,18 @@ public class FontDrawer {
         edgeOnly = false;
         normalMode = NormalMode.FLAT;
     }
-    
+
     /**
      * Specifies which font to render with this FontDrawer
      * @param font a font to use for rendering
      ** @throws java.lang.NullPointerException if the supplied font is null
      */
-    public void setFont(Font font) throws NullPointerException {
+    public void setFont(final Font font) throws NullPointerException {
         if (font == null)
             throw new NullPointerException("Can't set a FontDrawer font to null");
         this.font = font;
     }
-    
+
     /**
      * Retrieves the Font currently associated with this FontDrawer
      * @return the Font in which this object renders strings
@@ -93,18 +104,18 @@ public class FontDrawer {
     public Font getFont() {
         return this.font;
     }
-    
+
     /**
      * Determines how long the sides of the rendered text is. In the special case of 0, the rendering is 2D.
      * @param depth specifies the z-size of the rendered 3D text. Negative numbers will be set to 0.
      */
-    public void setDepth(float depth) {
+    public void setDepth(final float depth) {
         if (depth <= 0)
             this.depth = 0;
         else
             this.depth = depth;
     }
-    
+
     /**
      * Retrieves the z-depth used for this FontDrawer's text rendering.
      * @return the z-depth of the rendered 3D text.
@@ -112,15 +123,15 @@ public class FontDrawer {
     public float getDepth() {
         return this.depth;
     }
-    
+
     /**
      * Sets if the text should be rendered as filled polygons or wireframe.
      * @param fill if true, uses filled polygons, if false, renderings are wireframe.
      */
-    public void setFill(boolean fill) {
+    public void setFill(final boolean fill) {
         this.edgeOnly = !fill;
     }
-    
+
     /**
      * Determines if the text is being rendered as filled polygons or wireframes.
      * @return if true, uses filled polygons, if false, renderings are wireframe.
@@ -128,7 +139,7 @@ public class FontDrawer {
     public boolean isFill() {
         return !this.edgeOnly;
     }
-    
+
     /**
      * Sets technique for rendering Normals. Available options:
      * None: Performs no calls to glNormal* - best performance
@@ -137,10 +148,10 @@ public class FontDrawer {
      *
      * @param mode the mode to render in.  Default is flat.
      */
-    public void setNormal( NormalMode mode ) {
+    public void setNormal( final NormalMode mode ) {
         this.normalMode = mode;
     }
-    
+
     /**
      * Determines which normal-calculation technique is being used.
      * @see setNormal
@@ -149,18 +160,18 @@ public class FontDrawer {
     public NormalMode getNormal() {
         return this.normalMode;
     }
-    
+
     /**
-     * Renders a string into the specified GL object, starting at the (0,0,0) point in OpenGL coordinates. 
+     * Renders a string into the specified GL object, starting at the (0,0,0) point in OpenGL coordinates.
      * Note that this creates a new GLU instance everytime it is called, which will negatively impact performance.
      *
      * @param str the string to render.
      * @param gl the OpenGL context in which to render the text.
      */
-    public void drawString(String str, GL2 gl) {
+    public void drawString(final String str, final GL2 gl) {
         drawString(str,new GLU(),gl);
     }
-    
+
     /**
      * Renders a string into the specified GL object, starting at the (0,0,0) point in OpenGL coordinates.
      *
@@ -168,13 +179,13 @@ public class FontDrawer {
      * @param glu a GLU instance to use for the text rendering (provided to prevent continuous re-instantiation of a GLU object)
      * @param gl the OpenGL context in which to render the text.
      */
-    public void drawString(String str, GLU glu, GL2 gl) {
-        GlyphVector gv = font.createGlyphVector(
+    public void drawString(final String str, final GLU glu, final GL2 gl) {
+        final GlyphVector gv = font.createGlyphVector(
                 new FontRenderContext(new AffineTransform(), true, true),
                 new StringCharacterIterator(str));
-        GeneralPath gp = (GeneralPath)gv.getOutline();
+        final GeneralPath gp = (GeneralPath)gv.getOutline();
         PathIterator pi = gp.getPathIterator(AffineTransform.getScaleInstance(1.0, -1.0), 1.0f);
-        
+
         if (this.normalMode != NormalMode.NONE)
             gl.glNormal3f(0,0,-1.0f);
         tesselateFace(glu, gl, pi, pi.getWindingRule(), this.edgeOnly);
@@ -196,14 +207,14 @@ public class FontDrawer {
                     drawSidesAvgNorm(gl,pi,this.edgeOnly,this.depth);
                     break;
             }
-            
+
         }
-        
+
     }
-    
+
     /**
      * Renders a string into the specified GL object, starting at the (xOff,yOff,zOff) point in OpenGL coordinates.
-     * Note that this creates a new GLU instance everytime it is called, which will negatively impact performance. 
+     * Note that this creates a new GLU instance everytime it is called, which will negatively impact performance.
      *
      * @param xOff the distance to translate the text in the x-direction
      * @param yOff the distance to translate the text in the y-direction
@@ -211,13 +222,13 @@ public class FontDrawer {
      * @param str the string to render.
      * @param gl the OpenGL context in which to render the text.
      */
-    public void drawString(String str, GL2 gl, float xOff, float yOff, float zOff) {
+    public void drawString(final String str, final GL2 gl, final float xOff, final float yOff, final float zOff) {
         drawString(str,new GLU(),gl,xOff,yOff,zOff);
     }
-    
+
     /**
      * Renders a string into the specified GL object, starting at the (xOff,yOff,zOff) point in OpenGL coordinates.
-     * 
+     *
      * @param xOff the distance to translate the text in the x-direction
      * @param yOff the distance to translate the text in the y-direction
      * @param zOff the distance to translate the text in the z-direction
@@ -225,80 +236,80 @@ public class FontDrawer {
      * @param glu a GLU instance to use for the text rendering (provided to prevent continuous re-instantiation of a GLU object)
      * @param gl the OpenGL context in which to render the text.
      */
-    public void drawString(String str, GLU glu, GL2 gl, float xOff, float yOff, float zOff) {
+    public void drawString(final String str, final GLU glu, final GL2 gl, final float xOff, final float yOff, final float zOff) {
         gl.glPushAttrib(GL2.GL_TRANSFORM_BIT);
-        gl.glMatrixMode(GL2.GL_MODELVIEW);
+        gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
         gl.glPushMatrix();
         gl.glTranslatef(xOff,yOff,zOff);
         this.drawString(str,glu,gl);
         gl.glPopMatrix();
         gl.glPopAttrib();
     }
-    
-    private void tesselateFace(GLU glu, GL2 gl, PathIterator pi, int windingRule, boolean justBoundary) {
+
+    private void tesselateFace(final GLU glu, final GL2 gl, final PathIterator pi, final int windingRule, final boolean justBoundary) {
         tesselateFace(glu,gl,pi,windingRule,justBoundary,0);
     }
-    
-    private void tesselateFace(GLU glu, GL2 gl, PathIterator pi, int windingRule, boolean justBoundary,double tessZ) {
-        GLUtessellatorCallback aCallback = new GLUtesselatorCallbackImpl(gl);
-        GLUtessellator tess = glu.gluNewTess();
-        
-        glu.gluTessCallback(tess, GLU.GLU_TESS_BEGIN, aCallback);
-        glu.gluTessCallback(tess, GLU.GLU_TESS_END, aCallback);
-        glu.gluTessCallback(tess, GLU.GLU_TESS_ERROR, aCallback);
-        glu.gluTessCallback(tess, GLU.GLU_TESS_VERTEX, aCallback);
-        glu.gluTessCallback(tess, GLU.GLU_TESS_COMBINE, aCallback);
-        
-        glu.gluTessNormal(tess, 0.0, 0.0, -1.0);
-        
+
+    private void tesselateFace(final GLU glu, final GL2 gl, final PathIterator pi, final int windingRule, final boolean justBoundary,final double tessZ) {
+        final GLUtessellatorCallback aCallback = new GLUtesselatorCallbackImpl(gl);
+        final GLUtessellator tess = GLU.gluNewTess();
+
+        GLU.gluTessCallback(tess, GLU.GLU_TESS_BEGIN, aCallback);
+        GLU.gluTessCallback(tess, GLU.GLU_TESS_END, aCallback);
+        GLU.gluTessCallback(tess, GLU.GLU_TESS_ERROR, aCallback);
+        GLU.gluTessCallback(tess, GLU.GLU_TESS_VERTEX, aCallback);
+        GLU.gluTessCallback(tess, GLU.GLU_TESS_COMBINE, aCallback);
+
+        GLU.gluTessNormal(tess, 0.0, 0.0, -1.0);
+
         switch (windingRule) {
             case PathIterator.WIND_EVEN_ODD:
-                glu.gluTessProperty(tess, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_ODD);
+                GLU.gluTessProperty(tess, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_ODD);
                 break;
             case PathIterator.WIND_NON_ZERO:
-                glu.gluTessProperty(tess, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_NONZERO);
+                GLU.gluTessProperty(tess, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_NONZERO);
                 break;
         }
-        
+
         if (justBoundary) {
-            glu.gluTessProperty(tess, GLU.GLU_TESS_BOUNDARY_ONLY, GL2.GL_TRUE);
+            GLU.gluTessProperty(tess, GLU.GLU_TESS_BOUNDARY_ONLY, GL.GL_TRUE);
         } else {
-            glu.gluTessProperty(tess, GLU.GLU_TESS_BOUNDARY_ONLY, GL2.GL_FALSE);
+            GLU.gluTessProperty(tess, GLU.GLU_TESS_BOUNDARY_ONLY, GL.GL_FALSE);
         }
-        
-        glu.gluTessBeginPolygon(tess, (double[])null);
-        
+
+        GLU.gluTessBeginPolygon(tess, (double[])null);
+
         for (; !pi.isDone(); pi.next()) {
-            double[] coords = new double[3];
+            final double[] coords = new double[3];
             coords[2] = tessZ;
-            
+
             switch (pi.currentSegment(coords)) {
                 case PathIterator.SEG_MOVETO:
-                    glu.gluTessBeginContour(tess);
+                    GLU.gluTessBeginContour(tess);
                     break;
                 case PathIterator.SEG_LINETO:
-                    glu.gluTessVertex(tess, coords, 0, coords);
+                    GLU.gluTessVertex(tess, coords, 0, coords);
                     break;
                 case PathIterator.SEG_CLOSE:
-                    glu.gluTessEndContour(tess);
+                    GLU.gluTessEndContour(tess);
                     break;
             }
         }
-        glu.gluTessEndPolygon(tess);
-        
-        glu.gluDeleteTess(tess);
+        GLU.gluTessEndPolygon(tess);
+
+        GLU.gluDeleteTess(tess);
     }
-    
-    private void drawSidesNoNorm(GL2 gl, PathIterator pi, boolean justBoundary,float tessZ) {
+
+    private void drawSidesNoNorm(final GL2 gl, final PathIterator pi, final boolean justBoundary,final float tessZ) {
         //TODO: texture coords
-        
+
         if (justBoundary)
-            gl.glPolygonMode(GL2.GL_FRONT_AND_BACK,GL2.GL_LINE);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL2GL3.GL_LINE);
         else
-            gl.glPolygonMode(GL2.GL_FRONT_AND_BACK,GL2.GL_FILL);
-        
-        for(float[] coords = new float[6];!pi.isDone();pi.next()) {
-            float[] currRender = new float[3];
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL2GL3.GL_FILL);
+
+        for(final float[] coords = new float[6];!pi.isDone();pi.next()) {
+            final float[] currRender = new float[3];
             switch(pi.currentSegment(coords)) {
                 case PathIterator.SEG_MOVETO:
                     gl.glBegin(GL2.GL_QUAD_STRIP);
@@ -331,21 +342,21 @@ public class FontDrawer {
             }
         }
     }
-    
-    private void drawSidesFlatNorm(GL2 gl, PathIterator pi, boolean justBoundary,float tessZ) {
+
+    private void drawSidesFlatNorm(final GL2 gl, final PathIterator pi, final boolean justBoundary,final float tessZ) {
         //TODO: texture coords
-        
+
         if (justBoundary)
-            gl.glPolygonMode(GL2.GL_FRONT_AND_BACK,GL2.GL_LINE);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL2GL3.GL_LINE);
         else
-            gl.glPolygonMode(GL2.GL_FRONT_AND_BACK,GL2.GL_FILL);
-        
-        float[] lastCoord = new float[3];
-        float[] firstCoord = new float[3];
-        for(float[] coords = new float[6];!pi.isDone();pi.next()) {
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL2GL3.GL_FILL);
+
+        final float[] lastCoord = new float[3];
+        final float[] firstCoord = new float[3];
+        for(final float[] coords = new float[6];!pi.isDone();pi.next()) {
             switch(pi.currentSegment(coords)) {
                 case PathIterator.SEG_MOVETO:
-                    gl.glBegin(GL2.GL_QUADS);
+                    gl.glBegin(GL2ES3.GL_QUADS);
                     lastCoord[0] = coords[0];
                     lastCoord[1] = coords[1];
                     firstCoord[0] = coords[0];
@@ -362,7 +373,7 @@ public class FontDrawer {
                     gl.glVertex3fv(coords,0);
                     coords[2] = 0;
                     gl.glVertex3fv(coords,0);
-                    
+
                     lastCoord[0] = coords[0];
                     lastCoord[1] = coords[1];
                     break;
@@ -384,25 +395,25 @@ public class FontDrawer {
             }
         }
     }
-    
-    
-    private void drawSidesAvgNorm(GL2 gl, PathIterator pi, boolean justBoundary,float tessZ) {
+
+
+    private void drawSidesAvgNorm(final GL2 gl, final PathIterator pi, final boolean justBoundary,final float tessZ) {
         //TODO: improve performance with some form of caching?
         //TODO: texture coords
         //TODO: check last coord - might not quite be correct?
-        
+
         if (justBoundary)
-            gl.glPolygonMode(GL2.GL_FRONT_AND_BACK,GL2.GL_LINE);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL2GL3.GL_LINE);
         else
-            gl.glPolygonMode(GL2.GL_FRONT_AND_BACK,GL2.GL_FILL);
-        
-        
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL2GL3.GL_FILL);
+
+
         float[] firstCoord = null;
         float[] secondCoord = null;
         float[] thirdCoord = null;
         float[] twoBackCoord = null;
         float[] oneBackCoord = null;
-        for(float[] coords = new float[6];!pi.isDone();pi.next()) {
+        for(final float[] coords = new float[6];!pi.isDone();pi.next()) {
             switch(pi.currentSegment(coords)) {
                 case PathIterator.SEG_MOVETO:
                     firstCoord = new float[3];
@@ -418,20 +429,20 @@ public class FontDrawer {
                         twoBackCoord = firstCoord.clone();
                         oneBackCoord = secondCoord.clone();
                     } else {
-                        float avgdeltax = oneBackCoord[0] - twoBackCoord[0] + coords[0] - oneBackCoord[0];
-                        float avgdeltay = oneBackCoord[1] - twoBackCoord[1] + coords[1] - oneBackCoord[1];
+                        final float avgdeltax = oneBackCoord[0] - twoBackCoord[0] + coords[0] - oneBackCoord[0];
+                        final float avgdeltay = oneBackCoord[1] - twoBackCoord[1] + coords[1] - oneBackCoord[1];
                         if (thirdCoord == null) {
                             thirdCoord = new float[3];
                             thirdCoord[0] = coords[0];
                             thirdCoord[1] = coords[1];
-                            
+
                         }
                         gl.glNormal3f(-avgdeltay,avgdeltax,0);
                         oneBackCoord[2] = 0.0f;
                         gl.glVertex3fv(oneBackCoord,0);
                         oneBackCoord[2] = tessZ;
                         gl.glVertex3fv(oneBackCoord,0);
-                        
+
                         //copy to not have to recreate
                         twoBackCoord[0] = oneBackCoord[0];
                         twoBackCoord[1] = oneBackCoord[1];
@@ -447,7 +458,7 @@ public class FontDrawer {
                     gl.glVertex3fv(oneBackCoord,0);
                     oneBackCoord[2] = tessZ;
                     gl.glVertex3fv(oneBackCoord,0);
-                    
+
                     avgdeltax = firstCoord[0] - oneBackCoord[0] + secondCoord[0] - firstCoord[0];
                     avgdeltay = firstCoord[1] - oneBackCoord[1] + secondCoord[1] - firstCoord[1];
                     gl.glNormal3f(-avgdeltay,avgdeltax,0);
@@ -455,7 +466,7 @@ public class FontDrawer {
                     gl.glVertex3fv(firstCoord,0);
                     firstCoord[2] = tessZ;
                     gl.glVertex3fv(firstCoord,0);
-                    
+
                     avgdeltax = secondCoord[0] - firstCoord[0] + thirdCoord[0] - secondCoord[0];
                     avgdeltay = secondCoord[1] - firstCoord[1] + thirdCoord[1] - secondCoord[1];
                     gl.glNormal3f(-avgdeltay,avgdeltax,0);
@@ -463,7 +474,7 @@ public class FontDrawer {
                     gl.glVertex3fv(secondCoord,0);
                     secondCoord[2] = tessZ;
                     gl.glVertex3fv(secondCoord,0);
-                    
+
                     gl.glEnd();
                     firstCoord = null;
                     secondCoord = null;
@@ -476,24 +487,24 @@ public class FontDrawer {
             }
         }
     }
-    
-    private class GLUtesselatorCallbackImpl extends javax.media.opengl.glu.GLUtessellatorCallbackAdapter {
-        private GL2 gl;
-        
-        public GLUtesselatorCallbackImpl(GL2 gl) {
+
+    private class GLUtesselatorCallbackImpl extends GLUtessellatorCallbackAdapter {
+        private final GL2 gl;
+
+        public GLUtesselatorCallbackImpl(final GL2 gl) {
             this.gl = gl;
         }
-        
-        public void begin(int type) {
+
+        public void begin(final int type) {
             gl.glBegin(type);
         }
-        
-        public void vertex(java.lang.Object vertexData) {
-            double[] coords = (double[])vertexData;
-            
+
+        public void vertex(final java.lang.Object vertexData) {
+            final double[] coords = (double[])vertexData;
+
             gl.glVertex3dv(coords,0);
         }
-        
+
         public void end() {
             gl.glEnd();
         }

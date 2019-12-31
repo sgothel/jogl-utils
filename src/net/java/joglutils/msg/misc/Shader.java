@@ -1,21 +1,21 @@
 /*
  * Copyright (c) 2007 Sun Microsystems, Inc. All Rights Reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * - Redistribution of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * - Redistribution in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in the
  *   documentation and/or other materials provided with the distribution.
- * 
+ *
  * Neither the name of Sun Microsystems, Inc. or the names of
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
- * 
+ *
  * This software is provided "AS IS," without a warranty of any kind. ALL
  * EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES,
  * INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A
@@ -28,7 +28,7 @@
  * DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY,
  * ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF
  * SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * 
+ *
  * You acknowledge that this software is not designed or intended for use
  * in the design, construction, operation or maintenance of any nuclear
  * facility.
@@ -36,9 +36,11 @@
 
 package net.java.joglutils.msg.misc;
 
-import javax.media.opengl.*;
-import javax.media.opengl.glu.GLU;
-import static javax.media.opengl.GL2.*;
+import static com.jogamp.opengl.GL2.*;
+
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLException;
+import com.jogamp.opengl.glu.GLU;
 
 /**
  * Represents an OpenGL shader program object, which can be constructed from
@@ -69,61 +71,61 @@ import static javax.media.opengl.GL2.*;
  * @author Chris Campbell
  */
 public class Shader {
-    
+
     /**
      * The handle to the OpenGL fragment program object.
      */
     private int id;
-    
+
     /**
      * Creates a new shader program object and compiles/links the provided
      * fragment shader code into that object.
-     * 
+     *
      * @param fragmentCode a {@code String} representing the fragment shader
      * source code to be compiled and linked
-     * 
+     *
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public Shader(String fragmentCode)
+    public Shader(final String fragmentCode)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
+        final GL2 gl = GLU.getCurrentGL().getGL2();
         id = createProgram(gl, null, fragmentCode);
     }
-    
+
     /**
      * Creates a new shader program object and compiles/links the provided
      * vertex shader and fragment shader code into that object.
-     * 
+     *
      * @param vertexCode a {@code String} representing the vertex shader
      * source code to be compiled and linked; this may be null if only a
      * fragment shader is going to be needed
      * @param fragmentCode a {@code String} representing the fragment shader
      * source code to be compiled and linked; this may be null if only a
      * vertex shader is going to be needed
-     * 
+     *
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public Shader(String vertexCode, String fragmentCode)
+    public Shader(final String vertexCode, final String fragmentCode)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
+        final GL2 gl = GLU.getCurrentGL().getGL2();
         id = createProgram(gl, vertexCode, fragmentCode);
     }
-    
+
     /**
      * Compiles and links a new shader program using the given sources.  If
      * successful, this function returns a handle to the newly created shader
      * program; otherwise returns 0.
-     * 
+     *
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    private static int createProgram(GL2 gl,
-                                     String vertexShaderSource,
-                                     String fragmentShaderSource)
+    private static int createProgram(final GL2 gl,
+                                     final String vertexShaderSource,
+                                     final String fragmentShaderSource)
         throws GLException
     {
         if (vertexShaderSource == null && fragmentShaderSource == null) {
@@ -131,12 +133,12 @@ public class Shader {
                 "Either vertexShaderSource or fragmentShaderSource " +
                 "must be specified");
         }
-        
+
         int shaderProgram;
         int vertexShader = 0;
         int fragmentShader = 0;
-        int[] success = new int[1];
-        int[] infoLogLength = new int[1];
+        final int[] success = new int[1];
+        final int[] infoLogLength = new int[1];
 
         if (vertexShaderSource != null) {
             vertexShader = compileShader(gl, vertexShaderSource, true);
@@ -144,7 +146,7 @@ public class Shader {
                 return 0;
             }
         }
-        
+
         if (fragmentShaderSource != null) {
             fragmentShader = compileShader(gl, fragmentShaderSource, false);
             if (fragmentShader == 0) {
@@ -156,7 +158,7 @@ public class Shader {
         }
 
         // create the program object and attach it to the shader
-        shaderProgram = gl.glCreateProgramObjectARB();
+        shaderProgram = (int) gl.glCreateProgramObjectARB(); // FIXME int-cast old ARM
         if (vertexShader != 0) {
             gl.glAttachObjectARB(shaderProgram, vertexShader);
             // it is now safe to delete the shader object
@@ -179,7 +181,7 @@ public class Shader {
                                      GL_OBJECT_INFO_LOG_LENGTH_ARB,
                                      infoLogLength, 0);
         if (infoLogLength[0] > 1) {
-            byte[] infoLog = new byte[1024];
+            final byte[] infoLog = new byte[1024];
             gl.glGetInfoLogARB(shaderProgram, 1024, null, 0, infoLog, 0);
             System.err.println("Linker message: " +
                                new String(infoLog));
@@ -192,24 +194,24 @@ public class Shader {
 
         return shaderProgram;
     }
-    
+
     /**
      * Compiles the given shader program.  If successful, this function returns
      * a handle to the newly created shader object; otherwise returns 0.
-     * 
+     *
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    private static int compileShader(GL2 gl, String shaderSource, boolean vertex)
+    private static int compileShader(final GL2 gl, final String shaderSource, final boolean vertex)
         throws GLException
     {
-        int kind = vertex ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER;
+        final int kind = vertex ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER;
         int shader;
-        int[] success = new int[1];
-        int[] infoLogLength = new int[1];
-        
+        final int[] success = new int[1];
+        final int[] infoLogLength = new int[1];
+
         // create the shader object and compile the shader source code
-        shader = gl.glCreateShaderObjectARB(kind);
+        shader = (int) gl.glCreateShaderObjectARB(kind); // FIXME int-cast old ARM
         gl.glShaderSourceARB(shader, 1, new String[] { shaderSource }, null, 0);
         gl.glCompileShaderARB(shader);
         gl.glGetObjectParameterivARB(shader,
@@ -221,7 +223,7 @@ public class Shader {
                                      GL_OBJECT_INFO_LOG_LENGTH_ARB,
                                      infoLogLength, 0);
         if (infoLogLength[0] > 1) {
-            byte[] infoLog = new byte[1024];
+            final byte[] infoLog = new byte[1024];
             gl.glGetInfoLogARB(shader, 1024, null, 0, infoLog, 0);
             System.err.println((vertex ? "Vertex" : "Fragment") +
                                " compile message: " +
@@ -232,43 +234,43 @@ public class Shader {
             gl.glDeleteObjectARB(shader);
             return 0;
         }
-        
+
         return shader;
     }
-    
+
     /**
      * Returns the underlying OpenGL program object handle for this fragment
      * shader. Most applications will not need to access this, since it is
      * handled automatically by the enable() and dispose() methods.
-     * 
+     *
      * @return the OpenGL program object handle for this fragment shader
      */
     public int getProgramObject() {
         return id;
     }
-    
+
     /**
      * Enables this shader program in the current GL context's state.
-     * 
+     *
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
     public void enable() throws GLException {
-        GL2 gl = GLU.getCurrentGL().getGL2();
+        final GL2 gl = GLU.getCurrentGL().getGL2();
         gl.glUseProgramObjectARB(id);
     }
-    
+
     /**
      * Disables this shader program in the current GL context's state.
-     * 
+     *
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
     public void disable() throws GLException {
-        GL2 gl = GLU.getCurrentGL().getGL2();
+        final GL2 gl = GLU.getCurrentGL().getGL2();
         gl.glUseProgramObjectARB(0);
     }
-    
+
     /**
      * Disposes the native resources used by this program object.
      *
@@ -276,7 +278,7 @@ public class Shader {
      * OpenGL-related errors occurred
      */
     public void dispose() throws GLException {
-        GL2 gl = GLU.getCurrentGL().getGL2();
+        final GL2 gl = GLU.getCurrentGL().getGL2();
         gl.glDeleteObjectARB(id);
         id = 0;
     }
@@ -290,14 +292,14 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniform(String name, int i0)
+    public void setUniform(final String name, final int i0)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
-        int loc = gl.glGetUniformLocationARB(id, name);
+        final GL2 gl = GLU.getCurrentGL().getGL2();
+        final int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform1iARB(loc, i0);
     }
-    
+
     /**
      * Sets the uniform variable of the given name with the provided
      * integer values.
@@ -308,14 +310,14 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniform(String name, int i0, int i1)
+    public void setUniform(final String name, final int i0, final int i1)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
-        int loc = gl.glGetUniformLocationARB(id, name);
+        final GL2 gl = GLU.getCurrentGL().getGL2();
+        final int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform2iARB(loc, i0, i1);
     }
-    
+
     /**
      * Sets the uniform variable of the given name with the provided
      * integer values.
@@ -327,14 +329,14 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniform(String name, int i0, int i1, int i2)
+    public void setUniform(final String name, final int i0, final int i1, final int i2)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
-        int loc = gl.glGetUniformLocationARB(id, name);
+        final GL2 gl = GLU.getCurrentGL().getGL2();
+        final int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform3iARB(loc, i0, i1, i2);
     }
-    
+
     /**
      * Sets the uniform variable of the given name with the provided
      * integer values.
@@ -347,14 +349,14 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniform(String name, int i0, int i1, int i2, int i3)
+    public void setUniform(final String name, final int i0, final int i1, final int i2, final int i3)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
-        int loc = gl.glGetUniformLocationARB(id, name);
+        final GL2 gl = GLU.getCurrentGL().getGL2();
+        final int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform4iARB(loc, i0, i1, i2, i3);
     }
-    
+
     /**
      * Sets the uniform variable of the given name with the provided
      * float value.
@@ -364,14 +366,14 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniform(String name, float f0)
+    public void setUniform(final String name, final float f0)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
-        int loc = gl.glGetUniformLocationARB(id, name);
+        final GL2 gl = GLU.getCurrentGL().getGL2();
+        final int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform1fARB(loc, f0);
     }
-    
+
     /**
      * Sets the uniform variable of the given name with the provided
      * float values.
@@ -382,14 +384,14 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniform(String name, float f0, float f1)
+    public void setUniform(final String name, final float f0, final float f1)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
-        int loc = gl.glGetUniformLocationARB(id, name);
+        final GL2 gl = GLU.getCurrentGL().getGL2();
+        final int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform2fARB(loc, f0, f1);
     }
-    
+
     /**
      * Sets the uniform variable of the given name with the provided
      * float values.
@@ -401,14 +403,14 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniform(String name, float f0, float f1, float f2)
+    public void setUniform(final String name, final float f0, final float f1, final float f2)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
-        int loc = gl.glGetUniformLocationARB(id, name);
+        final GL2 gl = GLU.getCurrentGL().getGL2();
+        final int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform3fARB(loc, f0, f1, f2);
     }
-    
+
     /**
      * Sets the uniform variable of the given name with the provided
      * float values.
@@ -421,14 +423,14 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniform(String name, float f0, float f1, float f2, float f3)
+    public void setUniform(final String name, final float f0, final float f1, final float f2, final float f3)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
-        int loc = gl.glGetUniformLocationARB(id, name);
+        final GL2 gl = GLU.getCurrentGL().getGL2();
+        final int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform4fARB(loc, f0, f1, f2, f3);
     }
-    
+
     /**
      * Sets the uniform array variable of the given name with the provided
      * int array values.
@@ -440,14 +442,14 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniformArray1i(String name, int count, int[] vals, int off)
+    public void setUniformArray1i(final String name, final int count, final int[] vals, final int off)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
-        int loc = gl.glGetUniformLocationARB(id, name);
+        final GL2 gl = GLU.getCurrentGL().getGL2();
+        final int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform1ivARB(loc, count, vals, off);
     }
-    
+
     /**
      * Sets the uniform array variable of the given name with the provided
      * int array values.
@@ -459,14 +461,14 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniformArray2i(String name, int count, int[] vals, int off)
+    public void setUniformArray2i(final String name, final int count, final int[] vals, final int off)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
-        int loc = gl.glGetUniformLocationARB(id, name);
+        final GL2 gl = GLU.getCurrentGL().getGL2();
+        final int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform2ivARB(loc, count, vals, off);
     }
-    
+
     /**
      * Sets the uniform array variable of the given name with the provided
      * int array values.
@@ -478,14 +480,14 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniformArray3i(String name, int count, int[] vals, int off)
+    public void setUniformArray3i(final String name, final int count, final int[] vals, final int off)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
-        int loc = gl.glGetUniformLocationARB(id, name);
+        final GL2 gl = GLU.getCurrentGL().getGL2();
+        final int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform3ivARB(loc, count, vals, off);
     }
-    
+
     /**
      * Sets the uniform array variable of the given name with the provided
      * int array values.
@@ -497,11 +499,11 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniformArray4i(String name, int count, int[] vals, int off)
+    public void setUniformArray4i(final String name, final int count, final int[] vals, final int off)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
-        int loc = gl.glGetUniformLocationARB(id, name);
+        final GL2 gl = GLU.getCurrentGL().getGL2();
+        final int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform4ivARB(loc, count, vals, off);
     }
 
@@ -516,15 +518,15 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniformArray1f(String name,
-                                  int count, float[] vals, int off)
+    public void setUniformArray1f(final String name,
+                                  final int count, final float[] vals, final int off)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
-        int loc = gl.glGetUniformLocationARB(id, name);
+        final GL2 gl = GLU.getCurrentGL().getGL2();
+        final int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform1fvARB(loc, count, vals, off);
     }
-    
+
     /**
      * Sets the uniform array variable of the given name with the provided
      * float array values.
@@ -536,15 +538,15 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniformArray2f(String name,
-                                  int count, float[] vals, int off)
+    public void setUniformArray2f(final String name,
+                                  final int count, final float[] vals, final int off)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
-        int loc = gl.glGetUniformLocationARB(id, name);
+        final GL2 gl = GLU.getCurrentGL().getGL2();
+        final int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform2fvARB(loc, count, vals, off);
     }
-    
+
     /**
      * Sets the uniform array variable of the given name with the provided
      * float array values.
@@ -556,15 +558,15 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniformArray3f(String name,
-                                  int count, float[] vals, int off)
+    public void setUniformArray3f(final String name,
+                                  final int count, final float[] vals, final int off)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
-        int loc = gl.glGetUniformLocationARB(id, name);
+        final GL2 gl = GLU.getCurrentGL().getGL2();
+        final int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform3fvARB(loc, count, vals, off);
     }
-    
+
     /**
      * Sets the uniform array variable of the given name with the provided
      * float array values.
@@ -576,12 +578,12 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniformArray4f(String name,
-                                  int count, float[] vals, int off)
+    public void setUniformArray4f(final String name,
+                                  final int count, final float[] vals, final int off)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
-        int loc = gl.glGetUniformLocationARB(id, name);
+        final GL2 gl = GLU.getCurrentGL().getGL2();
+        final int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniform4fvARB(loc, count, vals, off);
     }
 
@@ -598,13 +600,13 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniformMatrices2f(String name,
-                                     int count, boolean transpose,
-                                     float[] vals, int off)
+    public void setUniformMatrices2f(final String name,
+                                     final int count, final boolean transpose,
+                                     final float[] vals, final int off)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
-        int loc = gl.glGetUniformLocationARB(id, name);
+        final GL2 gl = GLU.getCurrentGL().getGL2();
+        final int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniformMatrix2fvARB(loc, count, transpose, vals, off);
     }
 
@@ -621,13 +623,13 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniformMatrices3f(String name,
-                                     int count, boolean transpose,
-                                     float[] vals, int off)
+    public void setUniformMatrices3f(final String name,
+                                     final int count, final boolean transpose,
+                                     final float[] vals, final int off)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
-        int loc = gl.glGetUniformLocationARB(id, name);
+        final GL2 gl = GLU.getCurrentGL().getGL2();
+        final int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniformMatrix3fvARB(loc, count, transpose, vals, off);
     }
 
@@ -644,13 +646,13 @@ public class Shader {
      * @throws GLException if no OpenGL context was current or if any
      * OpenGL-related errors occurred
      */
-    public void setUniformMatrices4f(String name,
-                                     int count, boolean transpose,
-                                     float[] vals, int off)
+    public void setUniformMatrices4f(final String name,
+                                     final int count, final boolean transpose,
+                                     final float[] vals, final int off)
         throws GLException
     {
-        GL2 gl = GLU.getCurrentGL().getGL2();
-        int loc = gl.glGetUniformLocationARB(id, name);
+        final GL2 gl = GLU.getCurrentGL().getGL2();
+        final int loc = gl.glGetUniformLocationARB(id, name);
         gl.glUniformMatrix4fvARB(loc, count, transpose, vals, off);
     }
 }

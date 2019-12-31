@@ -37,10 +37,12 @@
 
 package net.java.joglutils.msg.actions;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
 
-import net.java.joglutils.msg.misc.*;
-import net.java.joglutils.msg.nodes.*;
+import net.java.joglutils.msg.misc.ActionTable;
+import net.java.joglutils.msg.misc.Path;
+import net.java.joglutils.msg.misc.State;
+import net.java.joglutils.msg.nodes.Node;
 
 /** The base class of all actions, which are applied to nodes in the
     scene graph to implement operations such as rendering. <P>

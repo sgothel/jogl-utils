@@ -32,8 +32,8 @@
  * You acknowledge that this software is not designed or intended for use
  * in the design, construction, operation or maintenance of any nuclear
  * facility.
- * 
- * 
+ *
+ *
  * Cleaned up, added correct normal calculations and removed extraneous stuff.
  * Also modified method signatures to match, as closely as reasonable, those
  * of TextRenderer.  Also added support for compiling the shapes to display lists
@@ -55,13 +55,21 @@ import java.text.StringCharacterIterator;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import javax.media.opengl.*;
-import javax.media.opengl.glu.*;
-import javax.vecmath.Vector3f;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2ES3;
+import com.jogamp.opengl.GL2GL3;
+import com.jogamp.opengl.fixedfunc.GLLightingFunc;
+import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
+import com.jogamp.opengl.glu.GLU;
+import com.jogamp.opengl.glu.GLUtessellator;
+import com.jogamp.opengl.glu.GLUtessellatorCallback;
+import com.jogamp.opengl.glu.GLUtessellatorCallbackAdapter;
+import com.jogamp.opengl.math.VectorUtil;
 
 /**
  * This class renders a TrueType Font into OpenGL
- * 
+ *
  * @author Davide Raccagni
  * @author Erik Tollerud
  * @created January 29, 2004
@@ -76,43 +84,43 @@ public class TextRenderer3D
 
 	private boolean calcNormals = true;;
 	private float	flatness = 0.0001f;
-	
-	private Vector3f vecA = new Vector3f();
-	private Vector3f vecB = new Vector3f();
-	private Vector3f normal = new Vector3f();
 
-	private GLU 	glu = new GLU();
-        private GL2 		gl = GLU.getCurrentGL().getGL2();
+	private final float[] vecA = new float[3];
+	private final float[] vecB = new float[3];
+	private final float[] normal = new float[3];
+
+	private final GLU 	glu = new GLU();
+        private final GL2 		gl = GLU.getCurrentGL().getGL2();
 
 	private int lastIndex = -1;
-	private ArrayList<Integer> listIndex = new ArrayList<Integer>();
+	private final ArrayList<Integer> listIndex = new ArrayList<Integer>();
 
 	/**
 	 * Intstantiates a new TextRenderer3D initially rendering in the specified
 	 * font.
-	 * 
+	 *
 	 * @param font - the initial font for this TextRenderer3D
 	 *        depth - the extruded depth for the font
 	 * @throws java.lang.NullPointerException
 	 *             if the supplied font is null
 	 */
-	public TextRenderer3D(Font font, float depth) throws NullPointerException
+	public TextRenderer3D(final Font font, final float depth) throws NullPointerException
 	{
 		if (font == null)
 			throw new NullPointerException("Can't use a null font to create a TextRenderer3D");
 		this.font = font;
 		this.depth = depth;
 	}
-	
+
 	/**
 	 * Specifies which font to render with this TextRenderer3D
-	 * 
+	 *
 	 * @param font
 	 *            a font to use for rendering *
 	 * @throws java.lang.NullPointerException
 	 *             if the supplied font is null
 	 */
-	public void setFont(Font font) throws NullPointerException
+	public void setFont(final Font font) throws NullPointerException
 	{
 		if (font == null)
 			throw new NullPointerException("Can't set a TextRenderer3D font to null");
@@ -121,7 +129,7 @@ public class TextRenderer3D
 
 	/**
 	 * Retrieves the Font currently associated with this TextRenderer3D
-	 * 
+	 *
 	 * @return the Font in which this object renders strings
 	 */
 	public Font getFont()
@@ -132,12 +140,12 @@ public class TextRenderer3D
 	/**
 	 * Determines how long the sides of the rendered text is. In the special
 	 * case of 0, the rendering is 2D.
-	 * 
+	 *
 	 * @param depth
 	 *            specifies the z-size of the rendered 3D text. Negative numbers
 	 *            will be set to 0.
 	 */
-	public void setDepth(float depth)
+	public void setDepth(final float depth)
 	{
 		if (depth <= 0)
 			this.depth = 0;
@@ -147,7 +155,7 @@ public class TextRenderer3D
 
 	/**
 	 * Retrieves the z-depth used for this TextRenderer3D's text rendering.
-	 * 
+	 *
 	 * @return the z-depth of the rendered 3D text.
 	 */
 	public float getDepth()
@@ -157,12 +165,12 @@ public class TextRenderer3D
 
 	/**
 	 * Sets if the text should be rendered as filled polygons or wireframe.
-	 * 
+	 *
 	 * @param fill
 	 *            if true, uses filled polygons, if false, renderings are
 	 *            wireframe.
 	 */
-	public void setFill(boolean fill)
+	public void setFill(final boolean fill)
 	{
 		this.edgeOnly = !fill;
 	}
@@ -170,7 +178,7 @@ public class TextRenderer3D
 	/**
 	 * Determines if the text is being rendered as filled polygons or
 	 * wireframes.
-	 * 
+	 *
 	 * @return if true, uses filled polygons, if false, renderings are
 	 *         wireframe.
 	 */
@@ -181,7 +189,7 @@ public class TextRenderer3D
 
 	/**
 	 * Set the flatness to which the glyph's curves will be flattened
-	 * 
+	 *
 	 * @return
 	 */
 	public float getFlatness()
@@ -191,28 +199,28 @@ public class TextRenderer3D
 
 	/**
 	 * Get the current flatness to which the glyph's curves will be flattened
-	 * 
+	 *
 	 * @return
 	 */
-	public void setFlatness(float flatness)
+	public void setFlatness(final float flatness)
 	{
 		this.flatness = flatness;
 	}
-	
+
 	/**
 	 * Sets whether the normals will eb calculated for each face
-	 * 
+	 *
 	 * @param mode
 	 *            the mode to render in. Default is flat.
 	 */
-	public void setCalcNormals( boolean normals)
+	public void setCalcNormals( final boolean normals)
 	{
 		this.calcNormals = normals;
 	}
 
 	/**
 	 * Gets whether normals are being calculated
-	 * 
+	 *
 	 * @see setNormal
 	 * @return the normal technique for this TextRenderer3D.
 	 */
@@ -221,26 +229,26 @@ public class TextRenderer3D
 		return this.calcNormals;
 	}
 
-	public void draw( String str, float xOff, float yOff, float zOff, float scaleFactor )
+	public void draw( final String str, final float xOff, final float yOff, final float zOff, final float scaleFactor )
 	{
 		gl.glPushAttrib(GL2.GL_TRANSFORM_BIT);
-		gl.glMatrixMode(GL2.GL_MODELVIEW);
+		gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
 		gl.glPushMatrix();
-		gl.glEnable( GL2.GL_NORMALIZE);
-		
+		gl.glEnable( GLLightingFunc.GL_NORMALIZE);
+
 		gl.glScalef(scaleFactor, scaleFactor, scaleFactor);
 		gl.glTranslatef(xOff, yOff, zOff);
-		
+
 		this.draw(str);
-		
+
 		gl.glPopMatrix();
 		gl.glPopAttrib();
 	}
-	
+
 	/**
 	 * Renders a string into the specified GL object, starting at the (0,0,0)
 	 * point in OpenGL coordinates.
-	 * 
+	 *
 	 * @param str
 	 *            the string to render.
 	 * @param glu
@@ -249,76 +257,76 @@ public class TextRenderer3D
 	 * @param gl
 	 *            the OpenGL context in which to render the text.
 	 */
-	public void draw( String str )
+	public void draw( final String str )
 	{
-		GlyphVector gv = font.createGlyphVector(new FontRenderContext(new AffineTransform(), true, true),
+		final GlyphVector gv = font.createGlyphVector(new FontRenderContext(new AffineTransform(), true, true),
 				                                new StringCharacterIterator(str));
-		GeneralPath gp = (GeneralPath) gv.getOutline();
+		final GeneralPath gp = (GeneralPath) gv.getOutline();
 		PathIterator pi = gp.getPathIterator(AffineTransform.getScaleInstance(1.0, -1.0), flatness);
 
 		// dumpShape(gl, gp);
-		
+
 		if (calcNormals)
 			gl.glNormal3f(0, 0, -1.0f);
-		
+
 		tesselateFace(glu, gl, pi, this.edgeOnly, 0.0f);
-		
+
 		if (this.depth != 0.0)
 		{
 			pi = gp.getPathIterator(AffineTransform.getScaleInstance(1.0, -1.0), flatness);
-			
+
 			if (calcNormals)
 				gl.glNormal3f(0, 0, 1.0f);
-			
+
 			tesselateFace(glu, gl, pi, this.edgeOnly, this.depth);
-			
+
 			pi = gp.getPathIterator(AffineTransform.getScaleInstance(1.0, -1.0), flatness);
-	
+
 			// TODO: add diagonal corner/VBO technique
 
 			drawSides(gl, pi, this.edgeOnly, this.depth);
 		}
-	}	
+	}
 
 	/**
-	 * Creates the specified string as a display list.  Can subsequently be drawn 
+	 * Creates the specified string as a display list.  Can subsequently be drawn
 	 * by calling "call".
-	 * 
+	 *
 	 * @param str
 	 * @param xOff
 	 * @param yOff
 	 * @param zOff
 	 * @param scaleFactor
 	 */
-	public int compile( String str, float xOff, float yOff, float zOff, float scaleFactor )
-	{		
-		int index = gl.glGenLists(1);
+	public int compile( final String str, final float xOff, final float yOff, final float zOff, final float scaleFactor )
+	{
+		final int index = gl.glGenLists(1);
 		gl.glNewList( index, GL2.GL_COMPILE);
 		draw( str, xOff, yOff, zOff, scaleFactor);
 		gl.glEndList();
-		
+
 		listIndex.add(index);
 		return index;
 	}
-	
+
 	/**
-	 * Creates the specified string as a display list.  Can subsequently be drawn 
+	 * Creates the specified string as a display list.  Can subsequently be drawn
 	 * by calling "call".
-	 * 
+	 *
 	 * @param str
 	 */
-	public int compile( String str )
-	{		
-		int index = gl.glGenLists(1);
+	public int compile( final String str )
+	{
+		final int index = gl.glGenLists(1);
 		gl.glNewList( index, GL2.GL_COMPILE);
 		draw( str );
 		gl.glEndList();
-		
+
 		listIndex.add(index);
-		
+
 		return index;
 	}
-	
+
 	/**
 	 * Draws the current compiled string, if any.
 	 *
@@ -328,41 +336,41 @@ public class TextRenderer3D
 		if (lastIndex != -1)
 			gl.glCallList(this.lastIndex);
 	}
-	
+
 	/**
 	 * Draws the specified compiled string, if any.
 	 *
 	 */
-	public void call( int index )
+	public void call( final int index )
 	{
 		gl.glCallList( index );
 	}
-	
+
 	/**
 	 * Diposes of the ALL the current compiled shapes, if any.
 	 *
 	 */
 	public void dispose()
 	{
-		for (Iterator iter = listIndex.iterator(); iter.hasNext();)
+		for (final Iterator iter = listIndex.iterator(); iter.hasNext();)
 		{
-			int index = (Integer) iter.next();
+			final int index = (Integer) iter.next();
 			gl.glDeleteLists( index, 1);
 		}
-		
+
 		lastIndex = -1;
 	}
-	
+
 	/**
 	 * Diposes of the specified compiled shapes, if it is in the list.
 	 * If it is the last-compiled, that index is cleared (set to -1)
 	 *
 	 */
-	public void dispose( int index )
+	public void dispose( final int index )
 	{
-		for (Iterator iter = listIndex.iterator(); iter.hasNext();)
+		for (final Iterator iter = listIndex.iterator(); iter.hasNext();)
 		{
-			int i = (Integer) iter.next();
+			final int i = (Integer) iter.next();
 			if (i == index)
 			{
 				gl.glDeleteLists( index, 1);
@@ -372,69 +380,69 @@ public class TextRenderer3D
 			}
 		}
 	}
-	
+
 	/**
 	 * Get the bounding box for the supplied string with the current font, etc.
-	 * 
+	 *
 	 * @param str
 	 * @return
 	 */
-	public Rectangle2D  getBounds( String str )
+	public Rectangle2D  getBounds( final String str )
 	{
-		GlyphVector gv = font.createGlyphVector(new FontRenderContext(new AffineTransform(), true, true),
+		final GlyphVector gv = font.createGlyphVector(new FontRenderContext(new AffineTransform(), true, true),
 				                                new StringCharacterIterator(str));
-		GeneralPath gp = (GeneralPath) gv.getOutline();
-		
+		final GeneralPath gp = (GeneralPath) gv.getOutline();
+
 		return gp.getBounds2D();
-	}	
-	
+	}
+
 	/**
-	 * Get the bounding box for the supplied string for the current font and 
+	 * Get the bounding box for the supplied string for the current font and
 	 * specified scale factor.
-	 * 
+	 *
 	 * @param str
 	 * @param scaleFactor
 	 * @return
 	 */
-	public Rectangle2D  getBounds( String str, float scaleFactor  )
+	public Rectangle2D  getBounds( final String str, final float scaleFactor  )
 	{
 		gl.glPushAttrib(GL2.GL_TRANSFORM_BIT);
-		gl.glMatrixMode(GL2.GL_MODELVIEW);
+		gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
 		gl.glPushMatrix();
-		
-		gl.glScalef(scaleFactor, scaleFactor, scaleFactor);
-		
-		GlyphVector gv = font.createGlyphVector(new FontRenderContext(new AffineTransform(), true, true),
-				                                new StringCharacterIterator(str));
-		GeneralPath gp = (GeneralPath) gv.getOutline();
 
-		Rectangle2D rect = gp.getBounds2D();
+		gl.glScalef(scaleFactor, scaleFactor, scaleFactor);
+
+		final GlyphVector gv = font.createGlyphVector(new FontRenderContext(new AffineTransform(), true, true),
+				                                new StringCharacterIterator(str));
+		final GeneralPath gp = (GeneralPath) gv.getOutline();
+
+		final Rectangle2D rect = gp.getBounds2D();
 
 		gl.glPopMatrix();
-		gl.glPopAttrib();	
-		
+		gl.glPopAttrib();
+
 		return rect;
-	}	
-	
+	}
+
 	// construct the sides of each glyph by walking around and extending each vertex
 	// out to the depth of the extrusion
-	private void drawSides(GL2 gl, PathIterator pi, boolean justBoundary, float depth)
+	private void drawSides(final GL2 gl, final PathIterator pi, final boolean justBoundary, final float depth)
 	{
 		if (justBoundary)
-			gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
+			gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
 		else
-			gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
+			gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
 
-		float[] lastCoord = new float[3];
-		float[] firstCoord = new float[3];
-		float[] coords = new float[6];
-		
+		final float[] lastCoord = new float[3];
+		final float[] firstCoord = new float[3];
+		final float[] coords = new float[6];
+
 		while ( !pi.isDone() )
 		{
 			switch (pi.currentSegment(coords))
 			{
 				case PathIterator.SEG_MOVETO:
-					gl.glBegin(GL2.GL_QUADS);
+					gl.glBegin(GL2ES3.GL_QUADS);
 					lastCoord[0] = coords[0];
 					lastCoord[1] = coords[1];
 					firstCoord[0] = coords[0];
@@ -442,9 +450,9 @@ public class TextRenderer3D
 					break;
 				case PathIterator.SEG_LINETO:
 					if (calcNormals)
-						setNormal(gl, lastCoord[0]-coords[0], lastCoord[1]-coords[1], 0.0f, 
+						setNormal(gl, lastCoord[0]-coords[0], lastCoord[1]-coords[1], 0.0f,
 								     0.0f, 0.0f, depth);
- 
+
 					lastCoord[2] = 0;
 					gl.glVertex3fv(lastCoord, 0);
 					lastCoord[2] = depth;
@@ -462,7 +470,7 @@ public class TextRenderer3D
 					break;
 				case PathIterator.SEG_CLOSE:
 					if(calcNormals)
-						setNormal(gl, lastCoord[0]-firstCoord[0], lastCoord[1]-firstCoord[1], 0.0f, 
+						setNormal(gl, lastCoord[0]-firstCoord[0], lastCoord[1]-firstCoord[1], 0.0f,
 								     0.0f, 0.0f, depth );
 
 					lastCoord[2] = 0;
@@ -479,90 +487,89 @@ public class TextRenderer3D
 					throw new RuntimeException(
 							"PathIterator segment not SEG_MOVETO, SEG_LINETO, SEG_CLOSE; Inappropriate font.");
 			}
-			
+
 			pi.next();
 		}
 	}
 
 	// simple convenience for calculating and setting the normal
-	private void setNormal ( GL2 gl, float x1, float y1, float z1, float x2, float y2, float z2 )
+	private void setNormal ( final GL2 gl, final float x1, final float y1, final float z1, final float x2, final float y2, final float z2 )
 	{
-		vecA.set( x1, y1, z1);
-		vecB.set( x2, y2, z2);
-		normal.cross( vecA, vecB );
-		normal.normalize();
-		gl.glNormal3f( normal.x, normal.y, normal.z );
+	    vecA[0] = x1; vecA[1] = y1; vecA[2] = z1;
+	    vecB[0] = x2; vecB[1] = y2; vecB[2] = z2;
+	    final float[] normal = VectorUtil.normalizeVec3(VectorUtil.crossVec3(new float[3], vecA, vecB));
+		gl.glNormal3f( normal[0], normal[1], normal[2] );
 	}
 
 	// routine that tesselates the current set of glyphs
-	private void tesselateFace(GLU glu, GL2 gl, PathIterator pi, boolean justBoundary, double tessZ)
+	private void tesselateFace(final GLU glu, final GL2 gl, final PathIterator pi, final boolean justBoundary, final double tessZ)
 	{
-		GLUtessellatorCallback aCallback = new GLUtesselatorCallbackImpl(gl);
-		GLUtessellator tess = glu.gluNewTess();
+		final GLUtessellatorCallback aCallback = new GLUtesselatorCallbackImpl(gl);
+		final GLUtessellator tess = GLU.gluNewTess();
 
-		glu.gluTessCallback(tess, GLU.GLU_TESS_BEGIN, aCallback);
-		glu.gluTessCallback(tess, GLU.GLU_TESS_END, aCallback);
-		glu.gluTessCallback(tess, GLU.GLU_TESS_ERROR, aCallback);
-		glu.gluTessCallback(tess, GLU.GLU_TESS_VERTEX, aCallback);
-		glu.gluTessCallback(tess, GLU.GLU_TESS_COMBINE, aCallback);
+		GLU.gluTessCallback(tess, GLU.GLU_TESS_BEGIN, aCallback);
+		GLU.gluTessCallback(tess, GLU.GLU_TESS_END, aCallback);
+		GLU.gluTessCallback(tess, GLU.GLU_TESS_ERROR, aCallback);
+		GLU.gluTessCallback(tess, GLU.GLU_TESS_VERTEX, aCallback);
+		GLU.gluTessCallback(tess, GLU.GLU_TESS_COMBINE, aCallback);
 
-		glu.gluTessNormal(tess, 0.0, 0.0, -1.0);
+		GLU.gluTessNormal(tess, 0.0, 0.0, -1.0);
 
 		if ( pi.getWindingRule() == PathIterator.WIND_EVEN_ODD)
-			glu.gluTessProperty(tess, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_ODD);
+			GLU.gluTessProperty(tess, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_ODD);
 		else
-			glu.gluTessProperty(tess, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_NONZERO);
-	
-		if (justBoundary)
-			glu.gluTessProperty(tess, GLU.GLU_TESS_BOUNDARY_ONLY, GL2.GL_TRUE);
-		else
-			glu.gluTessProperty(tess, GLU.GLU_TESS_BOUNDARY_ONLY, GL2.GL_FALSE);
+			GLU.gluTessProperty(tess, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_NONZERO);
 
-		glu.gluTessBeginPolygon(tess, (double[]) null);
+		if (justBoundary)
+			GLU.gluTessProperty(tess, GLU.GLU_TESS_BOUNDARY_ONLY, GL.GL_TRUE);
+		else
+			GLU.gluTessProperty(tess, GLU.GLU_TESS_BOUNDARY_ONLY, GL.GL_FALSE);
+
+		GLU.gluTessBeginPolygon(tess, (double[]) null);
 
 
 		while (!pi.isDone())
 		{
-			double[] coords = new double[3];
+			final double[] coords = new double[3];
 			coords[2] = tessZ;
 			switch (pi.currentSegment(coords))
 			{
 				case PathIterator.SEG_MOVETO:
-					glu.gluTessBeginContour(tess);
+					GLU.gluTessBeginContour(tess);
 					break;
 				case PathIterator.SEG_LINETO:
-					glu.gluTessVertex(tess, coords, 0, coords);
+					GLU.gluTessVertex(tess, coords, 0, coords);
 					break;
 				case PathIterator.SEG_CLOSE:
-					glu.gluTessEndContour(tess);
+					GLU.gluTessEndContour(tess);
 					break;
 			}
-			
+
 			pi.next();
 		}
-		glu.gluTessEndPolygon(tess);
+		GLU.gluTessEndPolygon(tess);
 
-		glu.gluDeleteTess(tess);
+		GLU.gluDeleteTess(tess);
 	}
 
 	// Private class that implements the required callbacks for the tesselator
-	private class GLUtesselatorCallbackImpl extends javax.media.opengl.glu.GLUtessellatorCallbackAdapter
+	private class GLUtesselatorCallbackImpl extends GLUtessellatorCallbackAdapter
 	{
-		private GL2 gl;
+		private final GL2 gl;
 
-		public GLUtesselatorCallbackImpl(GL2 gl)
+		public GLUtesselatorCallbackImpl(final GL2 gl)
 		{
 			this.gl = gl;
 		}
 
-		public void begin(int type)
+		public void begin(final int type)
 		{
 			gl.glBegin(type);
 		}
 
-		public void vertex(java.lang.Object vertexData)
+		public void vertex(final java.lang.Object vertexData)
 		{
-			double[] coords = (double[]) vertexData;
+			final double[] coords = (double[]) vertexData;
 
 			gl.glVertex3dv(coords, 0);
 		}
@@ -583,39 +590,39 @@ public class TextRenderer3D
 
 		PathIterator pi = path.getPathIterator(AffineTransform.getScaleInstance(1.0, -1.0));
 		FlatteningPathIterator	pif = new FlatteningPathIterator(pi, 0.005);
-		
+
 		while ( !pif.isDone() )
 		{
 			int type = pif.currentSegment(coords);
 			dumpSegment(count++, coords, type );
-			
+
 			pif.next();
 		}
 	}
 
 	private String Segment[] = { "MoveTo", "LineTo", "QuadTo", "CubicTo", "Close" };
 	private String Winding[] = { "EvenOdd", "NonZero" };
-	
+
 	protected void dumpSegment( int num, float[] points, int type )
 	{
 		System.out.print(num + " " + Segment[type]);
-		
+
 		switch(type)
 		{
 		case PathIterator.SEG_MOVETO:
 		case PathIterator.SEG_LINETO:
 			System.out.print(" " + points[0] + "," + points[1] );
 			break;
-			
+
 		case PathIterator.SEG_QUADTO:
 			System.out.print(" " + points[0] + "," + points[1] + "  " + points[2] + "," + points[3] );
 			break;
-			
+
 		case PathIterator.SEG_CUBICTO:
 			System.out.print(" " + points[0] + "," + points[1] + "  " + points[2] + "," + points[3] + "  " + points[4] + "," + points[5]  );
 			break;
 		}
-		
+
 		System.out.println();
 	}
 	*/

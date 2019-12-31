@@ -37,12 +37,10 @@
 
 package net.java.joglutils.msg.elements;
 
-import java.nio.*;
-import javax.media.opengl.*;
-
-import net.java.joglutils.msg.math.*;
-import net.java.joglutils.msg.misc.*;
-import net.java.joglutils.msg.nodes.*;
+import net.java.joglutils.msg.math.Vec4f;
+import net.java.joglutils.msg.misc.State;
+import net.java.joglutils.msg.misc.StateIndex;
+import net.java.joglutils.msg.nodes.Blend;
 
 /** Represents the blending state of the OpenGL fixed-function pipeline. */
 

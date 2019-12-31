@@ -37,8 +37,10 @@
 
 package net.java.joglutils.msg.nodes;
 
-import net.java.joglutils.msg.actions.*;
-import net.java.joglutils.msg.math.*;
+import net.java.joglutils.msg.actions.GLRenderAction;
+import net.java.joglutils.msg.math.Mat4f;
+import net.java.joglutils.msg.math.Vec2f;
+import net.java.joglutils.msg.math.Vec3f;
 
 public class OrthographicCamera extends Camera {
   private static final float DEFAULT_HEIGHT = 2.0f;

@@ -37,9 +37,22 @@
 
 package net.java.joglutils.msg.nodes;
 
-import net.java.joglutils.msg.actions.*;
-import net.java.joglutils.msg.elements.*;
-import net.java.joglutils.msg.math.*;
+import net.java.joglutils.msg.actions.Action;
+import net.java.joglutils.msg.actions.GLRenderAction;
+import net.java.joglutils.msg.actions.RayPickAction;
+import net.java.joglutils.msg.elements.GLModelMatrixElement;
+import net.java.joglutils.msg.elements.GLProjectionMatrixElement;
+import net.java.joglutils.msg.elements.GLViewingMatrixElement;
+import net.java.joglutils.msg.elements.ModelMatrixElement;
+import net.java.joglutils.msg.elements.ProjectionMatrixElement;
+import net.java.joglutils.msg.elements.ViewingMatrixElement;
+import net.java.joglutils.msg.math.Line;
+import net.java.joglutils.msg.math.Mat4f;
+import net.java.joglutils.msg.math.Rotf;
+import net.java.joglutils.msg.math.SingularMatrixException;
+import net.java.joglutils.msg.math.Vec2f;
+import net.java.joglutils.msg.math.Vec3f;
+import net.java.joglutils.msg.math.Vec4f;
 
 /** Represents a camera which is used to view the scene. The camera
     should be added to the scene graph before the geometry it is

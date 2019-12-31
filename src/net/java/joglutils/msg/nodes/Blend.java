@@ -37,9 +37,11 @@
 
 package net.java.joglutils.msg.nodes;
 
-import net.java.joglutils.msg.actions.*;
-import net.java.joglutils.msg.elements.*;
-import net.java.joglutils.msg.math.*;
+import net.java.joglutils.msg.actions.Action;
+import net.java.joglutils.msg.actions.GLRenderAction;
+import net.java.joglutils.msg.elements.BlendElement;
+import net.java.joglutils.msg.elements.GLBlendElement;
+import net.java.joglutils.msg.math.Vec4f;
 
 /** Provides control over OpenGL blending modes. */
 

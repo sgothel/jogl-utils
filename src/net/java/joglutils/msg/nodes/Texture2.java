@@ -1,21 +1,21 @@
 /*
  * Copyright (c) 2007 Sun Microsystems, Inc. All Rights Reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * - Redistribution of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * - Redistribution in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in the
  *   documentation and/or other materials provided with the distribution.
- * 
+ *
  * Neither the name of Sun Microsystems, Inc. or the names of
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
- * 
+ *
  * This software is provided "AS IS," without a warranty of any kind. ALL
  * EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES,
  * INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A
@@ -28,27 +28,38 @@
  * DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY,
  * ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF
  * SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * 
+ *
  * You acknowledge that this software is not designed or intended for use
  * in the design, construction, operation or maintenance of any nuclear
  * facility.
- * 
+ *
  */
 
 package net.java.joglutils.msg.nodes;
 
-import java.awt.image.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.media.opengl.*;
-import com.sun.opengl.util.awt.*;
-import com.sun.opengl.util.texture.*;
-import com.sun.opengl.util.texture.awt.*;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GLException;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.util.awt.TextureRenderer;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureData;
+import com.jogamp.opengl.util.texture.TextureIO;
+import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
 
-import net.java.joglutils.msg.actions.*;
-import net.java.joglutils.msg.elements.*;
+import net.java.joglutils.msg.actions.Action;
+import net.java.joglutils.msg.actions.GLRenderAction;
+import net.java.joglutils.msg.actions.GLResetAction;
+import net.java.joglutils.msg.actions.RayPickAction;
+import net.java.joglutils.msg.elements.GLTextureElement;
+import net.java.joglutils.msg.elements.TextureElement;
 
 /** Represents a two-dimensional texture which can be set up from all
     of the image sources supported by the JOGL TextureIO classes or
@@ -77,8 +88,8 @@ public class Texture2 extends Node {
 
   // Disposed Textures and TextureRenderers, used to allow app to be
   // oblivious and switch back and forth between them
-  private List<Texture> disposedTextures = new ArrayList<Texture>();
-  private List<TextureRenderer> disposedRenderers = new ArrayList<TextureRenderer>();
+  private final List<Texture> disposedTextures = new ArrayList<Texture>();
+  private final List<TextureRenderer> disposedRenderers = new ArrayList<TextureRenderer>();
 
   static {
     // Enable the elements this node affects for known actions
@@ -99,43 +110,43 @@ public class Texture2 extends Node {
   /** Initializes this texture from the given file. No OpenGL work is
       done during this call; it is done lazily when the Texture is
       fetched. */
-  public void setTexture(File file, boolean mipmap, String fileSuffix) throws IOException {
+  public void setTexture(final GLProfile glp, final File file, final boolean mipmap, final String fileSuffix) throws IOException {
     disposeTextureRenderer();
-    data = TextureIO.newTextureData(file, mipmap, fileSuffix);
+    data = TextureIO.newTextureData(glp, file, mipmap, fileSuffix);
     dirty = true;
   }
 
   /** Initializes this texture from the given InputStream. No OpenGL
       work is done during this call; it is done lazily when the
       Texture is fetched. */
-  public void setTexture(InputStream stream, boolean mipmap, String fileSuffix) throws IOException {
+  public void setTexture(final GLProfile glp, final InputStream stream, final boolean mipmap, final String fileSuffix) throws IOException {
     disposeTextureRenderer();
-    data = TextureIO.newTextureData(stream, mipmap, fileSuffix);
+    data = TextureIO.newTextureData(glp, stream, mipmap, fileSuffix);
     dirty = true;
   }
 
   /** Initializes this texture from the given URL. No OpenGL work is
       done during this call; it is done lazily when the Texture is
       fetched. */
-  public void setTexture(URL url, boolean mipmap, String fileSuffix) throws IOException {
+  public void setTexture(final GLProfile glp, final URL url, final boolean mipmap, final String fileSuffix) throws IOException {
     disposeTextureRenderer();
-    data = TextureIO.newTextureData(url, mipmap, fileSuffix);
+    data = TextureIO.newTextureData(glp, url, mipmap, fileSuffix);
     dirty = true;
   }
 
   /** Initializes this texture from the given BufferedImage. No OpenGL
       work is done during this call; it is done lazily when the
       Texture is fetched. */
-  public void setTexture(BufferedImage image, boolean mipmap) {
+  public void setTexture(final GLProfile glp, final BufferedImage image, final boolean mipmap) {
     disposeTextureRenderer();
-    data = AWTTextureIO.newTextureData(image, mipmap);
+    data = AWTTextureIO.newTextureData(glp, image, mipmap);
     dirty = true;
   }
-  
+
   /** Initializes this texture from the given TextureData. No OpenGL
       work is done during this call; it is done lazily when the
       Texture is fetched. */
-  public void setTexture(TextureData data) {
+  public void setTexture(final TextureData data) {
     disposeTextureRenderer();
     this.data = data;
     dirty = true;
@@ -202,10 +213,10 @@ public class Texture2 extends Node {
    * @param width the width (in pixels) of the rectangle to be updated
    * @param height the height (in pixels) of the rectangle to be updated
    */
-  public void updateSubImage(TextureData data, int mipmapLevel,
-                             int dstx, int dsty,
-                             int srcx, int srcy,
-                             int width, int height) {
+  public void updateSubImage(final TextureData data, final int mipmapLevel,
+                             final int dstx, final int dsty,
+                             final int srcx, final int srcy,
+                             final int width, final int height) {
     if (textureRenderer != null) {
       throw new IllegalStateException("May not call updateSubImage if a TextureRenderer has been set");
     }
@@ -225,7 +236,7 @@ public class Texture2 extends Node {
       Updates to the TextureRenderer are automatically propagated to
       the texture as long as <CODE>TextureRenderer.markDirty()</CODE>
       is used properly. */
-  public void initTextureRenderer(int width, int height, boolean alpha) {
+  public void initTextureRenderer(final int width, final int height, final boolean alpha) {
     disposeTexture();
     textureRenderer = new TextureRenderer(width, height, alpha);
   }
@@ -241,8 +252,8 @@ public class Texture2 extends Node {
       each frame during rendering. An OpenGL context must be current
       at the time this method is called or a GLException will be
       thrown. */
-  public Texture getTexture() throws GLException {
-    lazyDispose();
+  public Texture getTexture(final GL gl) throws GLException {
+    lazyDispose(gl);
 
     if (textureRenderer != null) {
       return textureRenderer.getTexture();
@@ -250,7 +261,7 @@ public class Texture2 extends Node {
 
     if (dirty) {
       if (texture != null) {
-        texture.dispose();
+        texture.destroy(gl);
         texture = null;
       }
       texture = TextureIO.newTexture(data);
@@ -258,7 +269,7 @@ public class Texture2 extends Node {
       dirty = false;
     }
     if (subImageDirty) {
-      texture.updateSubImage(subImageData,
+      texture.updateSubImage(gl, subImageData,
                              subImageMipmapLevel,
                              subImageDstX,
                              subImageDstY,
@@ -272,7 +283,7 @@ public class Texture2 extends Node {
   }
 
   /** Sets the texture environment mode. Default is MODULATE. */
-  public void setTexEnvMode(int mode) {
+  public void setTexEnvMode(final int mode) {
     if (mode < MODULATE || mode > REPLACE) {
       throw new IllegalArgumentException("Illegal texture environment mode");
     }
@@ -285,7 +296,7 @@ public class Texture2 extends Node {
     return texEnvMode;
   }
 
-  public void doAction(Action action) {
+  public void doAction(final Action action) {
     if (TextureElement.isEnabled(action.getState())) {
       TextureElement.set(action.getState(), this);
     }
@@ -294,10 +305,10 @@ public class Texture2 extends Node {
   /** Disposes of the OpenGL texture and/or TextureRenderer this
       Texture2 node refers to. An OpenGL context must be current at
       the point this method is called. */
-  public void dispose() throws GLException {
+  public void dispose(final GL gl) throws GLException {
     disposeTexture();
     disposeTextureRenderer();
-    lazyDispose();
+    lazyDispose(gl);
     data = null;
     subImageData = null;
     dirty = false;
@@ -309,7 +320,7 @@ public class Texture2 extends Node {
       know you are using this Texture2 node across the destruction and
       re-creation of OpenGL contexts and know how to re-initialize the
       Texture2 from its previous state. */
-  public void resetGL(GLResetAction action) {
+  public void resetGL(final GLResetAction action) {
     disposeTexture();
     disposeTextureRenderer();
     synchronized(this) {
@@ -340,13 +351,13 @@ public class Texture2 extends Node {
     }
   }
 
-  private void lazyDispose() {
+  private void lazyDispose(final GL gl) {
     while (!disposedTextures.isEmpty()) {
       Texture t = null;
       synchronized (this) {
         t = disposedTextures.remove(disposedTextures.size() - 1);
       }
-      t.dispose();
+      t.destroy(gl);
     }
 
     while (!disposedRenderers.isEmpty()) {

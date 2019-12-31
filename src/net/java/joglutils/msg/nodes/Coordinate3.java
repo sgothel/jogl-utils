@@ -37,9 +37,12 @@
 
 package net.java.joglutils.msg.nodes;
 
-import net.java.joglutils.msg.actions.*;
-import net.java.joglutils.msg.elements.*;
-import net.java.joglutils.msg.collections.*;
+import net.java.joglutils.msg.actions.Action;
+import net.java.joglutils.msg.actions.GLRenderAction;
+import net.java.joglutils.msg.actions.RayPickAction;
+import net.java.joglutils.msg.collections.Vec3fCollection;
+import net.java.joglutils.msg.elements.CoordinateElement;
+import net.java.joglutils.msg.elements.GLCoordinateElement;
 
 /** Represents a set of 3-dimensional vertices which can be assembled
     into shapes. */

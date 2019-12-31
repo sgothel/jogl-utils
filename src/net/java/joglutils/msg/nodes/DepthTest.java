@@ -36,10 +36,10 @@
 
 package net.java.joglutils.msg.nodes;
 
-import javax.media.opengl.*;
-
-import net.java.joglutils.msg.actions.*;
-import net.java.joglutils.msg.elements.*;
+import net.java.joglutils.msg.actions.Action;
+import net.java.joglutils.msg.actions.GLRenderAction;
+import net.java.joglutils.msg.elements.DepthTestElement;
+import net.java.joglutils.msg.elements.GLDepthTestElement;
 
 /** Represents depth test state. */
 public class DepthTest extends Node {

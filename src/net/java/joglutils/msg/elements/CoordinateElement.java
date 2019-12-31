@@ -37,10 +37,10 @@
 
 package net.java.joglutils.msg.elements;
 
-import java.nio.*;
-import javax.media.opengl.*;
+import java.nio.FloatBuffer;
 
-import net.java.joglutils.msg.misc.*;
+import net.java.joglutils.msg.misc.State;
+import net.java.joglutils.msg.misc.StateIndex;
 
 /** Represents the current set of coordinates, which are assembled to
     draw geometry. */
